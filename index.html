@@ -21,6 +21,28 @@
     .modal-content { background: white; border-radius: 24px; max-width: 640px; width: 90%; max-height: 90vh; overflow-y: auto; }
 
     picture { display: block; }
+    .nav-order-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    @media (min-width: 640px) { .nav-order-label { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; } }
+    .cart-icon-btn { position: relative; width: 44px; height: 44px; border-radius: 999px; border: 2px solid #047857; color: #065f46; background: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0; }
+    .cart-count { display: none; position: absolute; top: -6px; right: -6px; min-width: 1.25rem; height: 1.25rem; padding: 0 4px; border-radius: 999px; background: #059669; color: #fff; font-size: 0.7rem; font-weight: 700; align-items: center; justify-content: center; }
+    .cart-count.is-on { display: inline-flex; }
+    .cart-row { display: flex; gap: 0.5rem; margin-top: 1rem; align-items: center; }
+    .cart-add-btn { flex: 1 1 auto; min-height: 44px; }
+    .qty-stepper { display: inline-flex; align-items: center; height: 44px; border: 2px solid #047857; border-radius: 999px; background: #fff; overflow: hidden; flex-shrink: 0; }
+    .qty-stepper-lg { align-self: flex-start; }
+    .qty-btn { width: 40px; height: 44px; font-size: 1.25rem; line-height: 1; color: #065f46; background: transparent; }
+    .qty-input { width: 2.6rem; height: 40px; border: 0; text-align: center; font-size: 16px; font-weight: 600; color: #1c1917; background: transparent; -moz-appearance: textfield; }
+    .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .qty-readout { min-width: 1.5rem; text-align: center; font-weight: 700; font-size: 0.95rem; }
+    .cart-overlay { display: none; position: fixed; inset: 0; z-index: 80; background: rgba(28, 25, 23, 0.72); }
+    .cart-overlay.is-open { display: flex; justify-content: flex-end; }
+    .cart-sheet { background: #fafaf9; width: 100%; max-width: 28rem; height: 100dvh; max-height: 100dvh; display: flex; flex-direction: column; }
+    .cart-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: max(1rem, env(safe-area-inset-top)) 1.25rem 0.75rem; }
+    .cart-lines { flex: 1; overflow: auto; padding: 0 1.25rem 1rem; }
+    .cart-line { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 0.75rem; padding: 0.9rem 0; border-bottom: 1px solid #e7e5e4; }
+    .cart-remove { display: block; margin-top: 0.35rem; margin-left: auto; font-size: 0.8rem; font-weight: 600; color: #b45309; min-height: 32px; }
+    .cart-foot { border-top: 1px solid #e7e5e4; background: #fff; padding: 1rem 1.25rem max(1rem, env(safe-area-inset-bottom)); }
+    @media (max-width: 639px) { .cart-sheet { max-width: none; } }
     .photo-frame picture, .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
     .pay-overlay { display: none; position: fixed; inset: 0; z-index: 90; background: rgba(28, 25, 23, 0.72); }
     .pay-overlay.is-open { display: flex; }
@@ -52,8 +74,9 @@
     .pay-error { color: #b91c1c; font-size: 0.9rem; font-weight: 600; margin-top: 1rem; }
     @keyframes pay-pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     .pay-pop { animation: pay-pop .35s ease; }
+    nav.fixed { z-index: 60; }
     #page-tiles, #page-benches, #page-shelves, #page-coasters, #page-awards, #page-school {
-      padding-top: env(safe-area-inset-top);
+      padding-top: calc(5.5rem + env(safe-area-inset-top));
       padding-bottom: env(safe-area-inset-bottom);
     }
     @media (max-width: 1023px) {
@@ -90,9 +113,15 @@
           <a href="#impact" class="hover:text-emerald-600 transition">Impact</a>
           <a href="#contact" class="hover:text-emerald-600 transition">Contact</a>
         </div>
-        <a href="https://wa.me/18687752407" target="_blank" class="bg-emerald-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-emerald-700 transition flex items-center gap-2">
-          <i class="fab fa-whatsapp"></i> Order Now
-        </a>
+        <div class="flex items-center gap-2">
+          <button type="button" id="cart-open" class="cart-icon-btn" aria-label="Open cart, 0 items">
+            <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+            <span id="cart-count" class="cart-count">0</span>
+          </button>
+          <a href="https://wa.me/18687752407" target="_blank" class="bg-emerald-600 text-white px-3 sm:px-5 py-2 rounded-full text-sm font-medium hover:bg-emerald-700 transition flex items-center gap-2">
+            <i class="fab fa-whatsapp"></i> <span class="nav-order-label">Order</span>
+          </a>
+        </div>
       </div>
     </div>
   </nav>
@@ -229,11 +258,11 @@
       <div class="text-center mb-16">
         <h2 class="font-display text-4xl md:text-5xl font-bold text-emerald-900 mb-4">Our Products</h2>
         <p class="text-lg text-stone-600 max-w-2xl mx-auto">Durable, waterproof, low-maintenance pieces crafted from 100% plastic waste. Custom colors and sizes available.</p>
-        <p class="text-sm text-emerald-800 mt-4">Try Pay Now or Pay Deposit for a sample checkout in TTD. No real payment is taken.</p>
+        <p class="text-sm text-emerald-800 mt-4">Add pieces to your cart, then check out once. The payment step is a demo — nothing is charged.</p>
       </div>
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         <!-- Tiles -->
-        <div onclick="if(event.target.closest('[data-pay-open]'))return;document.getElementById('page-tiles').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
+        <div onclick="if(event.target.closest('[data-pay-open], [data-cart-control]'))return;document.getElementById('page-tiles').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
           <div class="photo-frame h-64 bg-stone-200 relative overflow-hidden">
             <picture class="block h-full"><source srcset="images/triangle-planter.webp" type="image/webp"><img src="images/triangle-planter.jpg" alt="Triangle wall planter with living plants, by Glastic Designs" class="w-full h-full object-cover" loading="lazy"></picture>
           </div>
@@ -244,15 +273,19 @@
               <span class="text-emerald-700 font-semibold">From $25 TT</span>
               <span class="text-sm text-stone-500">7 7/8" squares</span>
             </div>
-            <div class="pay-row">
-              <button type="button" data-pay-open="tiles" data-pay-mode="pay" class="pay-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3">Pay Now</button>
-              <button type="button" data-pay-open="tiles" data-pay-mode="deposit" class="pay-btn border-2 border-emerald-600 text-emerald-800 text-sm font-semibold rounded-full px-3 bg-white">Pay Deposit</button>
+<div class="cart-row" data-cart-control>
+              <div class="qty-stepper">
+                <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+                <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Plastic Tiles">
+                <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+              </div>
+              <button type="button" class="pay-btn cart-add-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3" data-cart-add="tiles">Add to Cart</button>
             </div>
             <p class="text-xs text-stone-500 mt-2">Demo checkout · no charge</p>
           </div>
         </div>
         <!-- Benches -->
-        <div onclick="if(event.target.closest('[data-pay-open]'))return;document.getElementById('page-benches').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
+        <div onclick="if(event.target.closest('[data-pay-open], [data-cart-control]'))return;document.getElementById('page-benches').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
           <div class="photo-frame h-64 bg-stone-200 relative overflow-hidden">
             <picture class="block h-full"><source srcset="images/front-door-garden.webp" type="image/webp"><img src="images/front-door-garden.jpg" alt="Vertical garden beside a front door, by Glastic Designs" class="w-full h-full object-cover" loading="lazy"></picture>
           </div>
@@ -263,15 +296,19 @@
               <span class="text-emerald-700 font-semibold">$250 TT</span>
               <span class="text-sm text-stone-500">Custom colors</span>
             </div>
-            <div class="pay-row">
-              <button type="button" data-pay-open="benches" data-pay-mode="pay" class="pay-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3">Pay Now</button>
-              <button type="button" data-pay-open="benches" data-pay-mode="deposit" class="pay-btn border-2 border-emerald-600 text-emerald-800 text-sm font-semibold rounded-full px-3 bg-white">Pay Deposit</button>
+<div class="cart-row" data-cart-control>
+              <div class="qty-stepper">
+                <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+                <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Benches and Stools">
+                <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+              </div>
+              <button type="button" class="pay-btn cart-add-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3" data-cart-add="benches">Add to Cart</button>
             </div>
             <p class="text-xs text-stone-500 mt-2">Demo checkout · no charge</p>
           </div>
         </div>
         <!-- Shelves -->
-        <div onclick="if(event.target.closest('[data-pay-open]'))return;document.getElementById('page-shelves').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
+        <div onclick="if(event.target.closest('[data-pay-open], [data-cart-control]'))return;document.getElementById('page-shelves').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
           <div class="photo-frame h-64 bg-stone-200 relative overflow-hidden"><picture class="block h-full"><source srcset="images/fern-planter.webp" type="image/webp"><img src="images/fern-planter.jpg" alt="Tall indoor fern wall planter by Glastic Designs" class="w-full h-full object-cover object-top" loading="lazy"></picture></div>
           <div class="p-6">
             <h3 class="font-bold text-2xl mb-2">Shelves & Furniture</h3>
@@ -280,15 +317,19 @@
               <span class="text-emerald-700 font-semibold">From $300 TT</span>
               <span class="text-sm text-stone-500">Indoor & outdoor</span>
             </div>
-            <div class="pay-row">
-              <button type="button" data-pay-open="shelves" data-pay-mode="pay" class="pay-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3">Pay Now</button>
-              <button type="button" data-pay-open="shelves" data-pay-mode="deposit" class="pay-btn border-2 border-emerald-600 text-emerald-800 text-sm font-semibold rounded-full px-3 bg-white">Pay Deposit</button>
+<div class="cart-row" data-cart-control>
+              <div class="qty-stepper">
+                <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+                <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Shelves and Furniture">
+                <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+              </div>
+              <button type="button" class="pay-btn cart-add-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3" data-cart-add="shelves">Add to Cart</button>
             </div>
             <p class="text-xs text-stone-500 mt-2">Demo checkout · no charge</p>
           </div>
         </div>
         <!-- Coasters -->
-        <div onclick="if(event.target.closest('[data-pay-open]'))return;document.getElementById('page-coasters').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
+        <div onclick="if(event.target.closest('[data-pay-open], [data-cart-control]'))return;document.getElementById('page-coasters').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
           <div class="photo-frame h-64 bg-stone-200 relative overflow-hidden"><picture class="block h-full"><source srcset="images/planter-frames.webp" type="image/webp"><img src="images/planter-frames.jpg" alt="Unfinished triangle and square planter frames in the Glastic Designs workshop" class="w-full h-full object-cover" loading="lazy"></picture></div>
           <div class="p-6">
             <h3 class="font-bold text-2xl mb-2">Coasters & Clocks</h3>
@@ -297,15 +338,19 @@
               <span class="text-emerald-700 font-semibold">DM for pricing</span>
               <span class="text-sm text-stone-500">27kg+ upcycled</span>
             </div>
-            <div class="pay-row">
-              <button type="button" data-pay-open="coasters" data-pay-mode="pay" class="pay-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3">Pay Now</button>
-              <button type="button" data-pay-open="coasters" data-pay-mode="deposit" class="pay-btn border-2 border-emerald-600 text-emerald-800 text-sm font-semibold rounded-full px-3 bg-white">Pay Deposit</button>
+<div class="cart-row" data-cart-control>
+              <div class="qty-stepper">
+                <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+                <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Coasters and Clocks">
+                <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+              </div>
+              <button type="button" class="pay-btn cart-add-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3" data-cart-add="coasters">Add to Cart</button>
             </div>
             <p class="text-xs text-stone-500 mt-2">Demo checkout · no charge</p>
           </div>
         </div>
         <!-- Trophies -->
-        <div onclick="if(event.target.closest('[data-pay-open]'))return;document.getElementById('page-awards').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
+        <div onclick="if(event.target.closest('[data-pay-open], [data-cart-control]'))return;document.getElementById('page-awards').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
           <div class="photo-frame h-64 bg-stone-200 relative overflow-hidden"><picture class="block h-full"><source srcset="images/triangle-planter.webp" type="image/webp"><img src="images/triangle-planter.jpg" alt="Triangle wall planter with living plants, by Glastic Designs" class="w-full h-full object-cover" loading="lazy"></picture></div>
           <div class="p-6">
             <h3 class="font-bold text-2xl mb-2">Awards & Keychains</h3>
@@ -314,14 +359,19 @@
               <span class="text-emerald-700 font-semibold">Custom orders</span>
               <span class="text-sm text-stone-500">Beat plastic pollution</span>
             </div>
-            <div class="pay-row">
-              <button type="button" data-pay-open="awards" data-pay-mode="deposit" class="pay-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3 w-full">Pay Deposit</button>
+<div class="cart-row" data-cart-control>
+              <div class="qty-stepper">
+                <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+                <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Awards and Keychains">
+                <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+              </div>
+              <button type="button" class="pay-btn cart-add-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3" data-cart-add="awards">Add to Cart</button>
             </div>
             <p class="text-xs text-stone-500 mt-2">Demo checkout · no charge</p>
           </div>
         </div>
         <!-- School -->
-        <div onclick="if(event.target.closest('[data-pay-open]'))return;document.getElementById('page-school').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
+        <div onclick="if(event.target.closest('[data-pay-open], [data-cart-control]'))return;document.getElementById('page-school').classList.remove('hidden')" class="product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer">
           <div class="photo-frame h-64 bg-stone-200 relative overflow-hidden"><picture class="block h-full"><source srcset="images/living-wall.webp" type="image/webp"><img src="images/living-wall.jpg" alt="Outdoor living wall by Glastic Designs, planted on a concrete wall" class="w-full h-full object-cover" loading="lazy"></picture></div>
           <div class="p-6">
             <h3 class="font-bold text-2xl mb-2">School Furniture Refurb</h3>
@@ -330,8 +380,13 @@
               <span class="text-emerald-700 font-semibold">Partner with us</span>
               <span class="text-sm text-stone-500">Schools welcome</span>
             </div>
-            <div class="pay-row">
-              <button type="button" data-pay-open="school" data-pay-mode="deposit" class="pay-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3 w-full">Pay Deposit</button>
+<div class="cart-row" data-cart-control>
+              <div class="qty-stepper">
+                <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+                <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for School Furniture">
+                <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+              </div>
+              <button type="button" class="pay-btn cart-add-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3" data-cart-add="school">Add to Cart</button>
             </div>
             <p class="text-xs text-stone-500 mt-2">Demo checkout · no charge</p>
           </div>
@@ -524,12 +579,16 @@
       <picture class="block"><source srcset="images/triangle-planter.webp" type="image/webp"><img src="images/triangle-planter.jpg" alt="Triangle wall planter with living plants, by Glastic Designs" class="rounded-3xl w-full object-cover h-96 product-photo" loading="lazy"></picture>
       <div>
         <h1 class="font-display text-4xl font-bold text-emerald-900 mb-4">Plastic Tiles</h1>
-        <p class="text-emerald-800 font-semibold mb-4">Sample order $100.00 TTD for 4 tiles, or a $50.00 TTD deposit.</p>
-        <div class="flex flex-col gap-3 mb-6">
-          <button type="button" data-pay-open="tiles" data-pay-mode="pay" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg"><i class="fas fa-lock"></i> Pay Now</button>
-          <button type="button" data-pay-open="tiles" data-pay-mode="deposit" class="pay-btn inline-flex w-full items-center justify-center gap-2 border-2 border-emerald-700 text-emerald-800 bg-white px-8 py-4 rounded-full font-semibold text-lg">Pay Deposit</button>
+        <p class="text-emerald-800 font-semibold mb-4">$25.00 TTD each</p>
+<div class="flex flex-col gap-3 mb-6" data-cart-control>
+          <div class="qty-stepper qty-stepper-lg">
+            <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+            <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Plastic Tiles">
+            <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg" data-cart-add="tiles">Add to Cart</button>
           <a href="https://wa.me/18687752407" class="inline-flex items-center justify-center gap-2 text-emerald-700 font-medium py-2"><i class="fab fa-whatsapp"></i> Or order via WhatsApp</a>
-          <p class="text-xs text-stone-500">Demo — no real payment will be taken.</p>
+          <p class="text-xs text-stone-500">Add items here, then checkout once from the cart. Demo — no real payment will be taken.</p>
         </div>
         <p class="text-lg text-stone-600 mb-6">Durable, waterproof, low-maintenance wall and floor tiles made from 100% plastic waste. Ideal for kitchen and bathroom backsplash, walls, floors, and outdoor pavers.</p>
         <ul class="space-y-3 text-stone-700 mb-8">
@@ -550,12 +609,16 @@
       <picture class="block"><source srcset="images/front-door-garden.webp" type="image/webp"><img src="images/front-door-garden.jpg" alt="Vertical garden beside a front door, by Glastic Designs" class="rounded-3xl w-full object-cover h-96 product-photo" loading="lazy"></picture>
       <div>
         <h1 class="font-display text-4xl font-bold text-emerald-900 mb-4">Benches & Stools</h1>
-        <p class="text-emerald-800 font-semibold mb-4">$250.00 TTD, or a $125.00 TTD deposit.</p>
-        <div class="flex flex-col gap-3 mb-6">
-          <button type="button" data-pay-open="benches" data-pay-mode="pay" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg"><i class="fas fa-lock"></i> Pay Now</button>
-          <button type="button" data-pay-open="benches" data-pay-mode="deposit" class="pay-btn inline-flex w-full items-center justify-center gap-2 border-2 border-emerald-700 text-emerald-800 bg-white px-8 py-4 rounded-full font-semibold text-lg">Pay Deposit</button>
+        <p class="text-emerald-800 font-semibold mb-4">$250.00 TTD each</p>
+<div class="flex flex-col gap-3 mb-6" data-cart-control>
+          <div class="qty-stepper qty-stepper-lg">
+            <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+            <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Benches and Stools">
+            <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg" data-cart-add="benches">Add to Cart</button>
           <a href="https://wa.me/18687752407" class="inline-flex items-center justify-center gap-2 text-emerald-700 font-medium py-2"><i class="fab fa-whatsapp"></i> Or order via WhatsApp</a>
-          <p class="text-xs text-stone-500">Demo — no real payment will be taken.</p>
+          <p class="text-xs text-stone-500">Add items here, then checkout once from the cart. Demo — no real payment will be taken.</p>
         </div>
         <p class="text-lg text-stone-600 mb-6">Compact, sturdy seating made from bottle caps and containers. Perfect for indoor, outdoor, classrooms, and patios. Pest and termite proof.</p>
         <ul class="space-y-3 text-stone-700 mb-8">
@@ -576,12 +639,16 @@
       <picture class="block"><source srcset="images/fern-planter.webp" type="image/webp"><img src="images/fern-planter.jpg" alt="Tall indoor fern wall planter by Glastic Designs" class="rounded-3xl w-full object-cover object-top h-96 product-photo" loading="lazy"></picture>
       <div>
         <h1 class="font-display text-4xl font-bold text-emerald-900 mb-4">Shelves & Furniture</h1>
-        <p class="text-emerald-800 font-semibold mb-4">Sample piece $300.00 TTD, or a $150.00 TTD deposit.</p>
-        <div class="flex flex-col gap-3 mb-6">
-          <button type="button" data-pay-open="shelves" data-pay-mode="pay" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg"><i class="fas fa-lock"></i> Pay Now</button>
-          <button type="button" data-pay-open="shelves" data-pay-mode="deposit" class="pay-btn inline-flex w-full items-center justify-center gap-2 border-2 border-emerald-700 text-emerald-800 bg-white px-8 py-4 rounded-full font-semibold text-lg">Pay Deposit</button>
+        <p class="text-emerald-800 font-semibold mb-4">$300.00 TTD each</p>
+<div class="flex flex-col gap-3 mb-6" data-cart-control>
+          <div class="qty-stepper qty-stepper-lg">
+            <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+            <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Shelves and Furniture">
+            <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg" data-cart-add="shelves">Add to Cart</button>
           <a href="https://wa.me/18687752407" class="inline-flex items-center justify-center gap-2 text-emerald-700 font-medium py-2"><i class="fab fa-whatsapp"></i> Or order via WhatsApp</a>
-          <p class="text-xs text-stone-500">Demo — no real payment will be taken.</p>
+          <p class="text-xs text-stone-500">Add items here, then checkout once from the cart. Demo — no real payment will be taken.</p>
         </div>
         <p class="text-lg text-stone-600 mb-6">Stylish shelving, consoles, and coffee tables crafted from plastic waste. Customizable by height and color.</p>
         <ul class="space-y-3 text-stone-700 mb-8">
@@ -602,12 +669,16 @@
       <picture class="block"><source srcset="images/planter-frames.webp" type="image/webp"><img src="images/planter-frames.jpg" alt="Unfinished triangle and square planter frames in the Glastic Designs workshop" class="rounded-3xl w-full object-cover h-96 product-photo" loading="lazy"></picture>
       <div>
         <h1 class="font-display text-4xl font-bold text-emerald-900 mb-4">Coasters & Clocks</h1>
-        <p class="text-emerald-800 font-semibold mb-4">Sample gift set $80.00 TTD, or a $40.00 TTD deposit.</p>
-        <div class="flex flex-col gap-3 mb-6">
-          <button type="button" data-pay-open="coasters" data-pay-mode="pay" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg"><i class="fas fa-lock"></i> Pay Now</button>
-          <button type="button" data-pay-open="coasters" data-pay-mode="deposit" class="pay-btn inline-flex w-full items-center justify-center gap-2 border-2 border-emerald-700 text-emerald-800 bg-white px-8 py-4 rounded-full font-semibold text-lg">Pay Deposit</button>
+        <p class="text-emerald-800 font-semibold mb-4">$80.00 TTD each</p>
+<div class="flex flex-col gap-3 mb-6" data-cart-control>
+          <div class="qty-stepper qty-stepper-lg">
+            <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+            <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Coasters and Clocks">
+            <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg" data-cart-add="coasters">Add to Cart</button>
           <a href="https://wa.me/18687752407" class="inline-flex items-center justify-center gap-2 text-emerald-700 font-medium py-2"><i class="fab fa-whatsapp"></i> Or order via WhatsApp</a>
-          <p class="text-xs text-stone-500">Demo — no real payment will be taken.</p>
+          <p class="text-xs text-stone-500">Add items here, then checkout once from the cart. Demo — no real payment will be taken.</p>
         </div>
         <p class="text-lg text-stone-600 mb-6">Original coasters and wall clocks made from upcycled plastic. Perfect gifts and conversation starters.</p>
         <ul class="space-y-3 text-stone-700 mb-8">
@@ -628,11 +699,16 @@
       <picture class="block"><source srcset="images/triangle-planter.webp" type="image/webp"><img src="images/triangle-planter.jpg" alt="Triangle wall planter with living plants, by Glastic Designs" class="rounded-3xl w-full object-cover h-96 product-photo" loading="lazy"></picture>
       <div>
         <h1 class="font-display text-4xl font-bold text-emerald-900 mb-4">Awards & Keychains</h1>
-        <p class="text-emerald-800 font-semibold mb-4">Sample deposit $200.00 TTD.</p>
-        <div class="flex flex-col gap-3 mb-6">
-          <button type="button" data-pay-open="awards" data-pay-mode="deposit" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg"><i class="fas fa-lock"></i> Pay Deposit</button>
+        <p class="text-emerald-800 font-semibold mb-4">$200.00 TTD each</p>
+<div class="flex flex-col gap-3 mb-6" data-cart-control>
+          <div class="qty-stepper qty-stepper-lg">
+            <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+            <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for Awards and Keychains">
+            <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg" data-cart-add="awards">Add to Cart</button>
           <a href="https://wa.me/18687752407" class="inline-flex items-center justify-center gap-2 text-emerald-700 font-medium py-2"><i class="fab fa-whatsapp"></i> Or order via WhatsApp</a>
-          <p class="text-xs text-stone-500">Demo — no real payment will be taken.</p>
+          <p class="text-xs text-stone-500">Add items here, then checkout once from the cart. Demo — no real payment will be taken.</p>
         </div>
         <p class="text-lg text-stone-600 mb-6">Custom trophies, medals and keychains made from plastic waste. Ideal for events and corporate gifts.</p>
         <ul class="space-y-3 text-stone-700 mb-8">
@@ -651,11 +727,16 @@
       <picture class="block"><source srcset="images/living-wall.webp" type="image/webp"><img src="images/living-wall.jpg" alt="Outdoor living wall by Glastic Designs, planted on a concrete wall" class="rounded-3xl w-full object-cover h-96 product-photo" loading="lazy"></picture>
       <div>
         <h1 class="font-display text-4xl font-bold text-emerald-900 mb-4">School Furniture Refurb</h1>
-        <p class="text-emerald-800 font-semibold mb-4">Sample partnership deposit $150.00 TTD.</p>
-        <div class="flex flex-col gap-3 mb-6">
-          <button type="button" data-pay-open="school" data-pay-mode="deposit" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg"><i class="fas fa-lock"></i> Pay Deposit</button>
+        <p class="text-emerald-800 font-semibold mb-4">$150.00 TTD each</p>
+<div class="flex flex-col gap-3 mb-6" data-cart-control>
+          <div class="qty-stepper qty-stepper-lg">
+            <button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>
+            <input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" aria-label="Quantity for School Furniture">
+            <button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>
+          </div>
+          <button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg" data-cart-add="school">Add to Cart</button>
           <a href="https://wa.me/18687752407" class="inline-flex items-center justify-center gap-2 text-emerald-700 font-medium py-2"><i class="fab fa-whatsapp"></i> Or order via WhatsApp</a>
-          <p class="text-xs text-stone-500">Demo — no real payment will be taken.</p>
+          <p class="text-xs text-stone-500">Add items here, then checkout once from the cart. Demo — no real payment will be taken.</p>
         </div>
         <p class="text-lg text-stone-600 mb-6">We collect and refurbish discarded school desks and chairs using recycled plastic — extending life and improving classrooms.</p>
         <ul class="space-y-3 text-stone-700 mb-8">
@@ -667,6 +748,25 @@
   </div>
 </div>
 
+
+<div id="cart-drawer" class="cart-overlay" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true">
+  <div class="cart-sheet" role="document">
+    <div class="cart-head">
+      <h2 id="cart-title" class="font-display text-2xl font-bold text-emerald-900">Your cart</h2>
+      <button type="button" class="pay-close" data-cart-close aria-label="Close cart">&times;</button>
+    </div>
+    <div id="cart-lines" class="cart-lines"></div>
+    <p id="cart-empty" class="px-5 pb-8 text-stone-600">Your cart is empty. Add a piece from the products, then come back here to check out.</p>
+    <div id="cart-footer" class="cart-foot hidden">
+      <div class="flex justify-between items-end mb-4">
+        <span class="text-sm text-stone-500">Subtotal</span>
+        <span id="cart-subtotal" class="font-display text-3xl font-bold text-emerald-900 leading-none">$0.00 TTD</span>
+      </div>
+      <button type="button" class="pay-submit" data-cart-checkout>Checkout</button>
+      <p class="text-xs text-stone-500 text-center mt-3">One demo checkout for this order. No real payment will be taken.</p>
+    </div>
+  </div>
+</div>
 <div id="pay-checkout" class="pay-overlay" role="dialog" aria-modal="true" aria-labelledby="pay-title" aria-hidden="true" tabindex="-1">
   <div class="pay-sheet" role="document">
     <div class="pay-header px-5 pt-4 pb-3 flex items-center justify-between gap-3">
@@ -699,6 +799,7 @@
             </div>
             <i class="fas fa-recycle text-emerald-600 text-xl" aria-hidden="true"></i>
           </div>
+          <div id="pay-lines" class="mt-3 text-sm border-t border-stone-200 pt-2"></div>
           <div class="pay-total">
             <span class="text-sm text-stone-500">Amount</span>
             <div class="text-right">
@@ -760,6 +861,7 @@
         <div class="flex justify-between gap-4 py-1"><span class="text-stone-500">Reference</span><span id="pay-ref" class="font-semibold text-right"></span></div>
         <div class="flex justify-between gap-4 py-1"><span class="text-stone-500">Item</span><span id="pay-success-item" class="font-semibold text-right"></span></div>
         <div class="flex justify-between gap-4 py-1"><span class="text-stone-500">Details</span><span id="pay-success-summary" class="text-right"></span></div>
+        <div id="pay-success-lines" class="border-t border-stone-200 mt-2 pt-2"></div>
         <div class="flex justify-between gap-4 py-1"><span class="text-stone-500">Type</span><span id="pay-success-kind" class="font-semibold text-right"></span></div>
         <div class="flex justify-between gap-4 py-1"><span class="text-stone-500">Amount</span><span id="pay-success-amount" class="font-semibold text-emerald-700 text-right"></span></div>
       </div>

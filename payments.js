@@ -35,7 +35,8 @@
     tiles: {
       id: 'tiles',
       name: 'Plastic Tiles',
-      summary: '4 × 7 7/8" square tiles',
+      summary: '7 7/8" square tile',
+      unit: 25,
       pay: 100,
       deposit: 50
     },
@@ -43,6 +44,7 @@
       id: 'benches',
       name: 'Bench or Stool',
       summary: 'One bench or circular stool',
+      unit: 250,
       pay: 250,
       deposit: 125
     },
@@ -50,6 +52,7 @@
       id: 'shelves',
       name: 'Shelf or Furniture',
       summary: 'One shelf, console, or table',
+      unit: 300,
       pay: 300,
       deposit: 150
     },
@@ -57,6 +60,7 @@
       id: 'coasters',
       name: 'Coasters & Clock',
       summary: 'Gift set at a sample price',
+      unit: 80,
       pay: 80,
       deposit: 40
     },
@@ -64,6 +68,7 @@
       id: 'awards',
       name: 'Custom Award',
       summary: 'Event or corporate gift',
+      unit: 200,
       pay: null,
       deposit: 200
     },
@@ -71,6 +76,7 @@
       id: 'school',
       name: 'School Furniture Refurb',
       summary: 'Partnership consultation',
+      unit: 150,
       pay: null,
       deposit: 150
     },
@@ -114,6 +120,107 @@
     return resolveMode(item, mode) === 'pay' ? item.pay : item.deposit;
   }
 
+  var CART_KEY = 'glastic-cart';
+
+  function clampQty(value) {
+    var qty = Math.round(Number(value));
+    if (!Number.isFinite(qty) || qty < 1) return 1;
+    if (qty > 99) return 99;
+    return qty;
+  }
+
+  function memoryStorage() {
+    var data = {};
+    return {
+      getItem: function (key) { return Object.prototype.hasOwnProperty.call(data, key) ? data[key] : null; },
+      setItem: function (key, value) { data[key] = String(value); }
+    };
+  }
+
+  function storageOr(storage) {
+    if (storage) return storage;
+    try {
+      if (typeof localStorage !== 'undefined') return localStorage;
+    } catch (e) { /* private mode */ }
+    return memoryStorage();
+  }
+
+  function normalizeCart(rows) {
+    if (!Array.isArray(rows)) return [];
+    var merged = {};
+    var order = [];
+    rows.forEach(function (row) {
+      if (!row || !CATALOG[row.id] || CATALOG[row.id].unit == null) return;
+      var qty = clampQty(row.qty);
+      if (!merged[row.id]) order.push(row.id);
+      merged[row.id] = (merged[row.id] || 0) + qty;
+      if (merged[row.id] > 99) merged[row.id] = 99;
+    });
+    return order.map(function (id) { return { id: id, qty: merged[id] }; });
+  }
+
+  function loadCart(storage) {
+    var store = storageOr(storage);
+    try {
+      return normalizeCart(JSON.parse(store.getItem(CART_KEY) || '[]'));
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveCart(storage, rows) {
+    var clean = normalizeCart(rows).map(function (row) { return { id: row.id, qty: row.qty }; });
+    storageOr(storage).setItem(CART_KEY, JSON.stringify(clean));
+    return clean;
+  }
+
+  function addToCart(storage, id, qty) {
+    var rows = loadCart(storage);
+    var found = false;
+    rows.forEach(function (row) {
+      if (row.id === id) {
+        row.qty = clampQty(row.qty + clampQty(qty));
+        found = true;
+      }
+    });
+    if (!found) rows.push({ id: id, qty: clampQty(qty) });
+    return saveCart(storage, rows);
+  }
+
+  function changeQty(storage, id, qty) {
+    var next = clampQty(qty);
+    var rows = loadCart(storage).map(function (row) {
+      return row.id === id ? { id: id, qty: next } : row;
+    });
+    return saveCart(storage, rows);
+  }
+
+  function removeFromCart(storage, id) {
+    return saveCart(storage, loadCart(storage).filter(function (row) { return row.id !== id; }));
+  }
+
+  function cartLines(rows) {
+    return normalizeCart(rows).map(function (row) {
+      var item = CATALOG[row.id];
+      return {
+        itemId: item.id,
+        itemName: item.name,
+        summary: item.summary,
+        qty: row.qty,
+        unitPrice: item.unit,
+        lineTotal: item.unit * row.qty
+      };
+    });
+  }
+
+  function cartSubtotal(rows) {
+    return cartLines(rows).reduce(function (sum, line) { return sum + line.lineTotal; }, 0);
+  }
+
+  function cartCount(rows) {
+    return normalizeCart(rows).reduce(function (sum, row) { return sum + row.qty; }, 0);
+  }
+
   function createOrderId(now) {
     var date = now || new Date();
     var y = String(date.getFullYear()).slice(2);
@@ -124,28 +231,58 @@
   }
 
   function assertNoCardPayload(payload) {
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-      throw new Error('Invalid checkout.');
+    if (!payload || typeof payload !== 'object') throw new Error('Invalid checkout.');
+    walkPayload(payload);
+  }
+
+  function walkPayload(value) {
+    if (Array.isArray(value)) {
+      value.forEach(walkPayload);
+      return;
     }
-    Object.keys(payload).forEach(function (key) {
+    if (!value || typeof value !== 'object') return;
+    Object.keys(value).forEach(function (key) {
       var normalized = String(key).toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (CARD_KEYS[normalized]) {
-        throw new Error('Card details cannot be included in checkout.');
-      }
+      if (CARD_KEYS[normalized]) throw new Error('Card details cannot be included in checkout.');
+      walkPayload(value[key]);
     });
   }
 
-  function buildCheckoutPayload(session) {
-    var payload = {
-      provider: getProvider().id,
-      orderId: session.orderId,
+  function sessionLines(session) {
+    if (session.lines && session.lines.length) return session.lines;
+    return [{
       itemId: session.item.id,
       itemName: session.item.name,
       summary: session.item.summary,
+      qty: 1,
+      unitPrice: session.amount,
+      lineTotal: session.amount
+    }];
+  }
+
+  function buildCheckoutPayload(session) {
+    var lines = sessionLines(session);
+    var amount = lines.reduce(function (sum, line) { return sum + line.lineTotal; }, 0);
+    var description = lines.length === 1
+      ? lines[0].itemName + ' — ' + (session.mode === 'deposit' ? 'deposit' : 'payment')
+      : 'Cart · ' + lines.length + ' items';
+    var payload = {
+      provider: getProvider().id,
+      orderId: session.orderId,
       kind: session.mode,
       currency: 'TTD',
-      amount: session.amount,
-      description: session.item.name + ' — ' + (session.mode === 'deposit' ? 'deposit' : 'payment')
+      amount: amount,
+      description: description,
+      items: lines.map(function (line) {
+        return {
+          itemId: line.itemId,
+          itemName: line.itemName,
+          summary: line.summary,
+          qty: line.qty,
+          unitPrice: line.unitPrice,
+          lineTotal: line.lineTotal
+        };
+      })
     };
     assertNoCardPayload(payload);
     return payload;
@@ -207,8 +344,8 @@
             amount: order.amount,
             currency: order.currency,
             description: order.description,
-            itemId: order.itemId,
-            kind: order.kind
+            kind: order.kind,
+            items: order.items
           })
         }).then(function (res) {
           if (!res.ok) throw new Error('WiPay is not connected yet.');
@@ -253,13 +390,36 @@
     return mode === 'deposit' ? 'Deposit' : 'Pay in full';
   }
 
+  function fillLineList(container, lines) {
+    if (!container) return;
+    container.textContent = '';
+    lines.forEach(function (line) {
+      var row = document.createElement('div');
+      row.className = 'flex justify-between gap-3 py-1';
+      var name = document.createElement('span');
+      name.className = 'text-stone-700';
+      name.textContent = line.qty + ' × ' + line.itemName;
+      var total = document.createElement('span');
+      total.className = 'font-semibold text-right';
+      total.textContent = formatTTD(line.lineTotal);
+      row.appendChild(name);
+      row.appendChild(total);
+      container.appendChild(row);
+    });
+  }
+
   function renderSummary() {
     if (!session) return;
-    el('pay-item-name').textContent = session.item.name;
-    el('pay-item-summary').textContent = session.item.summary;
+    var lines = sessionLines(session);
+    var amount = lines.reduce(function (sum, line) { return sum + line.lineTotal; }, 0);
+    var title = lines.length === 1 ? lines[0].itemName : 'Your order';
+    var detail = lines.length === 1 ? lines[0].summary : lines.length + ' items';
+    el('pay-item-name').textContent = title;
+    el('pay-item-summary').textContent = detail;
     el('pay-kind').textContent = kindLabel(session.mode);
     el('pay-order-id').textContent = session.orderId;
-    el('pay-amount').textContent = formatTTD(session.amount);
+    el('pay-amount').textContent = formatTTD(amount);
+    fillLineList(el('pay-lines'), lines);
     var provider = getProvider();
     var demo = provider.id === 'demo';
     el('pay-card-block').classList.toggle('hidden', !demo);
@@ -283,12 +443,19 @@
   }
 
   function showSuccess(order) {
+    var lines = order.items || [];
+    var label = lines.length === 1 ? lines[0].itemName : lines.length + ' items';
     el('pay-ref').textContent = order.orderId;
-    el('pay-success-item').textContent = order.itemName;
-    el('pay-success-summary').textContent = order.summary;
+    el('pay-success-item').textContent = label;
+    el('pay-success-summary').textContent = order.description;
     el('pay-success-kind').textContent = kindLabel(order.kind);
     el('pay-success-amount').textContent = formatTTD(order.amount);
-    var text = 'Hi Glastic Designs, I tried the sample checkout for ' + order.itemName +
+    fillLineList(el('pay-success-lines'), lines);
+    if (session && session.source === 'cart') {
+      saveCart(null, []);
+      renderCart();
+    }
+    var text = 'Hi Glastic Designs, I tried the sample checkout for ' + label +
       ' (' + order.orderId + ', ' + formatTTD(order.amount) + ').';
     el('pay-whatsapp').href = 'https://wa.me/18687752407?text=' + encodeURIComponent(text);
     el('pay-view-form').classList.add('hidden');
@@ -297,6 +464,127 @@
     el('pay-view-success').removeAttribute('aria-hidden');
     var done = el('pay-done');
     if (done) done.focus();
+  }
+
+  function renderCart() {
+    var rows = loadCart();
+    var count = cartCount(rows);
+    var lines = cartLines(rows);
+    var badge = el('cart-count');
+    if (badge) {
+      badge.textContent = String(count);
+      badge.classList.toggle('is-on', count > 0);
+    }
+    var opener = el('cart-open');
+    if (opener) {
+      opener.setAttribute('aria-label', 'Open cart, ' + count + (count === 1 ? ' item' : ' items'));
+    }
+    var list = el('cart-lines');
+    var empty = el('cart-empty');
+    var footer = el('cart-footer');
+    if (!list) return;
+    list.textContent = '';
+    if (empty) empty.classList.toggle('hidden', lines.length > 0);
+    if (footer) footer.classList.toggle('hidden', lines.length === 0);
+    lines.forEach(function (line) {
+      var article = document.createElement('article');
+      article.className = 'cart-line';
+      var info = document.createElement('div');
+      var name = document.createElement('p');
+      name.className = 'font-semibold text-stone-900';
+      name.textContent = line.itemName;
+      var meta = document.createElement('p');
+      meta.className = 'text-sm text-stone-500';
+      meta.textContent = formatTTD(line.unitPrice) + ' each';
+      info.appendChild(name);
+      info.appendChild(meta);
+      var side = document.createElement('div');
+      side.className = 'text-right';
+      var lineTotal = document.createElement('p');
+      lineTotal.className = 'font-semibold text-emerald-800';
+      lineTotal.textContent = formatTTD(line.lineTotal);
+      var controls = document.createElement('div');
+      controls.className = 'qty-stepper qty-stepper-sm mt-2';
+      controls.setAttribute('data-cart-control', '');
+      var minus = document.createElement('button');
+      minus.type = 'button';
+      minus.className = 'qty-btn';
+      minus.setAttribute('data-cart-delta', '-1');
+      minus.setAttribute('data-cart-id', line.itemId);
+      minus.setAttribute('aria-label', 'Decrease ' + line.itemName);
+      minus.textContent = '−';
+      var qty = document.createElement('span');
+      qty.className = 'qty-readout';
+      qty.textContent = String(line.qty);
+      var plus = document.createElement('button');
+      plus.type = 'button';
+      plus.className = 'qty-btn';
+      plus.setAttribute('data-cart-delta', '1');
+      plus.setAttribute('data-cart-id', line.itemId);
+      plus.setAttribute('aria-label', 'Increase ' + line.itemName);
+      plus.textContent = '+';
+      controls.appendChild(minus);
+      controls.appendChild(qty);
+      controls.appendChild(plus);
+      var remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'cart-remove';
+      remove.setAttribute('data-cart-remove', line.itemId);
+      remove.textContent = 'Remove';
+      side.appendChild(lineTotal);
+      side.appendChild(controls);
+      side.appendChild(remove);
+      article.appendChild(info);
+      article.appendChild(side);
+      list.appendChild(article);
+    });
+    var sub = el('cart-subtotal');
+    if (sub) sub.textContent = formatTTD(cartSubtotal(rows));
+  }
+
+  function openCart() {
+    var drawer = el('cart-drawer');
+    if (!drawer) return;
+    renderCart();
+    drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCart() {
+    var drawer = el('cart-drawer');
+    if (!drawer) return;
+    drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    if (!el('pay-checkout').classList.contains('is-open')) document.body.style.overflow = '';
+  }
+
+  function checkoutCart() {
+    var lines = cartLines(loadCart());
+    if (!lines.length) return;
+    session = {
+      source: 'cart',
+      mode: 'pay',
+      lines: lines,
+      amount: lines.reduce(function (sum, line) { return sum + line.lineTotal; }, 0),
+      orderId: createOrderId()
+    };
+    closeCart();
+    clearFields();
+    showError('');
+    showFormView();
+    renderSummary();
+    var overlay = el('pay-checkout');
+    lastFocus = document.activeElement;
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    overlay.focus();
+  }
+
+  function readQty(control) {
+    var input = control.querySelector('.qty-input');
+    return clampQty(input ? input.value : 1);
   }
 
   function open(itemId, mode) {
@@ -431,6 +719,64 @@
     bindFormatters();
 
     document.addEventListener('click', function (event) {
+      var cartControl = event.target.closest('[data-cart-control]');
+      if (cartControl && !event.target.closest('#cart-drawer')) {
+        event.stopPropagation();
+      }
+      var add = event.target.closest('[data-cart-add]');
+      if (add) {
+        event.preventDefault();
+        event.stopPropagation();
+        var group = add.closest('[data-cart-control]') || add.parentNode;
+        addToCart(null, add.getAttribute('data-cart-add'), readQty(group));
+        renderCart();
+        var previous = add.textContent;
+        add.textContent = 'Added';
+        window.setTimeout(function () { add.textContent = previous === 'Added' ? 'Add to Cart' : previous; }, 900);
+        return;
+      }
+      var deltaBtn = event.target.closest('[data-cart-delta]');
+      if (deltaBtn && deltaBtn.closest('#cart-drawer')) {
+        event.preventDefault();
+        var id = deltaBtn.getAttribute('data-cart-id');
+        var current = loadCart().filter(function (row) { return row.id === id; })[0];
+        var nextQty = (current ? current.qty : 1) + Number(deltaBtn.getAttribute('data-cart-delta'));
+        if (nextQty < 1) removeFromCart(null, id);
+        else changeQty(null, id, nextQty);
+        renderCart();
+        return;
+      }
+      var step = event.target.closest('[data-qty-delta]');
+      if (step) {
+        event.preventDefault();
+        event.stopPropagation();
+        var wrap = step.closest('[data-cart-control]');
+        var input = wrap && wrap.querySelector('.qty-input');
+        if (input) input.value = String(clampQty(Number(input.value) + Number(step.getAttribute('data-qty-delta'))));
+        return;
+      }
+      var removeBtn = event.target.closest('[data-cart-remove]');
+      if (removeBtn) {
+        event.preventDefault();
+        removeFromCart(null, removeBtn.getAttribute('data-cart-remove'));
+        renderCart();
+        return;
+      }
+      if (event.target.closest('#cart-open')) {
+        event.preventDefault();
+        openCart();
+        return;
+      }
+      if (event.target.closest('[data-cart-close]')) {
+        event.preventDefault();
+        closeCart();
+        return;
+      }
+      if (event.target.closest('[data-cart-checkout]')) {
+        event.preventDefault();
+        checkoutCart();
+        return;
+      }
       var opener = event.target.closest('[data-pay-open]');
       if (opener) {
         event.preventDefault();
@@ -454,8 +800,17 @@
     });
 
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && overlay.classList.contains('is-open')) close();
+      if (event.key !== 'Escape') return;
+      if (overlay.classList.contains('is-open')) close();
+      else if (el('cart-drawer') && el('cart-drawer').classList.contains('is-open')) closeCart();
     });
+    var drawer = el('cart-drawer');
+    if (drawer) {
+      drawer.addEventListener('click', function (event) {
+        if (event.target === drawer) closeCart();
+      });
+    }
+    renderCart();
 
     el('pay-submit').addEventListener('click', onSubmit);
     el('pay-form').addEventListener('keydown', function (event) {
@@ -478,6 +833,16 @@
     getProvider: getProvider,
     open: open,
     close: close,
-    mount: mount
+    mount: mount,
+    memoryStorage: memoryStorage,
+    loadCart: loadCart,
+    saveCart: saveCart,
+    addToCart: addToCart,
+    changeQty: changeQty,
+    removeFromCart: removeFromCart,
+    cartLines: cartLines,
+    cartSubtotal: cartSubtotal,
+    cartCount: cartCount,
+    clampQty: clampQty
   };
 });

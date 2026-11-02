@@ -37,13 +37,45 @@ test('amounts format as TTD', () => {
 test('checkout payload is order data only', () => {
   const payload = pay.buildCheckoutPayload(sessionFor('benches', 'pay'));
   assert.deepEqual(Object.keys(payload).sort(), [
-    'amount', 'currency', 'description', 'itemId', 'itemName', 'kind', 'orderId', 'provider', 'summary'
+    'amount', 'currency', 'description', 'items', 'kind', 'orderId', 'provider'
   ]);
   assert.equal(payload.provider, 'demo');
   assert.equal(payload.currency, 'TTD');
   assert.equal(payload.amount, 250);
   assert.equal(payload.kind, 'pay');
+  assert.equal(payload.items[0].itemId, 'benches');
+  assert.equal(payload.items[0].qty, 1);
   assert.equal(JSON.stringify(payload).includes('4242'), false);
+});
+
+test('cart stores quantity only and totals in TTD', () => {
+  const storage = pay.memoryStorage();
+  pay.addToCart(storage, 'tiles', 2);
+  pay.addToCart(storage, 'benches', 1);
+  pay.addToCart(storage, 'tiles', 1);
+  pay.addToCart(storage, 'consult', 4);
+  const saved = JSON.parse(storage.getItem('glastic-cart'));
+  assert.deepEqual(saved, [
+    { id: 'tiles', qty: 3 },
+    { id: 'benches', qty: 1 }
+  ]);
+  assert.equal(JSON.stringify(saved).includes('4242'), false);
+  assert.equal(pay.cartCount(saved), 4);
+  assert.equal(pay.cartSubtotal(saved), 25 * 3 + 250);
+  const lines = pay.cartLines(saved);
+  const payload = pay.buildCheckoutPayload({
+    source: 'cart',
+    mode: 'pay',
+    orderId: 'GD-261102-TEST',
+    lines
+  });
+  assert.equal(payload.amount, 325);
+  assert.equal(payload.items.length, 2);
+  assert.equal(payload.items[0].lineTotal, 75);
+  pay.changeQty(storage, 'benches', 2);
+  pay.removeFromCart(storage, 'tiles');
+  assert.deepEqual(pay.loadCart(storage), [{ id: 'benches', qty: 2 }]);
+  assert.equal(pay.cartSubtotal(pay.loadCart(storage)), 500);
 });
 
 test('card fields are rejected if someone adds them to the payload', () => {
@@ -77,7 +109,7 @@ test('wipay request body has no card fields', async () => {
   const result = await pay.providers.wipay.createCheckout(payload);
   assert.equal(sent.url, '/api/checkout');
   assert.deepEqual(Object.keys(sent.body).sort(), [
-    'amount', 'currency', 'description', 'itemId', 'kind', 'orderId', 'provider'
+    'amount', 'currency', 'description', 'items', 'kind', 'orderId', 'provider'
   ]);
   assert.equal(sent.body.provider, 'wipay');
   assert.equal(sent.body.amount, 150);

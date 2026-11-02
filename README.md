@@ -10,7 +10,7 @@ Founded by Alicia Barrie-George. We transform discarded plastic into tiles, furn
 - Product showcase
 - Process & impact sections
 - Direct WhatsApp and social links
-- Sample online checkout in TTD (demo only — card details are not saved or sent; WiPay can be connected later)
+- Shopping cart with quantities, saved in the browser, and one demo TTD checkout (card details are not saved or sent; WiPay can be connected later)
 - Real photos from the Glastic Designs Facebook page (hero, about, gallery, and every product page)
 - Based on content from the official Facebook page
 
