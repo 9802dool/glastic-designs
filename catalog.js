@@ -87,11 +87,11 @@
         + '</div>'
         + '<button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg" data-cart-add="">Add to Cart</button>'
         + '<p class="text-xs text-stone-500">Add this to your cart, then use Checkout once. Demo payment — nothing is charged.</p>'
-        + '</div><p class="text-lg text-stone-600"></p></div></div></div>';
+        + '</div><p class="product-description text-lg text-stone-600"></p></div></div></div>';
       fillGallery(page.querySelector('.product-gallery'), product);
       page.querySelector('h1').textContent = product.name;
       page.querySelector('.text-emerald-800').textContent = money(product.priceTtd) + ' each';
-      page.querySelector('.text-lg').textContent = product.description;
+      page.querySelector('.product-description').textContent = product.description;
       page.querySelector('[data-cart-add]').setAttribute('data-cart-add', product.id);
       page.querySelector('.qty-input').setAttribute('aria-label', 'Quantity for ' + product.name);
       page.querySelector('.back').addEventListener('click', function () { page.classList.add('hidden'); });
