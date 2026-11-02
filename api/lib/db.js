@@ -8,7 +8,7 @@ const SEED = [
     id: 'tiles',
     name: 'Plastic Tiles',
     description: 'Durable, waterproof wall and floor tiles made from plastic waste. Hexagonal, square, and rectangular shapes are available.',
-    category: 'Planters',
+    category: 'Tiles',
     price: 25,
     file: 'triangle-planter.jpg'
   },
@@ -108,6 +108,21 @@ async function migrate() {
       is_main boolean NOT NULL DEFAULT false,
       sort_order integer NOT NULL DEFAULT 0
     )`;
+  const categoryFixes = [
+    ['tiles', 'Plastic Tiles', 'Tiles'],
+    ['benches', 'Bench or Stool', 'Furniture'],
+    ['shelves', 'Shelf or Furniture', 'Furniture'],
+    ['coasters', 'Coasters & Clock', 'Gifts'],
+    ['awards', 'Custom Award', 'Gifts'],
+    ['school', 'School Furniture Refurb', 'Services']
+  ];
+  for (let i = 0; i < categoryFixes.length; i++) {
+    const fix = categoryFixes[i];
+    await sql`
+      UPDATE products
+      SET category = ${fix[2]}
+      WHERE id = ${fix[0]} AND name = ${fix[1]} AND category <> ${fix[2]}`;
+  }
   const existing = await sql`SELECT count(*)::int AS count FROM products`;
   if (existing[0].count > 0) return;
   for (let i = 0; i < SEED.length; i++) {
@@ -165,7 +180,7 @@ async function listProducts(includeHidden) {
     ? await sql`SELECT id, name, description, category, price_ttd, sort_order, hidden FROM products ORDER BY sort_order, name`
     : await sql`SELECT id, name, description, category, price_ttd, sort_order, hidden FROM products WHERE hidden = false ORDER BY sort_order, name`;
   if (!rows.length) return [];
-  const photos = await sql`SELECT id, product_id, url, is_main, sort_order FROM product_photos ORDER BY is_main DESC, sort_order, id`;
+  const photos = await sql`SELECT id, product_id, url, is_main, sort_order FROM product_photos ORDER BY sort_order, id`;
   return rows.map(function (row) {
     return mapProduct(row, photos.filter(function (photo) { return photo.product_id === row.id; }));
   });

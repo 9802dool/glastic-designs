@@ -1,6 +1,6 @@
 (function () {
   var FALLBACK = [
-    { id: 'tiles', name: 'Plastic Tiles', description: 'Durable, waterproof wall and floor tiles made from plastic waste. Hexagonal, square, and rectangular shapes are available.', category: 'Planters', priceTtd: 25, photos: [{ url: '/images/triangle-planter.jpg', isMain: true }] },
+    { id: 'tiles', name: 'Plastic Tiles', description: 'Durable, waterproof wall and floor tiles made from plastic waste. Hexagonal, square, and rectangular shapes are available.', category: 'Tiles', priceTtd: 25, photos: [{ url: '/images/triangle-planter.jpg', isMain: true }] },
     { id: 'benches', name: 'Bench or Stool', description: 'Compact, sturdy seating for indoors, outdoors, classrooms, and patios.', category: 'Furniture', priceTtd: 250, photos: [{ url: '/images/front-door-garden.jpg', isMain: true }] },
     { id: 'shelves', name: 'Shelf or Furniture', description: 'Shelving, consoles, and tables with custom heights and colors. Suitable indoors and outdoors.', category: 'Furniture', priceTtd: 300, photos: [{ url: '/images/fern-planter.jpg', isMain: true }] },
     { id: 'coasters', name: 'Coasters & Clock', description: 'Coasters and clocks made from upcycled plastic. Sample gift set.', category: 'Gifts', priceTtd: 80, photos: [{ url: '/images/planter-frames.jpg', isMain: true }] },
@@ -76,7 +76,7 @@
       page.innerHTML = '<div class="max-w-5xl mx-auto px-4 py-8">'
         + '<button type="button" class="back mb-6 text-emerald-700 font-medium flex items-center gap-2"><i class="fas fa-arrow-left"></i> Back to Products</button>'
         + '<div class="product-detail grid lg:grid-cols-2 gap-10">'
-        + (photo ? photoHtml(photo.url, product.name + ' by Glastic Designs', 'rounded-3xl w-full object-cover h-96 product-photo') : '<div class="rounded-3xl bg-stone-200 h-96"></div>')
+        + '<div class="product-gallery"></div>'
         + '<div><h1 class="font-display text-4xl font-bold text-emerald-900 mb-2"></h1>'
         + '<p class="text-emerald-800 font-semibold mb-4"></p>'
         + '<div class="flex flex-col gap-3 mb-6" data-cart-control>'
@@ -88,6 +88,7 @@
         + '<button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg" data-cart-add="">Add to Cart</button>'
         + '<p class="text-xs text-stone-500">Add this to your cart, then use Checkout once. Demo payment — nothing is charged.</p>'
         + '</div><p class="text-lg text-stone-600"></p></div></div></div>';
+      fillGallery(page.querySelector('.product-gallery'), product);
       page.querySelector('h1').textContent = product.name;
       page.querySelector('.text-emerald-800').textContent = money(product.priceTtd) + ' each';
       page.querySelector('.text-lg').textContent = product.description;
@@ -97,6 +98,67 @@
       document.body.appendChild(page);
     });
     if (window.GlasticPay && window.GlasticPay.adoptCatalog) window.GlasticPay.adoptCatalog(products);
+    openLinkedProduct();
+  }
+
+  function fillGallery(container, product) {
+    var photos = product.photos || [];
+    var photo = mainPhoto(product);
+    if (!photo) {
+      container.innerHTML = '<div class="rounded-3xl bg-stone-200 h-96"></div>';
+      return;
+    }
+    var big = document.createElement('img');
+    big.src = photo.url;
+    big.alt = product.name + ' by Glastic Designs';
+    big.className = 'rounded-3xl w-full object-cover h-96 product-photo';
+    container.appendChild(big);
+    if (photos.length < 2) return;
+    var strip = document.createElement('div');
+    strip.className = 'flex gap-2 mt-3 overflow-x-auto pb-1';
+    photos.forEach(function (item) {
+      var thumb = document.createElement('button');
+      thumb.type = 'button';
+      thumb.className = 'rounded-xl overflow-hidden border-2 border-stone-200 p-0';
+      thumb.style.width = '5rem';
+      thumb.style.height = '5rem';
+      thumb.style.flex = '0 0 auto';
+      if (item.isMain) {
+        thumb.classList.remove('border-stone-200');
+        thumb.classList.add('border-emerald-600');
+      }
+      thumb.setAttribute('aria-label', 'Show photo of ' + product.name);
+      var img = document.createElement('img');
+      img.src = item.url;
+      img.alt = '';
+      img.className = 'w-full h-full object-cover';
+      thumb.appendChild(img);
+      thumb.addEventListener('click', function () {
+        big.src = item.url;
+        var buttons = strip.querySelectorAll('button');
+        for (var i = 0; i < buttons.length; i++) {
+          buttons[i].classList.remove('border-emerald-600');
+          buttons[i].classList.add('border-stone-200');
+        }
+        thumb.classList.remove('border-stone-200');
+        thumb.classList.add('border-emerald-600');
+      });
+      strip.appendChild(thumb);
+    });
+    container.appendChild(strip);
+  }
+
+  function openLinkedProduct() {
+    var id = '';
+    try {
+      id = new URLSearchParams(window.location.search).get('product') || '';
+    } catch (error) {
+      id = '';
+    }
+    if (!id && window.location.hash.indexOf('#product-') === 0) id = decodeURIComponent(window.location.hash.slice('#product-'.length));
+    if (!/^[A-Za-z0-9-]{1,80}$/.test(id)) return;
+    var page = document.getElementById('page-' + id);
+    if (page) page.classList.remove('hidden');
   }
 
   function load() {

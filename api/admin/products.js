@@ -8,13 +8,21 @@ function newId() {
   return randomBytes(8).toString('hex');
 }
 
+function photoBuffer(data) {
+  const buffer = Buffer.from(String(data || ''), 'base64');
+  if (!buffer.length || buffer.length > 4 * 1024 * 1024) return null;
+  return buffer;
+}
+
+async function removeBlob(url) {
+  if (url && /^https:\/\//.test(url)) {
+    try { await del(url); } catch (error) { /* the file may already be gone */ }
+  }
+}
+
 async function deleteProduct(sql, id, res) {
   const photos = await sql`SELECT url FROM product_photos WHERE product_id = ${id}`;
-  for (let i = 0; i < photos.length; i++) {
-    if (/^https:\/\//.test(photos[i].url)) {
-      try { await del(photos[i].url); } catch (error) { /* ignore missing files */ }
-    }
-  }
+  for (let i = 0; i < photos.length; i++) await removeBlob(photos[i].url);
   await sql`DELETE FROM products WHERE id = ${id}`;
   return send(res, 200, { products: await listProducts(true) });
 }
@@ -39,6 +47,32 @@ module.exports = async function handler(req, res) {
       return send(res, 200, { products: await listProducts(true) });
     }
 
+    if (req.method === 'POST' && body.action === 'replace-photo') {
+      const photoId = cleanText(body.photoId, 80);
+      const rows = await sql`SELECT id, url, product_id, is_main, sort_order FROM product_photos WHERE id = ${photoId}`;
+      if (!rows.length) return send(res, 404, { error: 'Photo not found.' });
+      const buffer = photoBuffer(body.data);
+      if (!buffer) return send(res, 400, { error: 'That photo is too large. Try another one.' });
+      if (!process.env.BLOB_READ_WRITE_TOKEN) return send(res, 503, { error: 'Photo storage is not connected yet.' });
+      const blob = await put('products/' + rows[0].product_id + '/' + newId() + '.jpg', buffer, {
+        access: 'public',
+        contentType: 'image/jpeg',
+        addRandomSuffix: false
+      });
+      await sql`UPDATE product_photos SET url = ${blob.url} WHERE id = ${photoId}`;
+      await removeBlob(rows[0].url);
+      return send(res, 200, { products: await listProducts(true) });
+    }
+
+    if (req.method === 'POST' && body.action === 'reorder-photos') {
+      const productId = cleanText(body.productId, 80);
+      const ids = Array.isArray(body.ids) ? body.ids.map(function (id) { return cleanText(id, 80); }).filter(Boolean) : [];
+      for (let i = 0; i < ids.length; i++) {
+        await sql`UPDATE product_photos SET sort_order = ${i} WHERE id = ${ids[i]} AND product_id = ${productId}`;
+      }
+      return send(res, 200, { products: await listProducts(true) });
+    }
+
     if (req.method === 'POST' && body.action === 'photo') {
       const productId = cleanText(body.productId, 80);
       const data = String(body.data || '');
@@ -47,10 +81,8 @@ module.exports = async function handler(req, res) {
       if (!process.env.BLOB_READ_WRITE_TOKEN) {
         return send(res, 503, { error: 'Photo storage is not connected yet.' });
       }
-      const buffer = Buffer.from(data, 'base64');
-      if (!buffer.length || buffer.length > 4 * 1024 * 1024) {
-        return send(res, 400, { error: 'That photo is too large. Try another one.' });
-      }
+      const buffer = photoBuffer(data);
+      if (!buffer) return send(res, 400, { error: 'That photo is too large. Try another one.' });
       const photoId = newId();
       const blob = await put('products/' + productId + '/' + photoId + '.jpg', buffer, {
         access: 'public',
@@ -87,9 +119,7 @@ module.exports = async function handler(req, res) {
     if (req.method === 'POST' && body.action === 'delete-photo') {
       const photoId = cleanText(body.photoId, 80);
       const rows = await sql`SELECT url, product_id FROM product_photos WHERE id = ${photoId}`;
-      if (rows.length && /^https:\/\//.test(rows[0].url)) {
-        try { await del(rows[0].url); } catch (error) { /* keep going if the file is already gone */ }
-      }
+      if (rows.length) await removeBlob(rows[0].url);
       await sql`DELETE FROM product_photos WHERE id = ${photoId}`;
       if (rows.length) {
         const left = await sql`SELECT id FROM product_photos WHERE product_id = ${rows[0].product_id} ORDER BY sort_order LIMIT 1`;
