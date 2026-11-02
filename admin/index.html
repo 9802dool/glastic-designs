@@ -13,48 +13,50 @@
     header, main, .savebar-inner { width: min(100%, 68rem); margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
     header { padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     main { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
-    body.editing main { padding-bottom: calc(12rem + env(safe-area-inset-bottom)); }
+    body.editing main { padding-bottom: calc(8.5rem + env(safe-area-inset-bottom)); }
     h1 { font-family: "Playfair Display", serif; font-size: 2rem; margin: 0.2rem 0 0; color: #064e3b; }
-    h2 { font-size: 1.35rem; margin: 0 0 0.75rem; }
-    .eyebrow { margin: 0; color: #047857; font-weight: 700; font-size: 0.85rem; }
-    button, .btn, .file-btn { font: inherit; border: 0; border-radius: 999px; min-height: 52px; padding: 0.8rem 1.1rem; font-weight: 700; cursor: pointer; touch-action: manipulation; }
+    h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 0.75rem; }
+    .eyebrow { margin: 0; color: #0f766e; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.04em; }
+    button, .btn, .file-btn { font: inherit; font-size: 0.9375rem; font-weight: 600; letter-spacing: 0.01em; border: 0; border-radius: 999px; min-height: 44px; padding: 0.45rem 1rem; cursor: pointer; touch-action: manipulation; }
     button:disabled { opacity: 0.38; cursor: default; }
     button.is-selected:disabled { opacity: 1; }
-    .primary { background: #059669; color: white; width: 100%; }
-    .primary:active { background: #047857; }
-    .add-new { min-height: 4.75rem; font-size: 1.45rem; box-shadow: 0 12px 28px rgba(5, 150, 105, 0.28); }
-    .ghost { background: white; color: #065f46; border: 2px solid #047857; }
-    .quiet { background: transparent; color: #57534e; min-height: 48px; }
-    .danger { background: #fff7ed; color: #c2410c; border: 2px solid #fdba74; min-height: 52px; }
+    .primary { background: #0f766e; color: white; width: 100%; }
+    .primary:active { background: #115e59; }
+    .add-new { min-height: 48px; font-size: 1rem; }
+    .ghost { background: white; color: #115e59; border: 1px solid #d6d3d1; }
+    .ghost:active { background: #f5f5f4; }
+    .quiet { background: transparent; color: #57534e; min-height: 40px; font-weight: 500; }
+    .danger { background: white; color: #c2410c; border: 1px solid #fed7aa; min-height: 44px; }
     .file-btn { display: flex; align-items: center; justify-content: center; text-align: center; gap: 0.4rem; }
     input, textarea, select { width: 100%; font: inherit; font-size: 16px; border: 1px solid #d6d3d1; border-radius: 1rem; padding: 0.9rem 1rem; background: white; }
     textarea { min-height: 7rem; }
-    label.field { display: block; font-weight: 700; margin: 1rem 0 0.4rem; }
+    label.field { display: block; font-weight: 600; font-size: 0.875rem; margin: 0.9rem 0 0.35rem; }
     .card { background: white; border-radius: 1.25rem; padding: 1rem; margin: 0.8rem 0; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
     .row { display: flex; gap: 0.5rem; align-items: center; }
     .split { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.8rem; }
-    .price { color: #047857; font-weight: 700; }
+    .price { color: #0f766e; font-weight: 600; }
     .muted { color: #57534e; }
     .thumb { width: 5.25rem; height: 5.25rem; object-fit: cover; border-radius: 0.9rem; background: #e7e5e4; flex: 0 0 auto; }
     .photo-card { border: 1px solid #e7e5e4; border-radius: 1.1rem; padding: 0.75rem; margin-top: 0.85rem; }
     .photo-card img.preview { width: 100%; height: 13rem; object-fit: cover; border-radius: 0.9rem; background: #e7e5e4; display: block; }
-    .photo-actions { display: grid; gap: 0.55rem; margin-top: 0.75rem; }
-    .photo-actions .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
-    .badge { display: inline-block; background: #059669; color: white; border-radius: 999px; padding: 0.45rem 0.8rem; font-weight: 700; }
-    .hidden-flag { display: inline-block; background: #fef3c7; color: #92400e; border-radius: 999px; padding: 0.15rem 0.55rem; font-size: 0.75rem; font-weight: 700; }
-    .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }
-    .chips button { min-height: 48px; background: #ecfdf5; color: #065f46; border: 2px solid transparent; }
-    .chips button.chip-on { background: #059669; color: white; }
-    .banner { border-radius: 1rem; padding: 1rem 1.1rem; font-weight: 700; font-size: 1.05rem; margin: 0.4rem 0 0.8rem; }
-    .banner.ok { background: #d1fae5; color: #064e3b; }
-    .banner.bad { background: #fee2e2; color: #991b1b; }
-    .banner.wait { background: #e7e5e4; color: #1c1917; }
+    .photo-actions { display: grid; gap: 0.45rem; margin-top: 0.7rem; }
+    .photo-actions .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
+    .badge { justify-self: start; width: fit-content; background: #f0fdfa; color: #115e59; border: 1px solid #ccfbf1; border-radius: 999px; padding: 0.15rem 0.55rem; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; }
+    button.ghost.is-selected { background: #f0fdfa; color: #115e59; border-color: #99f6e4; }
+    .hidden-flag { display: inline-block; background: #fffbeb; color: #92400e; border: 1px solid #fde68a; border-radius: 999px; padding: 0.1rem 0.45rem; font-size: 0.7rem; font-weight: 600; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .chips button { min-height: 32px; padding: 0.2rem 0.7rem; font-size: 0.8125rem; font-weight: 500; background: #fafaf9; color: #44403c; border: 1px solid #e7e5e4; }
+    .chips button.chip-on { background: #f0fdfa; color: #115e59; border-color: #99f6e4; }
+    .banner { border-radius: 0.75rem; padding: 0.7rem 0.9rem; font-weight: 500; font-size: 0.9rem; line-height: 1.45; margin: 0.35rem 0 0.7rem; }
+    .banner.ok { background: #f0fdf4; color: #14532d; border: 1px solid #bbf7d0; }
+    .banner.bad { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .banner.wait { background: #f5f5f4; color: #44403c; border: 1px solid #e7e5e4; }
     .banner a { color: inherit; }
     .hint { margin: 0.55rem 0 0; }
     .editor-layout { display: block; }
-    .savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: white; border-top: 1px solid #e7e5e4; box-shadow: 0 -10px 30px rgba(0,0,0,.08); padding: 0.75rem 0 max(0.75rem, env(safe-area-inset-bottom)); }
-    .savebar .primary { min-height: 4.25rem; font-size: 1.35rem; }
-    #save-status { margin: 0 0 0.45rem; font-weight: 700; min-height: 0; }
+    .savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: white; border-top: 1px solid #e7e5e4; box-shadow: 0 -6px 16px rgba(28,25,23,.05); padding: 0.65rem 0 max(0.65rem, env(safe-area-inset-bottom)); }
+    .savebar .primary { min-height: 48px; font-size: 1rem; }
+    #save-status { margin: 0 0 0.4rem; font-weight: 500; font-size: 0.9rem; min-height: 0; }
     #save-status:empty { display: none; }
     #save-status.ok { color: #047857; }
     #save-status.bad { color: #b91c1c; }
@@ -260,7 +262,7 @@
 
     function photoCard(photo, index, total) {
       const main = photo.isMain
-        ? '<span class="badge">Main photo</span><button class="primary is-selected" type="button" disabled>Set as main</button>'
+        ? '<span class="badge">Main photo</span><button class="ghost is-selected" type="button" disabled>Set as main</button>'
         : '<button class="ghost" type="button" data-main="' + esc(photo.id) + '">Set as main</button>';
       return '<article class="photo-card">'
         + '<img class="preview" src="' + esc(photo.url) + '" alt="">'
@@ -308,7 +310,7 @@
         + '<form id="product-form" class="editor-layout">'
         + '<section class="card">'
         + '<h2>Photos</h2>'
-        + '<label class="primary file-btn add-new">+ Add photos<input id="photo" type="file" accept="image/*" multiple hidden></label>'
+        + '<label class="primary file-btn">+ Add photos<input id="photo" type="file" accept="image/*" multiple hidden></label>'
         + '<p class="muted hint">Camera or photo library. You can choose more than one.</p>'
         + (saved || queued ? saved + queued : '<p class="muted hint">No photos yet.</p>')
         + '</section>'

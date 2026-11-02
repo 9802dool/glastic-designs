@@ -47,19 +47,19 @@
         + '<div class="p-6">'
         + '<h3 class="font-bold text-2xl mb-2"></h3>'
         + '<p class="text-stone-600 mb-4"></p>'
-        + '<div class="flex justify-between items-center"><span class="text-emerald-700 font-semibold"></span><span class="text-sm text-stone-500"></span></div>'
+        + '<div class="flex justify-between items-center"><span class="text-emerald-800 font-medium"></span><span class="text-xs font-medium tracking-wide text-stone-500"></span></div>'
         + '<div class="cart-row" data-cart-control>'
         + '<div class="qty-stepper">'
         + '<button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>'
         + '<input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric">'
         + '<button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>'
         + '</div>'
-        + '<button type="button" class="pay-btn cart-add-btn bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-full px-3" data-cart-add="">Add to Cart</button>'
+        + '<button type="button" class="pay-btn cart-add-btn bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-medium rounded-full px-4" data-cart-add="">Add to Cart</button>'
         + '</div>'
         + '</div>';
       card.querySelector('h3').textContent = product.name;
       card.querySelector('.text-stone-600').textContent = product.description;
-      card.querySelector('.text-emerald-700').textContent = money(product.priceTtd);
+      card.querySelector('.text-emerald-800').textContent = money(product.priceTtd);
       card.querySelector('.text-stone-500').textContent = product.category;
       card.querySelector('[data-cart-add]').setAttribute('data-cart-add', product.id);
       card.querySelector('.qty-input').setAttribute('aria-label', 'Quantity for ' + product.name);
@@ -78,14 +78,14 @@
         + '<div class="product-detail grid lg:grid-cols-2 gap-10">'
         + '<div class="product-gallery"></div>'
         + '<div><h1 class="font-display text-4xl font-bold text-emerald-900 mb-2"></h1>'
-        + '<p class="text-emerald-800 font-semibold mb-4"></p>'
+        + '<p class="text-emerald-800 font-medium mb-4"></p>'
         + '<div class="flex flex-col gap-3 mb-6" data-cart-control>'
         + '<div class="qty-stepper qty-stepper-lg">'
         + '<button type="button" class="qty-btn" data-qty-delta="-1" aria-label="Decrease quantity">−</button>'
         + '<input class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric">'
         + '<button type="button" class="qty-btn" data-qty-delta="1" aria-label="Increase quantity">+</button>'
         + '</div>'
-        + '<button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg" data-cart-add="">Add to Cart</button>'
+        + '<button type="button" class="pay-btn inline-flex w-full items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-900 text-white px-5 py-2.5 rounded-full font-medium text-base" data-cart-add="">Add to Cart</button>'
         + '<p class="text-xs text-stone-500">Add this to your cart, then use Checkout once. Demo payment — nothing is charged.</p>'
         + '</div><p class="product-description text-lg text-stone-600"></p></div></div></div>';
       fillGallery(page.querySelector('.product-gallery'), product);
