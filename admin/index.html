@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <title>Your shop | Glastic Designs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap">
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, sans-serif; background: #fafaf9; color: #1c1917; }
+    header, main { width: min(100%, 40rem); margin: 0 auto; padding: 1rem 1rem max(1.5rem, env(safe-area-inset-bottom)); }
+    header { padding-top: max(1rem, env(safe-area-inset-top)); display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    h1 { font-family: "Playfair Display", serif; font-size: 2rem; margin: 0.2rem 0 0; color: #064e3b; }
+    .eyebrow { margin: 0; color: #047857; font-weight: 700; font-size: 0.85rem; }
+    button, .btn { font: inherit; border: 0; border-radius: 999px; min-height: 52px; padding: 0.8rem 1.1rem; font-weight: 700; cursor: pointer; }
+    .primary { background: #059669; color: white; width: 100%; }
+    .primary:active { background: #047857; }
+    .ghost { background: white; color: #065f46; border: 2px solid #047857; }
+    .quiet { background: transparent; color: #57534e; min-height: 44px; }
+    .danger { background: transparent; color: #b45309; min-height: 44px; }
+    input, textarea, select { width: 100%; font: inherit; font-size: 16px; border: 1px solid #d6d3d1; border-radius: 1rem; padding: 0.9rem 1rem; background: white; }
+    textarea { min-height: 8rem; }
+    label { display: block; font-weight: 700; margin: 1rem 0 0.4rem; }
+    .card { background: white; border-radius: 1.25rem; padding: 1rem; margin: 0.8rem 0; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .row { display: flex; gap: 0.5rem; align-items: center; }
+    .price { color: #047857; font-weight: 700; }
+    .muted { color: #57534e; }
+    .error { color: #b91c1c; font-weight: 700; }
+    .thumb { width: 4.5rem; height: 4.5rem; object-fit: cover; border-radius: 0.8rem; background: #e7e5e4; }
+    .photos { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.4rem; }
+    .photo { width: 7.5rem; flex: 0 0 auto; }
+    .photo img { width: 100%; height: 7.5rem; object-fit: cover; border-radius: 0.8rem; }
+    .hidden-flag { display: inline-block; background: #fef3c7; color: #92400e; border-radius: 999px; padding: 0.15rem 0.55rem; font-size: 0.75rem; font-weight: 700; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+    .chips button { min-height: 40px; background: #ecfdf5; color: #065f46; }
+    #status { min-height: 1.4rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">Glastic Designs</p>
+      <h1 id="title">Your shop</h1>
+    </div>
+    <button type="button" class="quiet" id="sign-out" hidden>Sign out</button>
+  </header>
+  <main id="app"></main>
+  <script>
+    const app = document.getElementById('app');
+    const signOut = document.getElementById('sign-out');
+    let products = [];
+    let editing = null;
+
+    function money(value) { return '$' + Number(value).toFixed(2) + ' TTD'; }
+    function esc(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+      });
+    }
+    async function api(url, options) {
+      const res = await fetch(url, Object.assign({ credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } }, options || {}));
+      const data = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw Object.assign(new Error(data.error || 'Please try again.'), data);
+      return data;
+    }
+    function mainPhoto(product) {
+      const photos = product.photos || [];
+      return photos.find(function (photo) { return photo.isMain; }) || photos[0];
+    }
+
+    function databaseHelp() {
+      app.innerHTML = '<div class="card"><p><strong>One step is left before you can manage the shop.</strong></p><p class="muted">On a computer, open the Glastic Designs project in Vercel, then:</p><ol><li>Open <strong>Storage</strong>.</li><li>Choose <strong>Create Database</strong>.</li><li>Pick <strong>Neon</strong> (Postgres), the <strong>Free</strong> plan, and region <strong>Washington, D.C. (iad1)</strong>.</li><li>Connect it to <strong>glastic-designs</strong> for Production, Preview, and Development.</li><li>Open <strong>Deployments</strong> and choose <strong>Redeploy</strong> on the latest production deployment.</li></ol><p class="muted">Photo storage is already connected. Come back to this page after the redeploy.</p><p><a href="https://vercel.com/simeon-doolarsinghs-projects/glastic-designs/stores">Open Storage for this project</a></p></div>';
+    }
+
+    function authForm(mode) {
+      const setup = mode === 'setup';
+      document.getElementById('title').textContent = setup ? 'Welcome' : 'Sign in';
+      app.innerHTML = '<form id="auth-form" class="card">'
+        + (setup
+          ? '<p>Choose a password only you will use. You can save it in your iPhone passwords.</p>'
+          : '<p>Sign in to add products, change prices, and update photos.</p>')
+        + '<label for="username">Name</label><input id="username" value="owner" autocomplete="username" readonly>'
+        + '<label for="password">' + (setup ? 'New password' : 'Password') + '</label>'
+        + '<input id="password" type="password" autocomplete="' + (setup ? 'new-password' : 'current-password') + '" minlength="8" required>'
+        + (setup ? '<label for="confirm">Type it again</label><input id="confirm" type="password" autocomplete="new-password" minlength="8" required>' : '')
+        + '<p id="status" class="error"></p>'
+        + '<button class="primary" type="submit">' + (setup ? 'Save password and continue' : 'Sign in') + '</button>'
+        + '</form>';
+      document.getElementById('auth-form').onsubmit = async function (event) {
+        event.preventDefault();
+        const password = document.getElementById('password').value;
+        const status = document.getElementById('status');
+        if (setup && password !== document.getElementById('confirm').value) {
+          status.textContent = 'Those passwords do not match.';
+          return;
+        }
+        status.textContent = '';
+        try {
+          await api('/api/admin/auth', { method: 'POST', body: JSON.stringify({ action: setup ? 'setup' : 'login', password: password }) });
+          await showShop();
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      };
+    }
+
+    function renderList() {
+      document.getElementById('title').textContent = 'Your shop';
+      signOut.hidden = false;
+      const cards = products.map(function (product, index) {
+        const photo = mainPhoto(product);
+        return '<article class="card">'
+          + '<div class="row">'
+          + (photo ? '<img class="thumb" src="' + esc(photo.url) + '" alt="">' : '<div class="thumb"></div>')
+          + '<div style="flex:1"><strong>' + esc(product.name) + '</strong><br><span class="price">' + money(product.priceTtd) + '</span> <span class="muted">' + esc(product.category) + '</span>'
+          + (product.hidden ? ' <span class="hidden-flag">Hidden</span>' : '')
+          + '</div></div>'
+          + '<div class="row" style="margin-top:0.8rem;flex-wrap:wrap">'
+          + '<button class="ghost" type="button" data-edit="' + esc(product.id) + '">Edit</button>'
+          + '<button class="ghost" type="button" data-move="' + esc(product.id) + '" data-dir="-1"' + (index === 0 ? ' disabled' : '') + '>Up</button>'
+          + '<button class="ghost" type="button" data-move="' + esc(product.id) + '" data-dir="1"' + (index === products.length - 1 ? ' disabled' : '') + '>Down</button>'
+          + '<button class="quiet" type="button" data-hide="' + esc(product.id) + '">' + (product.hidden ? 'Show' : 'Hide') + '</button>'
+          + '<button class="danger" type="button" data-delete="' + esc(product.id) + '">Delete</button>'
+          + '</div></article>';
+      }).join('');
+      app.innerHTML = cards + '<button class="primary" type="button" id="add-product">Add a product</button>';
+      document.getElementById('add-product').onclick = function () { renderEditor(null); };
+      app.querySelectorAll('[data-edit]').forEach(function (button) {
+        button.onclick = function () { renderEditor(button.getAttribute('data-edit')); };
+      });
+      app.querySelectorAll('[data-move]').forEach(function (button) {
+        button.onclick = function () { move(button.getAttribute('data-move'), Number(button.getAttribute('data-dir'))); };
+      });
+      app.querySelectorAll('[data-hide]').forEach(function (button) {
+        button.onclick = function () {
+          const product = products.find(function (item) { return item.id === button.getAttribute('data-hide'); });
+          saveVisibility(product, !product.hidden);
+        };
+      });
+      app.querySelectorAll('[data-delete]').forEach(function (button) {
+        button.onclick = function () { removeProduct(button.getAttribute('data-delete')); };
+      });
+    }
+
+    function renderEditor(id) {
+      const product = products.find(function (item) { return item.id === id; }) || { name: '', description: '', category: 'Planters', priceTtd: '', hidden: false, photos: [] };
+      editing = product.id || null;
+      document.getElementById('title').textContent = editing ? 'Edit product' : 'New product';
+      const photos = (product.photos || []).map(function (photo) {
+        return '<div class="photo"><img src="' + esc(photo.url) + '" alt="">'
+          + '<button class="quiet" type="button" data-main="' + esc(photo.id) + '">' + (photo.isMain ? 'Main photo' : 'Make main') + '</button>'
+          + '<button class="danger" type="button" data-drop-photo="' + esc(photo.id) + '">Remove</button></div>';
+      }).join('');
+      app.innerHTML = '<form id="product-form" class="card">'
+        + '<label for="name">Name</label><input id="name" required value="' + esc(product.name) + '">'
+        + '<label for="description">Description</label><textarea id="description">' + esc(product.description || '') + '</textarea>'
+        + '<label for="category">Category</label><input id="category" value="' + esc(product.category || 'Planters') + '">'
+        + '<div class="chips"><button type="button" data-chip="Planters">Planters</button><button type="button" data-chip="Furniture">Furniture</button><button type="button" data-chip="Gifts">Gifts</button><button type="button" data-chip="Services">Services</button></div>'
+        + '<label for="price">Price in TTD</label><input id="price" inputmode="decimal" required value="' + esc(product.priceTtd) + '">'
+        + (editing ? '<label>Photos</label><div class="photos">' + photos + '</div><label class="primary" style="display:flex;align-items:center;justify-content:center;margin-top:0.8rem">Add photo from your phone<input id="photo" type="file" accept="image/*" multiple hidden></label>' : '<p class="muted">Save the product first, then add photos from your camera or library.</p>')
+        + '<p id="status" class="error"></p>'
+        + '<button class="primary" type="submit">Save</button>'
+        + '<button class="quiet" type="button" id="cancel" style="width:100%">Back</button>'
+        + '</form>';
+      document.getElementById('cancel').onclick = renderList;
+      app.querySelectorAll('[data-chip]').forEach(function (button) {
+        button.onclick = function () { document.getElementById('category').value = button.getAttribute('data-chip'); };
+      });
+      document.getElementById('product-form').onsubmit = saveProduct;
+      if (editing) {
+        document.getElementById('photo').onchange = uploadPhotos;
+        app.querySelectorAll('[data-main]').forEach(function (button) {
+          button.onclick = function () { setMain(button.getAttribute('data-main')); };
+        });
+        app.querySelectorAll('[data-drop-photo]').forEach(function (button) {
+          button.onclick = function () { dropPhoto(button.getAttribute('data-drop-photo')); };
+        });
+      }
+    }
+
+    async function saveProduct(event) {
+      event.preventDefault();
+      const status = document.getElementById('status');
+      status.textContent = 'Saving…';
+      const payload = {
+        name: document.getElementById('name').value,
+        description: document.getElementById('description').value,
+        category: document.getElementById('category').value,
+        priceTtd: document.getElementById('price').value
+      };
+      try {
+        const data = editing
+          ? await api('/api/admin/products', { method: 'PATCH', body: JSON.stringify(Object.assign({ id: editing, hidden: products.find(function (item) { return item.id === editing; }).hidden }, payload)) })
+          : await api('/api/admin/products', { method: 'POST', body: JSON.stringify(payload) });
+        products = data.products;
+        if (!editing && data.id) renderEditor(data.id);
+        else renderList();
+      } catch (error) {
+        status.textContent = error.message;
+      }
+    }
+
+    function compress(file) {
+      return createImageBitmap(file).then(function (bitmap) {
+        const max = 1600;
+        const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        return new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.82); });
+      });
+    }
+    function blobToBase64(blob) {
+      return new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+        reader.onload = function () { resolve(String(reader.result).split(',')[1]); };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+    async function uploadPhotos(event) {
+      const status = document.getElementById('status');
+      const files = Array.from(event.target.files || []);
+      for (let i = 0; i < files.length; i++) {
+        status.textContent = 'Adding photo ' + (i + 1) + ' of ' + files.length + '…';
+        const blob = await compress(files[i]);
+        const data = await blobToBase64(blob);
+        const result = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'photo', productId: editing, data: data, makeMain: i === 0 && !(products.find(function (item) { return item.id === editing; }).photos || []).length }) });
+        products = result.products;
+      }
+      renderEditor(editing);
+    }
+    async function setMain(photoId) {
+      const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'main-photo', productId: editing, photoId: photoId }) });
+      products = data.products;
+      renderEditor(editing);
+    }
+    async function dropPhoto(photoId) {
+      const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'delete-photo', photoId: photoId }) });
+      products = data.products;
+      renderEditor(editing);
+    }
+    async function saveVisibility(product, hidden) {
+      const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'visibility', id: product.id, hidden: hidden }) });
+      products = data.products;
+      renderList();
+    }
+    async function move(id, dir) {
+      const ids = products.map(function (item) { return item.id; });
+      const index = ids.indexOf(id);
+      const next = index + dir;
+      if (next < 0 || next >= ids.length) return;
+      const swap = ids[index];
+      ids[index] = ids[next];
+      ids[next] = swap;
+      const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'reorder', ids: ids }) });
+      products = data.products;
+      renderList();
+    }
+    async function removeProduct(id) {
+      const product = products.find(function (item) { return item.id === id; });
+      if (!confirm('Remove ' + product.name + ' from the shop?')) return;
+      const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
+      products = data.products;
+      renderList();
+    }
+    async function showShop() {
+      const data = await api('/api/admin/products');
+      products = data.products;
+      renderList();
+    }
+    signOut.onclick = async function () {
+      await api('/api/admin/auth', { method: 'DELETE' });
+      signOut.hidden = true;
+      location.reload();
+    };
+    api('/api/admin/auth').then(function (state) {
+      if (state.needsDatabase) return databaseHelp();
+      if (state.signedIn) return showShop();
+      authForm(state.needsSetup ? 'setup' : 'login');
+    }).catch(function (error) {
+      if (error.needsDatabase) databaseHelp();
+      else app.innerHTML = '<p class="error">' + esc(error.message) + '</p>';
+    });
+  </script>
+</body>
+</html>

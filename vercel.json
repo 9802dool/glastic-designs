@@ -1,0 +1,30 @@
+{
+  "functions": {
+    "api/products.js": {
+      "includeFiles": "images/**"
+    },
+    "api/admin/products.js": {
+      "includeFiles": "images/**"
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    }
+  ]
+}

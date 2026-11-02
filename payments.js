@@ -711,6 +711,25 @@
     });
   }
 
+  function adoptCatalog(products) {
+    if (!Array.isArray(products)) return;
+    Object.keys(CATALOG).forEach(function (key) { delete CATALOG[key]; });
+    products.forEach(function (product) {
+      if (!product || product.hidden) return;
+      var price = Number(product.priceTtd);
+      if (!product.id || !Number.isFinite(price)) return;
+      CATALOG[product.id] = {
+        id: product.id,
+        name: product.name,
+        summary: product.description || '',
+        unit: price,
+        pay: price,
+        deposit: null
+      };
+    });
+    if (typeof document !== 'undefined' && document.getElementById('cart-count')) renderCart();
+  }
+
   function mount() {
     var overlay = el('pay-checkout');
     if (!overlay || overlay.dataset.bound === 'true') return;
@@ -834,6 +853,7 @@
     open: open,
     close: close,
     mount: mount,
+    adoptCatalog: adoptCatalog,
     memoryStorage: memoryStorage,
     loadCart: loadCart,
     saveCart: saveCart,

@@ -22,6 +22,12 @@ This is a static site. Deploy `index.html`, `payments.js`, and assets to Vercel,
 2. Import the repo in Vercel.
 3. Set the root directory if needed, or deploy as static.
 
+## Owner shop
+
+The owner manages products at `/admin` on a phone. The first visit asks them to choose a password, which is stored only as a hash. A password can also be supplied with the `ADMIN_PASSWORD` environment variable in Vercel; that value is never shown on the site.
+
+Products and prices live in Neon Postgres. Photos for new uploads live in Vercel Blob. Until Neon is connected, the public site keeps showing the current products.
+
 ## Contact
 WhatsApp: 775-2407  
 Facebook: https://www.facebook.com/gdistyles  

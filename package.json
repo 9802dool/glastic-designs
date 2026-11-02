@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "description": "Glastic Designs shop API (Neon Postgres and Vercel Blob).",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@vercel/blob": "^2.3.0"
+  }
+}
