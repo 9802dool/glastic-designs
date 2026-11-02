@@ -10,10 +10,11 @@ Founded by Alicia Barrie-George. We transform discarded plastic into tiles, furn
 - Product showcase
 - Process & impact sections
 - Direct WhatsApp and social links
+- Sample online checkout in TTD (demo only — card details are not saved or sent; WiPay can be connected later)
 - Based on content from the official Facebook page
 
 ## Deploy
-This is a static site. Deploy the `index.html` (and assets) to Vercel, Netlify, or any static host.
+This is a static site. Deploy `index.html`, `payments.js`, and assets to Vercel, Netlify, or any static host.
 
 ### Vercel
 1. Push this folder to a GitHub repository.
