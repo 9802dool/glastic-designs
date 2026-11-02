@@ -7,6 +7,16 @@
       "includeFiles": "images/**"
     }
   },
+  "rewrites": [
+    { "source": "/products", "destination": "/index.html" },
+    { "source": "/category/:name", "destination": "/index.html" },
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/gallery", "destination": "/index.html" },
+    { "source": "/process", "destination": "/index.html" },
+    { "source": "/impact", "destination": "/index.html" },
+    { "source": "/contact", "destination": "/index.html" },
+    { "source": "/cart", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",

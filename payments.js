@@ -477,11 +477,17 @@
     }
     var opener = el('cart-open');
     if (opener) {
-      opener.setAttribute('aria-label', 'Open cart, ' + count + (count === 1 ? ' item' : ' items'));
+      opener.setAttribute('aria-label', 'Cart, ' + count + (count === 1 ? ' item' : ' items'));
     }
-    var list = el('cart-lines');
-    var empty = el('cart-empty');
-    var footer = el('cart-footer');
+    document.querySelectorAll('[data-cart-panel]').forEach(function (panel) {
+      paintCartPanel(panel, lines, rows);
+    });
+  }
+
+  function paintCartPanel(panel, lines, rows) {
+    var list = panel.querySelector('[data-cart-lines]');
+    var empty = panel.querySelector('[data-cart-empty]');
+    var footer = panel.querySelector('[data-cart-footer]');
     if (!list) return;
     list.textContent = '';
     if (empty) empty.classList.toggle('hidden', lines.length > 0);
@@ -538,7 +544,7 @@
       article.appendChild(side);
       list.appendChild(article);
     });
-    var sub = el('cart-subtotal');
+    var sub = panel.querySelector('[data-cart-subtotal]');
     if (sub) sub.textContent = formatTTD(cartSubtotal(rows));
   }
 
@@ -755,7 +761,7 @@
         return;
       }
       var deltaBtn = event.target.closest('[data-cart-delta]');
-      if (deltaBtn && deltaBtn.closest('#cart-drawer')) {
+      if (deltaBtn && deltaBtn.closest('[data-cart-panel]')) {
         event.preventDefault();
         var id = deltaBtn.getAttribute('data-cart-id');
         var current = loadCart().filter(function (row) { return row.id === id; })[0];
@@ -779,11 +785,6 @@
         event.preventDefault();
         removeFromCart(null, removeBtn.getAttribute('data-cart-remove'));
         renderCart();
-        return;
-      }
-      if (event.target.closest('#cart-open')) {
-        event.preventDefault();
-        openCart();
         return;
       }
       if (event.target.closest('[data-cart-close]')) {

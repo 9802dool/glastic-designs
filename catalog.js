@@ -28,13 +28,29 @@
     return '<img src="' + esc(url) + '" alt="' + esc(alt) + '" class="' + className + '" loading="lazy">';
   }
 
+  function shownProducts(products) {
+    var route = window.GLASTIC_ROUTE || {};
+    if (route.id !== 'category') return products;
+    if (!route.category) return [];
+    return products.filter(function (product) {
+      return String(product.category || '').toLowerCase() === route.category.toLowerCase();
+    });
+  }
+
   function render(products) {
     var grid = document.getElementById('product-grid');
     if (!grid) return;
+    var all = products || [];
+    products = shownProducts(all);
     document.querySelectorAll('.product-page').forEach(function (page) { page.remove(); });
     grid.textContent = '';
     if (!products.length) {
-      grid.innerHTML = '<p class="text-stone-600 col-span-full text-center">No products to show right now.</p>';
+      var route = window.GLASTIC_ROUTE || {};
+      var label = route.id === 'category' && route.category ? route.category.toLowerCase() : 'products';
+      grid.innerHTML = '<p class="text-stone-600 col-span-full text-center">No ' + label + ' are listed yet. Use Contact if you want one made.</p>';
+      if (window.GlasticPay && window.GlasticPay.adoptCatalog) window.GlasticPay.adoptCatalog(all);
+      openLinkedProduct();
+      return;
     }
     products.forEach(function (product) {
       var photo = mainPhoto(product);
@@ -97,7 +113,7 @@
       page.querySelector('.back').addEventListener('click', function () { page.classList.add('hidden'); });
       document.body.appendChild(page);
     });
-    if (window.GlasticPay && window.GlasticPay.adoptCatalog) window.GlasticPay.adoptCatalog(products);
+    if (window.GlasticPay && window.GlasticPay.adoptCatalog) window.GlasticPay.adoptCatalog(all);
     openLinkedProduct();
   }
 
