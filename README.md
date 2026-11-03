@@ -22,23 +22,15 @@ This is a static site. Deploy `index.html`, `payments.js`, and assets to Vercel,
 2. Import the repo in Vercel.
 3. Set the root directory if needed, or deploy as static.
 
-## Owner shop
+## Owner shop (simple phone dashboard)
 
-The owner manages products at `/admin` on a phone. The first visit asks them to choose a password, which is stored only as a hash. A password can also be supplied with the `ADMIN_PASSWORD` environment variable in Vercel; that value is never shown on the site.
+After sign-in at **`/admin`**, the owner sees **“What would you like to do?”** with six large buttons: add a product, change a price, change photos, hide/show sold-out items, edit homepage words, and pick one of four colour looks. Each task is one short screen; saving goes live immediately with a **Done – it's on your website** screen.
 
-Products and prices live in Neon Postgres. Photos for new uploads live in Vercel Blob. Until Neon is connected, the public site keeps showing the current products.
+- **Add to Home Screen:** `/admin/manifest.webmanifest`
+- **Stay signed in:** HttpOnly cookie, 30 days (`SESSION_DAYS`)
+- **Developer / advanced:** **More settings** → `/admin/advanced.html` (visual editor, full forms, gallery, contact, product list)
 
-### Website look (no redeploy)
-
-After signing in at `/admin`, use **Edit my website** to open a live preview of the public site. Tap text, photos, products, and links to edit them in a side panel; use **Site look** for theme presets, colours, fonts, and section visibility. **Publish changes** saves to the same APIs as the form-based **Website look & content** view (still available as a fallback).
-
-The preview loads your real pages in an iframe with `?visualEdit=1`. That query string only loads a small helper script; outlines and editing UI appear only when the signed-in admin parent sends an enable message after `GET /api/admin/auth` succeeds. Visitors never see edit mode, and the query flag does not allow writes by itself.
-
-Changes are stored in Neon (`site_settings`, `gallery_photos`, products tables) and served from `GET /api/settings` / `GET /api/products` with `Cache-Control: no-store`. The public site applies them via `settings.js` (theme cached in the browser to reduce colour flash).
-
-Local dev: `node scripts/dev-server.js` serves static files, SPA routes (`/products`, etc.), and the API handlers. Admin sign-in still needs `DATABASE_URL` (Neon) like production.
-
-No new environment variables are required beyond existing `DATABASE_URL` / Neon and `BLOB_READ_WRITE_TOKEN`.
+Products and site copy use Neon Postgres and Vercel Blob via `/api/admin/*`. Local dev: `node scripts/dev-server.js`. Mobile UI smoke test: `node scripts/test-simple-admin-mobile.mjs`.
 
 ## Contact
 WhatsApp: 775-2407  
