@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <title>Advanced settings | Glastic Designs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap">
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, sans-serif; background: #fafaf9; color: #1c1917; }
+    header, main, .savebar-inner { width: min(100%, 68rem); margin: 0 auto; padding-left: 1rem; padding-right: 1rem; }
+    header { padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    main { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+    body.editing main { padding-bottom: calc(8.5rem + env(safe-area-inset-bottom)); }
+    h1 { font-family: "Playfair Display", serif; font-size: 2rem; margin: 0.2rem 0 0; color: #064e3b; }
+    h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 0.75rem; }
+    .eyebrow { margin: 0; color: #0f766e; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.04em; }
+    button, .btn, .file-btn { font: inherit; font-size: 0.9375rem; font-weight: 600; letter-spacing: 0.01em; border: 0; border-radius: 999px; min-height: 44px; padding: 0.45rem 1rem; cursor: pointer; touch-action: manipulation; }
+    button:disabled { opacity: 0.38; cursor: default; }
+    button.is-selected:disabled { opacity: 1; }
+    .primary { background: #0f766e; color: white; width: 100%; }
+    .primary:active { background: #115e59; }
+    .add-new { min-height: 48px; font-size: 1rem; }
+    .ghost { background: white; color: #115e59; border: 1px solid #d6d3d1; }
+    .ghost:active { background: #f5f5f4; }
+    .quiet { background: transparent; color: #57534e; min-height: 40px; font-weight: 500; }
+    .danger { background: white; color: #c2410c; border: 1px solid #fed7aa; min-height: 44px; }
+    .file-btn { display: flex; align-items: center; justify-content: center; text-align: center; gap: 0.4rem; }
+    input, textarea, select { width: 100%; font: inherit; font-size: 16px; border: 1px solid #d6d3d1; border-radius: 1rem; padding: 0.9rem 1rem; background: white; }
+    textarea { min-height: 7rem; }
+    label.field { display: block; font-weight: 600; font-size: 0.875rem; margin: 0.9rem 0 0.35rem; }
+    .card { background: white; border-radius: 1.25rem; padding: 1rem; margin: 0.8rem 0; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .row { display: flex; gap: 0.5rem; align-items: center; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.8rem; }
+    .price { color: #0f766e; font-weight: 600; }
+    .muted { color: #57534e; }
+    .thumb { width: 5.25rem; height: 5.25rem; object-fit: cover; border-radius: 0.9rem; background: #e7e5e4; flex: 0 0 auto; }
+    .photo-card { border: 1px solid #e7e5e4; border-radius: 1.1rem; padding: 0.75rem; margin-top: 0.85rem; }
+    .photo-card img.preview { width: 100%; height: 13rem; object-fit: cover; border-radius: 0.9rem; background: #e7e5e4; display: block; }
+    .photo-actions { display: grid; gap: 0.45rem; margin-top: 0.7rem; }
+    .photo-actions .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
+    .badge { justify-self: start; width: fit-content; background: #f0fdfa; color: #115e59; border: 1px solid #ccfbf1; border-radius: 999px; padding: 0.15rem 0.55rem; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; }
+    button.ghost.is-selected { background: #f0fdfa; color: #115e59; border-color: #99f6e4; }
+    .hidden-flag { display: inline-block; background: #fffbeb; color: #92400e; border: 1px solid #fde68a; border-radius: 999px; padding: 0.1rem 0.45rem; font-size: 0.7rem; font-weight: 600; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .chips button { min-height: 32px; padding: 0.2rem 0.7rem; font-size: 0.8125rem; font-weight: 500; background: #fafaf9; color: #44403c; border: 1px solid #e7e5e4; }
+    .chips button.chip-on { background: #f0fdfa; color: #115e59; border-color: #99f6e4; }
+    .banner { border-radius: 0.75rem; padding: 0.7rem 0.9rem; font-weight: 500; font-size: 0.9rem; line-height: 1.45; margin: 0.35rem 0 0.7rem; }
+    .banner.ok { background: #f0fdf4; color: #14532d; border: 1px solid #bbf7d0; }
+    .banner.bad { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .banner.wait { background: #f5f5f4; color: #44403c; border: 1px solid #e7e5e4; }
+    .banner a { color: inherit; }
+    .hint { margin: 0.55rem 0 0; }
+    .editor-layout { display: block; }
+    .savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: white; border-top: 1px solid #e7e5e4; box-shadow: 0 -6px 16px rgba(28,25,23,.05); padding: 0.65rem 0 max(0.65rem, env(safe-area-inset-bottom)); }
+    .savebar .primary { min-height: 48px; font-size: 1rem; }
+    #save-status { margin: 0 0 0.4rem; font-weight: 500; font-size: 0.9rem; min-height: 0; }
+    #save-status:empty { display: none; }
+    #save-status.ok { color: #047857; }
+    #save-status.bad { color: #b91c1c; }
+    #save-status.wait { color: #44403c; }
+    #save-status a { color: inherit; }
+    @media (min-width: 760px) {
+      .editor-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+      .editor-layout .card { margin-top: 0; }
+      .list-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+      .list-grid .span { grid-column: 1 / -1; }
+    }
+    .admin-tabs { display: flex; gap: 0.4rem; overflow: auto; padding: 0.25rem 0 0.75rem; margin-bottom: 0.25rem; }
+    .admin-tabs button { min-height: 40px; white-space: nowrap; padding: 0.35rem 0.85rem; font-size: 0.8125rem; font-weight: 600; background: #fafaf9; color: #44403c; border: 1px solid #e7e5e4; border-radius: 999px; }
+    .admin-tabs button.chip-on { background: #f0fdfa; color: #115e59; border-color: #99f6e4; }
+    .hub-grid { display: grid; gap: 0.75rem; margin-top: 0.5rem; }
+    body.visual-editing header h1 { font-size: 1.35rem; }
+    body.visual-editing main { padding-bottom: calc(9rem + env(safe-area-inset-bottom)); }
+    .ve-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; margin: 0.5rem 0; }
+    .ve-pages { flex: 1; min-width: 0; margin: 0; padding-bottom: 0.25rem; }
+    .ve-layout { display: grid; gap: 0.75rem; grid-template-columns: 1fr; align-items: start; }
+    .ve-frame-wrap { background: #e7e5e4; border-radius: 1rem; overflow: hidden; min-height: min(62vh, 720px); box-shadow: inset 0 0 0 1px #d6d3d1; }
+    .ve-iframe { width: 100%; height: min(62vh, 720px); border: 0; background: #fff; display: block; }
+    .ve-theme-drawer, .ve-edit-panel { background: white; border-radius: 1.25rem; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,.06); max-height: min(50vh, 420px); overflow: auto; }
+    .ve-edit-panel { border: 2px solid #99f6e4; }
+    @media (min-width: 900px) {
+      .ve-layout { grid-template-columns: 1fr min(22rem, 34vw); }
+      .ve-theme-drawer { grid-column: 2; grid-row: 1; max-height: min(62vh, 720px); }
+      .ve-edit-panel { grid-column: 2; grid-row: 1; z-index: 2; }
+      .ve-frame-wrap { grid-column: 1; grid-row: 1 / span 2; }
+    }
+  </style>
+  <script src="/settings.js"></script>
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">Glastic Designs</p>
+      <h1 id="title">Advanced settings</h1>
+    </div>
+    <button type="button" class="quiet" id="sign-out" hidden>Sign out</button>
+  </header>
+  <p style="width:min(100%,68rem);margin:0 auto;padding:0 1rem 0.5rem"><a href="/admin/" class="quiet" style="padding:0;font-size:0.9rem">← Simple menu for Alicia</a></p>
+  <main id="app"></main>
+  <div id="savebar" class="savebar" hidden>
+    <div class="savebar-inner">
+      <p id="save-status" role="status"></p>
+      <button id="save-button" class="primary" type="submit" form="product-form">Save</button>
+    </div>
+  </div>
+  <script>
+    const app = document.getElementById('app');
+    const signOut = document.getElementById('sign-out');
+    const savebar = document.getElementById('savebar');
+    const saveStatus = document.getElementById('save-status');
+    const saveButton = document.getElementById('save-button');
+    const CATEGORIES = ['Tiles', 'Planters', 'Furniture', 'Gifts', 'Services'];
+    let products = [];
+    let editing = null;
+    let pendingFiles = [];
+    let pendingUrls = [];
+    let notice = null;
+    let saving = false;
+
+    function money(value) { return '$' + Number(value).toFixed(2) + ' TTD'; }
+    function esc(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+      });
+    }
+    async function api(url, options) {
+      const res = await fetch(url, Object.assign({ credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } }, options || {}));
+      const data = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw Object.assign(new Error(data.error || 'Please try again.'), data);
+      return data;
+    }
+    window.adminApi = api;
+    window.adminShowProducts = function () { renderList(); };
+    function mainPhoto(product) {
+      const photos = product.photos || [];
+      return photos.find(function (photo) { return photo.isMain; }) || photos[0];
+    }
+    function showNotice(text, kind, link, linkLabel) {
+      notice = { text: text, kind: kind || 'ok', link: link || '', linkLabel: linkLabel || 'View page' };
+    }
+    function noticeHtml() {
+      if (!notice) return '';
+      let html = esc(notice.text);
+      if (notice.link) html += ' <a href="' + esc(notice.link) + '" target="_blank" rel="noopener">' + esc(notice.linkLabel) + '</a>';
+      return html;
+    }
+    function clearPendingUrls() {
+      pendingUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+      pendingUrls = [];
+    }
+    function pageLink(id) { return '/?product=' + encodeURIComponent(id); }
+    function currentDraft() {
+      const name = document.getElementById('name');
+      if (!name) return null;
+      return {
+        name: name.value,
+        description: document.getElementById('description').value,
+        category: document.getElementById('category').value,
+        priceTtd: document.getElementById('price').value
+      };
+    }
+    function paintStatus() {
+      saveStatus.className = notice ? notice.kind : '';
+      saveStatus.innerHTML = noticeHtml();
+      const banner = app.querySelector('.banner');
+      if (banner && notice) {
+        banner.className = 'banner ' + notice.kind;
+        banner.innerHTML = noticeHtml();
+      }
+    }
+
+    function databaseHelp() {
+      document.body.classList.remove('editing');
+      savebar.hidden = true;
+      app.innerHTML = '<div class="card"><p><strong>One step is left before you can manage the shop.</strong></p><p class="muted">On a computer, open the Glastic Designs project in Vercel, then:</p><ol><li>Open <strong>Storage</strong>.</li><li>Choose <strong>Create Database</strong>.</li><li>Pick <strong>Neon</strong> (Postgres), the <strong>Free</strong> plan, and region <strong>Washington, D.C. (iad1)</strong>.</li><li>Connect it to <strong>glastic-designs</strong> for Production, Preview, and Development.</li><li>Open <strong>Deployments</strong> and choose <strong>Redeploy</strong> on the latest production deployment.</li></ol><p class="muted">Photo storage is already connected. Come back to this page after the redeploy.</p><p><a href="https://vercel.com/simeon-doolarsinghs-projects/glastic-designs/stores">Open Storage for this project</a></p></div>';
+    }
+
+    function authForm(mode) {
+      const setup = mode === 'setup';
+      document.body.classList.remove('editing');
+      savebar.hidden = true;
+      document.getElementById('title').textContent = setup ? 'Welcome' : 'Sign in';
+      app.innerHTML = '<form id="auth-form" class="card">'
+        + (setup
+          ? '<p>Choose a password only you will use. You can save it in your iPhone passwords.</p>'
+          : '<p>Sign in to add products, change prices, and update photos.</p>')
+        + '<label class="field" for="username">Name</label><input id="username" value="owner" autocomplete="username" readonly>'
+        + '<label class="field" for="password">' + (setup ? 'New password' : 'Password') + '</label>'
+        + '<input id="password" type="password" autocomplete="' + (setup ? 'new-password' : 'current-password') + '" minlength="8" required>'
+        + (setup ? '<label class="field" for="confirm">Type it again</label><input id="confirm" type="password" autocomplete="new-password" minlength="8" required>' : '')
+        + '<p id="auth-status" class="banner bad" hidden></p>'
+        + '<button class="primary" type="submit">' + (setup ? 'Save password and continue' : 'Sign in') + '</button>'
+        + '</form>';
+      document.getElementById('auth-form').onsubmit = async function (event) {
+        event.preventDefault();
+        const password = document.getElementById('password').value;
+        const status = document.getElementById('auth-status');
+        if (setup && password !== document.getElementById('confirm').value) {
+          status.hidden = false;
+          status.textContent = 'Those passwords do not match.';
+          return;
+        }
+        status.hidden = true;
+        try {
+          await api('/api/admin/auth', { method: 'POST', body: JSON.stringify({ action: setup ? 'setup' : 'login', password: password }) });
+          await showShop();
+        } catch (error) {
+          status.hidden = false;
+          status.textContent = error.message;
+        }
+      };
+    }
+
+    function renderList() {
+      document.body.classList.remove('editing');
+      savebar.hidden = true;
+      editing = null;
+      document.getElementById('title').textContent = 'Advanced settings';
+      signOut.hidden = false;
+      const cards = products.map(function (product, index) {
+        const photo = mainPhoto(product);
+        const count = (product.photos || []).length;
+        return '<article class="card">'
+          + '<div class="row">'
+          + (photo ? '<img class="thumb" src="' + esc(photo.url) + '" alt="">' : '<div class="thumb"></div>')
+          + '<div style="flex:1"><strong>' + esc(product.name) + '</strong><br><span class="price">' + money(product.priceTtd) + '</span> <span class="muted">' + esc(product.category) + '</span>'
+          + '<br><span class="muted">' + count + (count === 1 ? ' photo' : ' photos') + '</span>'
+          + (product.hidden ? ' <span class="hidden-flag">Hidden</span>' : '')
+          + '</div></div>'
+          + '<div class="split">'
+          + '<button class="ghost" type="button" data-edit="' + esc(product.id) + '">Edit</button>'
+          + '<label class="primary file-btn">Add photos<input type="file" accept="image/*" multiple hidden data-add-photos="' + esc(product.id) + '"></label>'
+          + '</div>'
+          + '<div class="row" style="margin-top:0.45rem;flex-wrap:wrap">'
+          + '<button class="quiet" type="button" data-move="' + esc(product.id) + '" data-dir="-1"' + (index === 0 ? ' disabled' : '') + '>Up</button>'
+          + '<button class="quiet" type="button" data-move="' + esc(product.id) + '" data-dir="1"' + (index === products.length - 1 ? ' disabled' : '') + '>Down</button>'
+          + '<button class="quiet" type="button" data-hide="' + esc(product.id) + '">' + (product.hidden ? 'Show on website' : 'Hide') + '</button>'
+          + '<button class="danger" type="button" data-delete="' + esc(product.id) + '">Delete</button>'
+          + '</div></article>';
+      }).join('');
+      app.innerHTML = '<div class="span hub-grid">'
+        + '<button class="primary add-new" type="button" id="visual-edit">Edit my website</button>'
+        + '<button class="ghost add-new" type="button" id="edit-website">Website look &amp; content (forms)</button>'
+        + '<button class="ghost add-new" type="button" id="add-product">+ Add New Product</button>'
+        + '<p class="muted hint">Use <strong>Edit my website</strong> to tap the live page and change text and photos. The form view is still here if you prefer it.</p>'
+        + (notice ? '<div class="banner ' + esc(notice.kind) + '" role="status">' + noticeHtml() + '</div>' : '')
+        + '</div><div class="list-grid">' + cards + '</div>';
+      const wrap = app.querySelector('.span');
+      const grid = app.querySelector('.list-grid');
+      if (wrap && grid) wrap.appendChild(grid);
+      document.getElementById('visual-edit').onclick = function () {
+        if (window.adminShowVisualEditor) window.adminShowVisualEditor();
+      };
+      document.getElementById('edit-website').onclick = function () {
+        if (window.adminShowSitePanel) window.adminShowSitePanel();
+      };
+      document.getElementById('add-product').onclick = function () {
+        pendingFiles = [];
+        notice = null;
+        renderEditor(null);
+      };
+      app.querySelectorAll('[data-edit]').forEach(function (button) {
+        button.onclick = function () {
+          pendingFiles = [];
+          notice = null;
+          renderEditor(button.getAttribute('data-edit'));
+        };
+      });
+      app.querySelectorAll('[data-add-photos]').forEach(function (input) {
+        input.onchange = function () {
+          const id = input.getAttribute('data-add-photos');
+          const files = Array.from(input.files || []);
+          input.value = '';
+          addPhotos(id, files);
+        };
+      });
+      app.querySelectorAll('[data-move]').forEach(function (button) {
+        button.onclick = function () { move(button.getAttribute('data-move'), Number(button.getAttribute('data-dir'))); };
+      });
+      app.querySelectorAll('[data-hide]').forEach(function (button) {
+        button.onclick = function () {
+          const product = products.find(function (item) { return item.id === button.getAttribute('data-hide'); });
+          saveVisibility(product, !product.hidden);
+        };
+      });
+      app.querySelectorAll('[data-delete]').forEach(function (button) {
+        button.onclick = function () { removeProduct(button.getAttribute('data-delete')); };
+      });
+    }
+
+    function photoCard(photo, index, total) {
+      const main = photo.isMain
+        ? '<span class="badge">Main photo</span><button class="ghost is-selected" type="button" disabled>Set as main</button>'
+        : '<button class="ghost" type="button" data-main="' + esc(photo.id) + '">Set as main</button>';
+      return '<article class="photo-card">'
+        + '<img class="preview" src="' + esc(photo.url) + '" alt="">'
+        + '<div class="photo-actions">'
+        + '<label class="ghost file-btn">Replace<input type="file" accept="image/*" hidden data-replace="' + esc(photo.id) + '"></label>'
+        + main
+        + '<button class="danger" type="button" data-drop-photo="' + esc(photo.id) + '">Remove</button>'
+        + '<div class="pair">'
+        + '<button class="quiet" type="button" data-photo-move="' + esc(photo.id) + '" data-dir="-1"' + (index === 0 ? ' disabled' : '') + '>Move up</button>'
+        + '<button class="quiet" type="button" data-photo-move="' + esc(photo.id) + '" data-dir="1"' + (index === total - 1 ? ' disabled' : '') + '>Move down</button>'
+        + '</div></div></article>';
+    }
+
+    function pendingCard(file, index) {
+      const url = URL.createObjectURL(file);
+      pendingUrls.push(url);
+      return '<article class="photo-card">'
+        + '<img class="preview" src="' + esc(url) + '" alt="">'
+        + '<p class="muted hint">This photo is added when you tap Save.</p>'
+        + '<div class="photo-actions"><button class="danger" type="button" data-drop-pending="' + index + '">Remove</button></div>'
+        + '</article>';
+    }
+
+    function renderEditor(id, draft) {
+      clearPendingUrls();
+      const product = products.find(function (item) { return item.id === id; }) || { name: '', description: '', category: '', priceTtd: '', hidden: false, photos: [] };
+      const fields = draft || product;
+      editing = product.id || null;
+      document.body.classList.add('editing');
+      savebar.hidden = false;
+      saveButton.disabled = false;
+      saveButton.textContent = 'Save';
+      saveButton.setAttribute('form', 'product-form');
+      saveButton.onclick = null;
+      paintStatus();
+      document.getElementById('title').textContent = editing ? 'Edit product' : 'New product';
+      signOut.hidden = false;
+      const photos = product.photos || [];
+      const saved = photos.map(function (photo, index) { return photoCard(photo, index, photos.length); }).join('');
+      const queued = pendingFiles.map(function (file, index) { return pendingCard(file, index); }).join('');
+      const chips = CATEGORIES.map(function (name) {
+        const on = fields.category === name ? ' chip-on' : '';
+        return '<button type="button" class="' + on + '" data-chip="' + esc(name) + '">' + esc(name) + '</button>';
+      }).join('');
+      app.innerHTML = (notice ? '<div class="banner ' + esc(notice.kind) + '" role="status">' + noticeHtml() + '</div>' : '')
+        + '<button class="quiet" type="button" id="cancel">← All products</button>'
+        + '<form id="product-form" class="editor-layout">'
+        + '<section class="card">'
+        + '<h2>Photos</h2>'
+        + '<label class="primary file-btn">+ Add photos<input id="photo" type="file" accept="image/*" multiple hidden></label>'
+        + '<p class="muted hint">Camera or photo library. You can choose more than one.</p>'
+        + (saved || queued ? saved + queued : '<p class="muted hint">No photos yet.</p>')
+        + '</section>'
+        + '<section class="card">'
+        + '<label class="field" for="name">Name</label><input id="name" required value="' + esc(fields.name || '') + '" placeholder="Plastic tiles, wall planter…">'
+        + '<label class="field" for="description">Description</label><textarea id="description" placeholder="What is it, and where can someone use it?">' + esc(fields.description || '') + '</textarea>'
+        + '<label class="field" for="category">Category</label><input id="category" value="' + esc(fields.category || '') + '" placeholder="Tap a category below">'
+        + '<div class="chips">' + chips + '</div>'
+        + '<label class="field" for="price">Price in TTD</label><input id="price" inputmode="decimal" required value="' + esc(fields.priceTtd) + '" placeholder="25">'
+        + (editing ? '<p class="muted hint"><a href="' + esc(pageLink(editing)) + '" target="_blank" rel="noopener">View public page</a></p>' : '<p class="muted hint">Tap Save and this product gets its own page on the website.</p>')
+        + '</section></form>';
+      window.scrollTo(0, 0);
+      document.getElementById('cancel').onclick = function () {
+        pendingFiles = [];
+        renderList();
+      };
+      app.querySelectorAll('[data-chip]').forEach(function (button) {
+        button.onclick = function () {
+          document.getElementById('category').value = button.getAttribute('data-chip');
+          paintChips();
+        };
+      });
+      document.getElementById('category').oninput = paintChips;
+      document.getElementById('product-form').onsubmit = saveProduct;
+      document.getElementById('photo').onchange = function (event) {
+        const files = Array.from(event.target.files || []);
+        event.target.value = '';
+        if (!files.length) return;
+        if (!editing) {
+          const draft = currentDraft();
+          pendingFiles = pendingFiles.concat(files);
+          renderEditor(null, draft);
+          return;
+        }
+        addPhotos(editing, files);
+      };
+      app.querySelectorAll('[data-replace]').forEach(function (input) {
+        input.onchange = function () {
+          const file = (input.files || [])[0];
+          input.value = '';
+          if (file) replacePhoto(input.getAttribute('data-replace'), file);
+        };
+      });
+      app.querySelectorAll('[data-main]').forEach(function (button) {
+        button.onclick = function () { setMain(button.getAttribute('data-main')); };
+      });
+      app.querySelectorAll('[data-drop-photo]').forEach(function (button) {
+        button.onclick = function () { dropPhoto(button.getAttribute('data-drop-photo')); };
+      });
+      app.querySelectorAll('[data-photo-move]').forEach(function (button) {
+        button.onclick = function () { movePhoto(button.getAttribute('data-photo-move'), Number(button.getAttribute('data-dir'))); };
+      });
+      app.querySelectorAll('[data-drop-pending]').forEach(function (button) {
+        button.onclick = function () {
+          const draft = currentDraft();
+          pendingFiles.splice(Number(button.getAttribute('data-drop-pending')), 1);
+          renderEditor(null, draft);
+        };
+      });
+    }
+
+    function paintChips() {
+      const value = document.getElementById('category').value;
+      app.querySelectorAll('[data-chip]').forEach(function (button) {
+        button.classList.toggle('chip-on', button.getAttribute('data-chip') === value);
+      });
+    }
+
+    async function saveProduct(event) {
+      event.preventDefault();
+      if (saving) return;
+      const name = document.getElementById('name').value.trim();
+      const description = document.getElementById('description').value;
+      const category = document.getElementById('category').value.trim();
+      const priceRaw = document.getElementById('price').value.trim();
+      if (!name) { showNotice('Add a name for this product.', 'bad'); paintStatus(); return; }
+      if (!category) { showNotice('Tap a category, such as Tiles or Planters.', 'bad'); paintStatus(); return; }
+      if (!priceRaw) { showNotice('Add a price in TTD.', 'bad'); paintStatus(); return; }
+      saving = true;
+      saveButton.disabled = true;
+      showNotice('Saving…', 'wait');
+      paintStatus();
+      const payload = { name: name, description: description, category: category, priceTtd: priceRaw };
+      const wasNew = !editing;
+      try {
+        const current = products.find(function (item) { return item.id === editing; });
+        const data = editing
+          ? await api('/api/admin/products', { method: 'PATCH', body: JSON.stringify(Object.assign({ id: editing, hidden: current ? current.hidden : false }, payload)) })
+          : await api('/api/admin/products', { method: 'POST', body: JSON.stringify(payload) });
+        products = data.products;
+        const id = editing || data.id;
+        editing = id;
+        if (wasNew && pendingFiles.length) {
+          const files = pendingFiles.slice();
+          pendingFiles = [];
+          await uploadFiles(id, files, true);
+        }
+        showNotice('Saved. ' + name + ' now has its own page on the website.', 'ok', pageLink(id), 'View page');
+        renderEditor(id);
+      } catch (error) {
+        showNotice(error.message, 'bad');
+        if (editing) renderEditor(editing, currentDraft());
+        else paintStatus();
+      } finally {
+        saving = false;
+        saveButton.disabled = false;
+        saveButton.textContent = 'Save';
+      }
+    }
+
+    function compress(file) {
+      return createImageBitmap(file).then(function (bitmap) {
+        const max = 1600;
+        const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        bitmap.close && bitmap.close();
+        return new Promise(function (resolve, reject) {
+          canvas.toBlob(function (blob) {
+            if (!blob) reject(new Error('Could not read that photo. Choose a JPG or PNG from your library.'));
+            else resolve(blob);
+          }, 'image/jpeg', 0.82);
+        });
+      }).catch(function () {
+        throw new Error('Could not read that photo. Choose a JPG or PNG from your library.');
+      });
+    }
+    function blobToBase64(blob) {
+      return new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+        reader.onload = function () { resolve(String(reader.result).split(',')[1]); };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+    async function uploadFiles(productId, files, makeFirstMainIfEmpty) {
+      let current = products.find(function (item) { return item.id === productId; });
+      for (let i = 0; i < files.length; i++) {
+        showNotice('Adding photo ' + (i + 1) + ' of ' + files.length + '…', 'wait');
+        paintStatus();
+        const blob = await compress(files[i]);
+        const data = await blobToBase64(blob);
+        const hasPhotos = current && (current.photos || []).length > 0;
+        const result = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({
+          action: 'photo',
+          productId: productId,
+          data: data,
+          makeMain: Boolean(makeFirstMainIfEmpty) && i === 0 && !hasPhotos
+        }) });
+        products = result.products;
+        current = products.find(function (item) { return item.id === productId; });
+      }
+    }
+    async function addPhotos(productId, files) {
+      if (!files.length) return;
+      const draft = currentDraft();
+      savebar.hidden = false;
+      document.body.classList.add('editing');
+      saveButton.disabled = true;
+      try {
+        await uploadFiles(productId, files, true);
+        showNotice(files.length > 1 ? 'Photos added.' : 'Photo added.', 'ok', pageLink(productId), 'View page');
+        renderEditor(productId, draft);
+      } catch (error) {
+        showNotice(error.message, 'bad');
+        renderEditor(productId, draft);
+      }
+    }
+    async function replacePhoto(photoId, file) {
+      const draft = currentDraft();
+      saveButton.disabled = true;
+      showNotice('Replacing photo…', 'wait');
+      paintStatus();
+      try {
+        const blob = await compress(file);
+        const data = await blobToBase64(blob);
+        const result = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'replace-photo', photoId: photoId, data: data }) });
+        products = result.products;
+        showNotice('Photo replaced.', 'ok', editing ? pageLink(editing) : '', 'View page');
+        renderEditor(editing, draft);
+      } catch (error) {
+        showNotice(error.message, 'bad');
+        paintStatus();
+        saveButton.disabled = false;
+      }
+    }
+    async function setMain(photoId) {
+      const draft = currentDraft();
+      try {
+        const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'main-photo', productId: editing, photoId: photoId }) });
+        products = data.products;
+        showNotice('That photo is now the main photo.', 'ok');
+        renderEditor(editing, draft);
+      } catch (error) {
+        showNotice(error.message, 'bad');
+        paintStatus();
+      }
+    }
+    async function dropPhoto(photoId) {
+      if (!confirm('Remove this photo?')) return;
+      const draft = currentDraft();
+      try {
+        const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'delete-photo', photoId: photoId }) });
+        products = data.products;
+        showNotice('Photo removed.', 'ok');
+        renderEditor(editing, draft);
+      } catch (error) {
+        showNotice(error.message, 'bad');
+        paintStatus();
+      }
+    }
+    async function movePhoto(photoId, dir) {
+      const draft = currentDraft();
+      const product = products.find(function (item) { return item.id === editing; });
+      if (!product) return;
+      const ids = (product.photos || []).map(function (photo) { return photo.id; });
+      const index = ids.indexOf(photoId);
+      const next = index + dir;
+      if (index < 0 || next < 0 || next >= ids.length) return;
+      const swap = ids[index];
+      ids[index] = ids[next];
+      ids[next] = swap;
+      try {
+        const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'reorder-photos', productId: editing, ids: ids }) });
+        products = data.products;
+        showNotice('Photo order updated.', 'ok');
+        renderEditor(editing, draft);
+      } catch (error) {
+        showNotice(error.message, 'bad');
+        paintStatus();
+      }
+    }
+    async function saveVisibility(product, hidden) {
+      const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'visibility', id: product.id, hidden: hidden }) });
+      products = data.products;
+      showNotice(hidden ? 'Hidden on the website.' : 'Showing on the website.', 'ok');
+      renderList();
+    }
+    async function move(id, dir) {
+      const ids = products.map(function (item) { return item.id; });
+      const index = ids.indexOf(id);
+      const next = index + dir;
+      if (next < 0 || next >= ids.length) return;
+      const swap = ids[index];
+      ids[index] = ids[next];
+      ids[next] = swap;
+      const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'reorder', ids: ids }) });
+      products = data.products;
+      renderList();
+    }
+    async function removeProduct(id) {
+      const product = products.find(function (item) { return item.id === id; });
+      if (!confirm('Remove ' + product.name + ' from the shop?')) return;
+      const data = await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
+      products = data.products;
+      showNotice(product.name + ' was removed.', 'ok');
+      renderList();
+    }
+    async function showShop() {
+      const data = await api('/api/admin/products');
+      products = data.products;
+      renderList();
+    }
+    window.adminRefreshProducts = function (list) {
+      products = list || products;
+    };
+    signOut.onclick = async function () {
+      await api('/api/admin/auth', { method: 'DELETE' });
+      signOut.hidden = true;
+      location.reload();
+    };
+    api('/api/admin/auth').then(function (state) {
+      if (state.needsDatabase) return databaseHelp();
+      if (state.signedIn) return showShop();
+      authForm(state.needsSetup ? 'setup' : 'login');
+    }).catch(function (error) {
+      if (error.needsDatabase) databaseHelp();
+      else app.innerHTML = '<p class="banner bad">' + esc(error.message) + '</p>';
+    });
+  </script>
+  <script src="/admin/site-panel.js"></script>
+  <script src="/admin/visual-editor.js"></script>
+</body>
+</html>

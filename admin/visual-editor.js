@@ -621,7 +621,7 @@
       return '<button type="button" class="' + on + '" data-ve-page="' + esc(p.path) + '">' + esc(p.label) + '</button>';
     }).join('');
 
-    container.innerHTML = '<button class="quiet" type="button" id="ve-back">← Back to admin</button>'
+    container.innerHTML = '<button class="quiet" type="button" id="ve-back">← Back to advanced</button>'
       + '<p class="muted hint">Tap anything on your site to edit it. Use <strong>Site look</strong> for colours and which sections show.</p>'
       + '<div class="ve-toolbar">'
       + '<nav class="admin-tabs ve-pages" aria-label="Pages">' + pageChips + '</nav>'

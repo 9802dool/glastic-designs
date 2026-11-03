@@ -58,43 +58,85 @@ function sanitizeSettings(body) {
   const partial = {};
   if (body.theme && typeof body.theme === 'object') {
     const theme = body.theme;
-    const base = mergeSettings({ theme: theme }).theme;
-    partial.theme = {
-      preset: cleanText(theme.preset, 40) || base.preset,
-      primary: cleanColor(theme.primary, base.primary),
-      primaryDark: cleanColor(theme.primaryDark, base.primaryDark),
-      accent: cleanColor(theme.accent, base.accent),
-      background: cleanColor(theme.background, base.background),
-      text: cleanColor(theme.text, base.text),
-      fontId: FONT_OPTIONS.some(function (f) { return f.id === theme.fontId; }) ? theme.fontId : base.fontId,
-      logoUrl: cleanUrl(theme.logoUrl, 500) != null ? (cleanUrl(theme.logoUrl, 500) || base.logoUrl) : base.logoUrl
-    };
-    if (theme.preset && THEME_PRESETS[theme.preset] && !theme.primary) {
-      partial.theme = applyPresetToTheme(partial.theme, theme.preset);
+    if (theme.preset && THEME_PRESETS[theme.preset] && !theme.primary && !theme.accent) {
+      partial.theme = applyPresetToTheme({ preset: theme.preset }, theme.preset);
+    } else {
+      const base = mergeSettings({ theme: theme }).theme;
+      partial.theme = {};
+      if (Object.prototype.hasOwnProperty.call(theme, 'preset')) {
+        partial.theme.preset = cleanText(theme.preset, 40) || base.preset;
+      }
+      if (Object.prototype.hasOwnProperty.call(theme, 'primary')) {
+        partial.theme.primary = cleanColor(theme.primary, base.primary);
+      }
+      if (Object.prototype.hasOwnProperty.call(theme, 'primaryDark')) {
+        partial.theme.primaryDark = cleanColor(theme.primaryDark, base.primaryDark);
+      }
+      if (Object.prototype.hasOwnProperty.call(theme, 'accent')) {
+        partial.theme.accent = cleanColor(theme.accent, base.accent);
+      }
+      if (Object.prototype.hasOwnProperty.call(theme, 'background')) {
+        partial.theme.background = cleanColor(theme.background, base.background);
+      }
+      if (Object.prototype.hasOwnProperty.call(theme, 'text')) {
+        partial.theme.text = cleanColor(theme.text, base.text);
+      }
+      if (Object.prototype.hasOwnProperty.call(theme, 'fontId')) {
+        partial.theme.fontId = FONT_OPTIONS.some(function (f) { return f.id === theme.fontId; }) ? theme.fontId : base.fontId;
+      }
+      if (Object.prototype.hasOwnProperty.call(theme, 'logoUrl')) {
+        partial.theme.logoUrl = cleanUrl(theme.logoUrl, 500) != null ? (cleanUrl(theme.logoUrl, 500) || base.logoUrl) : base.logoUrl;
+      }
+      if (theme.preset && THEME_PRESETS[theme.preset] && partial.theme.preset && !partial.theme.primary) {
+        partial.theme = applyPresetToTheme(Object.assign({}, base, partial.theme), theme.preset);
+      }
     }
   }
   if (body.homepage && typeof body.homepage === 'object') {
     const hp = body.homepage;
-    partial.homepage = {
-      heroBadge: cleanText(hp.heroBadge, 120) || current.homepage.heroBadge,
-      heroHeadline: cleanText(hp.heroHeadline, 200, { keepLines: true }) || current.homepage.heroHeadline,
-      heroSubtext: cleanText(hp.heroSubtext, 800, { keepLines: true }) || current.homepage.heroSubtext,
-      heroImage: cleanUrl(hp.heroImage, 500) != null ? (cleanUrl(hp.heroImage, 500) || current.homepage.heroImage) : current.homepage.heroImage,
-      heroBadgeNote: cleanText(hp.heroBadgeNote, 40) || current.homepage.heroBadgeNote,
-      heroBadgeCaption: cleanText(hp.heroBadgeCaption, 80) || current.homepage.heroBadgeCaption,
-      aboutEyebrow: cleanText(hp.aboutEyebrow, 120) || current.homepage.aboutEyebrow,
-      aboutTitle: cleanText(hp.aboutTitle, 120) || current.homepage.aboutTitle,
-      aboutText: cleanText(hp.aboutText, 2000, { keepLines: true }) || current.homepage.aboutText,
-      aboutImage: cleanUrl(hp.aboutImage, 500) != null ? (cleanUrl(hp.aboutImage, 500) || current.homepage.aboutImage) : current.homepage.aboutImage,
-      processSteps: Array.isArray(hp.processSteps)
-        ? hp.processSteps.slice(0, 6).map(function (step) {
-          return {
-            title: cleanText(step && step.title, 80) || 'Step',
-            text: cleanText(step && step.text, 400, { keepLines: true }) || ''
-          };
-        }).filter(function (step) { return step.title; })
-        : undefined
-    };
+    partial.homepage = {};
+    if (Object.prototype.hasOwnProperty.call(hp, 'heroBadge')) {
+      partial.homepage.heroBadge = cleanText(hp.heroBadge, 120) || current.homepage.heroBadge;
+    }
+    if (Object.prototype.hasOwnProperty.call(hp, 'heroHeadline')) {
+      partial.homepage.heroHeadline = cleanText(hp.heroHeadline, 200, { keepLines: true }) || current.homepage.heroHeadline;
+    }
+    if (Object.prototype.hasOwnProperty.call(hp, 'heroSubtext')) {
+      partial.homepage.heroSubtext = cleanText(hp.heroSubtext, 800, { keepLines: true }) || current.homepage.heroSubtext;
+    }
+    if (Object.prototype.hasOwnProperty.call(hp, 'heroImage')) {
+      partial.homepage.heroImage = cleanUrl(hp.heroImage, 500) != null
+        ? (cleanUrl(hp.heroImage, 500) || current.homepage.heroImage)
+        : current.homepage.heroImage;
+    }
+    if (Object.prototype.hasOwnProperty.call(hp, 'heroBadgeNote')) {
+      partial.homepage.heroBadgeNote = cleanText(hp.heroBadgeNote, 40) || current.homepage.heroBadgeNote;
+    }
+    if (Object.prototype.hasOwnProperty.call(hp, 'heroBadgeCaption')) {
+      partial.homepage.heroBadgeCaption = cleanText(hp.heroBadgeCaption, 80) || current.homepage.heroBadgeCaption;
+    }
+    if (Object.prototype.hasOwnProperty.call(hp, 'aboutEyebrow')) {
+      partial.homepage.aboutEyebrow = cleanText(hp.aboutEyebrow, 120) || current.homepage.aboutEyebrow;
+    }
+    if (Object.prototype.hasOwnProperty.call(hp, 'aboutTitle')) {
+      partial.homepage.aboutTitle = cleanText(hp.aboutTitle, 120) || current.homepage.aboutTitle;
+    }
+    if (Object.prototype.hasOwnProperty.call(hp, 'aboutText')) {
+      partial.homepage.aboutText = cleanText(hp.aboutText, 2000, { keepLines: true }) || current.homepage.aboutText;
+    }
+    if (Object.prototype.hasOwnProperty.call(hp, 'aboutImage')) {
+      partial.homepage.aboutImage = cleanUrl(hp.aboutImage, 500) != null
+        ? (cleanUrl(hp.aboutImage, 500) || current.homepage.aboutImage)
+        : current.homepage.aboutImage;
+    }
+    if (Array.isArray(hp.processSteps)) {
+      partial.homepage.processSteps = hp.processSteps.slice(0, 6).map(function (step) {
+        return {
+          title: cleanText(step && step.title, 80) || 'Step',
+          text: cleanText(step && step.text, 400, { keepLines: true }) || ''
+        };
+      }).filter(function (step) { return step.title; });
+    }
   }
   if (body.gallery && typeof body.gallery === 'object') {
     partial.gallery = {
