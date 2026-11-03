@@ -110,13 +110,14 @@
       return;
     }
     grid.innerHTML = galleryItems.map(function (item) {
-      return '<figure class="group">'
+      return '<figure class="group" data-gallery-id="' + esc(item.id || '') + '">'
         + '<div class="photo-frame h-72 sm:h-80 rounded-3xl overflow-hidden bg-stone-200">'
         + '<img src="' + esc(item.url) + '" alt="' + esc(item.caption || 'Gallery photo') + '" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">'
         + '</div>'
         + '<figcaption class="mt-3 text-sm font-medium text-stone-700">' + esc(item.caption || '') + '</figcaption>'
         + '</figure>';
     }).join('');
+    if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
     if (meta) {
       setText('gallery-title', meta.title);
       setText('gallery-subtitle', meta.subtitle);
@@ -133,6 +134,7 @@
         + '<p class="text-emerald-100">' + esc(step.text || '') + '</p>'
         + '</div>';
     }).join('');
+    if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
   }
 
   function renderImpact(impact) {
@@ -153,6 +155,7 @@
           + '</div>';
       }).join('');
     }
+    if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
   }
 
   function applyBanner(banner) {
@@ -256,6 +259,7 @@
     applyContact(s.contact);
     var fbHero = document.getElementById('hero-facebook');
     if (fbHero && s.contact && s.contact.facebook) fbHero.setAttribute('href', s.contact.facebook);
+    if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
   }
 
   var DEFAULT_PAYLOAD = {

@@ -4,6 +4,12 @@ const path = require('path');
 const settings = require('../api/settings');
 const adminSettings = require('../api/admin/settings');
 const adminAuth = require('../api/admin/auth');
+const products = require('../api/products');
+const adminProducts = require('../api/admin/products');
+
+const SPA_ROUTES = new Set([
+  '/products', '/about', '/gallery', '/process', '/impact', '/contact', '/cart'
+]);
 
 const root = path.join(__dirname, '..');
 const types = {
@@ -42,7 +48,20 @@ const server = http.createServer(async function (req, res) {
     req.body = await readBody(req);
     return adminAuth(req, res);
   }
-  let filePath = path.join(root, url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname));
+  if (url.pathname === '/api/products') {
+    req.method = 'GET';
+    return products(req, res);
+  }
+  if (url.pathname === '/api/admin/products') {
+    req.body = await readBody(req);
+    return adminProducts(req, res);
+  }
+  var pathname = url.pathname;
+  var pathKey = pathname.replace(/\/$/, '') || '/';
+  if (SPA_ROUTES.has(pathKey) || /^\/category\/[a-z]+$/.test(pathKey)) {
+    pathname = 'index.html';
+  }
+  let filePath = path.join(root, pathname === '/' ? 'index.html' : decodeURIComponent(pathname.replace(/^\//, '')));
   if (!filePath.startsWith(root)) {
     res.writeHead(403); return res.end('Forbidden');
   }

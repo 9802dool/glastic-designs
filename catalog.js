@@ -56,6 +56,7 @@
       var photo = mainPhoto(product);
       var card = document.createElement('div');
       card.className = 'product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer';
+      card.setAttribute('data-product-id', product.id);
       card.innerHTML = ''
         + '<div class="photo-frame h-64 bg-stone-200 relative overflow-hidden">'
         + (photo ? photoHtml(photo.url, product.name + ' by Glastic Designs', 'w-full h-full object-cover') : '')
@@ -114,8 +115,13 @@
       document.body.appendChild(page);
     });
     if (window.GlasticPay && window.GlasticPay.adoptCatalog) window.GlasticPay.adoptCatalog(all);
+    if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
     openLinkedProduct();
   }
+
+  window.GLASTIC_RENDER_CATALOG = function (products) {
+    render(products || []);
+  };
 
   function fillGallery(container, product) {
     var photos = product.photos || [];

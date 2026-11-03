@@ -72,6 +72,21 @@
     .admin-tabs button { min-height: 40px; white-space: nowrap; padding: 0.35rem 0.85rem; font-size: 0.8125rem; font-weight: 600; background: #fafaf9; color: #44403c; border: 1px solid #e7e5e4; border-radius: 999px; }
     .admin-tabs button.chip-on { background: #f0fdfa; color: #115e59; border-color: #99f6e4; }
     .hub-grid { display: grid; gap: 0.75rem; margin-top: 0.5rem; }
+    body.visual-editing header h1 { font-size: 1.35rem; }
+    body.visual-editing main { padding-bottom: calc(9rem + env(safe-area-inset-bottom)); }
+    .ve-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; margin: 0.5rem 0; }
+    .ve-pages { flex: 1; min-width: 0; margin: 0; padding-bottom: 0.25rem; }
+    .ve-layout { display: grid; gap: 0.75rem; grid-template-columns: 1fr; align-items: start; }
+    .ve-frame-wrap { background: #e7e5e4; border-radius: 1rem; overflow: hidden; min-height: min(62vh, 720px); box-shadow: inset 0 0 0 1px #d6d3d1; }
+    .ve-iframe { width: 100%; height: min(62vh, 720px); border: 0; background: #fff; display: block; }
+    .ve-theme-drawer, .ve-edit-panel { background: white; border-radius: 1.25rem; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,.06); max-height: min(50vh, 420px); overflow: auto; }
+    .ve-edit-panel { border: 2px solid #99f6e4; }
+    @media (min-width: 900px) {
+      .ve-layout { grid-template-columns: 1fr min(22rem, 34vw); }
+      .ve-theme-drawer { grid-column: 2; grid-row: 1; max-height: min(62vh, 720px); }
+      .ve-edit-panel { grid-column: 2; grid-row: 1; z-index: 2; }
+      .ve-frame-wrap { grid-column: 1; grid-row: 1 / span 2; }
+    }
   </style>
   <script src="/settings.js"></script>
 </head>
@@ -226,14 +241,18 @@
           + '</div></article>';
       }).join('');
       app.innerHTML = '<div class="span hub-grid">'
-        + '<button class="primary add-new" type="button" id="edit-website">Website look &amp; content</button>'
+        + '<button class="primary add-new" type="button" id="visual-edit">Edit my website</button>'
+        + '<button class="ghost add-new" type="button" id="edit-website">Website look &amp; content (forms)</button>'
         + '<button class="ghost add-new" type="button" id="add-product">+ Add New Product</button>'
-        + '<p class="muted hint">Tap Website look to change colours, text, and photos. Scroll down to edit products.</p>'
+        + '<p class="muted hint">Use <strong>Edit my website</strong> to tap the live page and change text and photos. The form view is still here if you prefer it.</p>'
         + (notice ? '<div class="banner ' + esc(notice.kind) + '" role="status">' + noticeHtml() + '</div>' : '')
         + '</div><div class="list-grid">' + cards + '</div>';
       const wrap = app.querySelector('.span');
       const grid = app.querySelector('.list-grid');
       if (wrap && grid) wrap.appendChild(grid);
+      document.getElementById('visual-edit').onclick = function () {
+        if (window.adminShowVisualEditor) window.adminShowVisualEditor();
+      };
       document.getElementById('edit-website').onclick = function () {
         if (window.adminShowSitePanel) window.adminShowSitePanel();
       };
@@ -589,6 +608,9 @@
       products = data.products;
       renderList();
     }
+    window.adminRefreshProducts = function (list) {
+      products = list || products;
+    };
     signOut.onclick = async function () {
       await api('/api/admin/auth', { method: 'DELETE' });
       signOut.hidden = true;
@@ -604,5 +626,6 @@
     });
   </script>
   <script src="/admin/site-panel.js"></script>
+  <script src="/admin/visual-editor.js"></script>
 </body>
 </html>
