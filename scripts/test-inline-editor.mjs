@@ -134,7 +134,16 @@ async function runViewport(browser, viewport, tag) {
   await page.goto(ORIGIN + '/?adminEdit=1&visualEdit=1', { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#glastic-edit-gate', { state: 'hidden', timeout: 20000 });
   await page.waitForSelector('#hero-headline', { timeout: 15000 });
-  await page.waitForTimeout(400);
+  await page.waitForFunction(function () {
+    return document.querySelectorAll('[data-editable]').length >= 3 && window.GLASTIC_VISUAL_EDIT_ACTIVE;
+  }, { timeout: 8000 });
+  const statusText = await page.locator('#glastic-edit-status').textContent();
+  if (!statusText || statusText.indexOf('Editing on') < 0) {
+    console.error(`FAIL ${tag}: edit status pill`, statusText);
+    await context.close();
+    process.exit(1);
+  }
+  await page.waitForTimeout(200);
   await page.locator('#glastic-edit-toolbar').screenshot({ path: `${OUT}/inline-edit-mode-${tag}.png` });
 
   await page.locator('#hero-headline').click();

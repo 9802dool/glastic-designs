@@ -33,6 +33,9 @@
   var AUTH_TIMEOUT_MS = 20000;
   var DATA_TIMEOUT_MS = 25000;
   var BOOT_TIMEOUT_MS = 45000;
+  var DRAFT_NAV_KEY = 'glastic-admin-edit-draft-v1';
+
+  window.__GLASTIC_EDIT_SESSION_OK = false;
 
   function logEdit(stage, detail) {
     try {
@@ -98,10 +101,88 @@
     if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
   }
 
+  function updateStatusPill(text, tone) {
+    var pill = document.getElementById('glastic-edit-status');
+    if (!pill) return;
+    pill.textContent = text;
+    pill.className = 'status-pill' + (tone ? ' ' + tone : '');
+  }
+
   function enableInlineEdit() {
+    logEdit('enable-inline', 'start');
     postPreview();
-    if (window.__glasticEnableVisualEdit) window.__glasticEnableVisualEdit();
-    else window.__GLASTIC_PENDING_VISUAL_ENABLE = true;
+    var enabled = false;
+    if (window.__GLASTIC_REQUEST_VISUAL_EDIT_ENABLE) {
+      enabled = window.__GLASTIC_REQUEST_VISUAL_EDIT_ENABLE('site-editor');
+    } else if (window.__glasticEnableVisualEdit) {
+      window.__glasticEnableVisualEdit();
+      enabled = true;
+    } else {
+      window.__GLASTIC_PENDING_VISUAL_ENABLE = true;
+    }
+    var markCount = document.querySelectorAll('[data-editable]').length;
+    logEdit('enable-inline', enabled ? markCount + ' marks' : 'pending visual script');
+    if (markCount > 0) {
+      updateStatusPill('Editing on: tap any outlined item', 'ok');
+    } else {
+      updateStatusPill('Loading editable areas…', 'warn');
+    }
+  }
+
+  function enableInlineEditWithRetries() {
+    enableInlineEdit();
+    var attempts = 0;
+    var timer = setInterval(function () {
+      attempts += 1;
+      var count = document.querySelectorAll('[data-editable]').length;
+      if (count > 0 && window.GLASTIC_VISUAL_EDIT_ACTIVE) {
+        updateStatusPill('Editing on: tap any outlined item', 'ok');
+        clearInterval(timer);
+        logEdit('enable-inline', 'stable after ' + attempts + ' retries');
+        return;
+      }
+      if (window.__GLASTIC_EDIT_SESSION_OK) enableInlineEdit();
+      if (attempts >= 12) {
+        clearInterval(timer);
+        if (count === 0) {
+          updateStatusPill('Edit mode failed to start — Try again', 'err');
+          logEdit('enable-inline-failed', 'no data-editable nodes');
+        }
+      }
+    }, 250);
+  }
+
+  function persistDraftForNavigation() {
+    try {
+      sessionStorage.setItem(DRAFT_NAV_KEY, JSON.stringify({
+        settings: draft.settings,
+        gallery: draft.gallery,
+        products: draft.products,
+        pending: window.__vePendingUploads || [],
+        dirty: dirty
+      }));
+      logEdit('draft-persist', 'sessionStorage');
+    } catch (e) {
+      logEdit('draft-persist-failed', String(e && e.message));
+    }
+  }
+
+  function restoreDraftFromNavigation() {
+    try {
+      var raw = sessionStorage.getItem(DRAFT_NAV_KEY);
+      if (!raw) return;
+      sessionStorage.removeItem(DRAFT_NAV_KEY);
+      var snap = JSON.parse(raw);
+      if (snap.settings) draft.settings = snap.settings;
+      if (snap.gallery) draft.gallery = snap.gallery;
+      if (snap.products) draft.products = snap.products;
+      window.__vePendingUploads = snap.pending || [];
+      setDirty(Boolean(snap.dirty));
+      postPreview();
+      logEdit('draft-restore', 'from sessionStorage');
+    } catch (e) {
+      logEdit('draft-restore-failed', String(e && e.message));
+    }
   }
 
   function navigateTo(path) {
@@ -110,6 +191,7 @@
       if (pageSelect) pageSelect.value = currentPath;
       return;
     }
+    persistDraftForNavigation();
     window.location.href = editNavUrl(path);
   }
 
@@ -409,6 +491,7 @@
     window.__vePendingUploads = [];
     undoStack = [];
     setDirty(false);
+    restoreDraftFromNavigation();
   }
 
   function esc(value) {
@@ -437,6 +520,9 @@
   }
 
   function showSignInForm(needsSetup) {
+    window.__GLASTIC_EDIT_SESSION_OK = false;
+    if (window.__glasticDisableVisualEdit) window.__glasticDisableVisualEdit();
+    showSignInBanner();
     gate.hidden = false;
     gate.innerHTML = '<div class="panel"><h1 style="margin:0 0 0.5rem;font-size:1.25rem">' + (needsSetup ? 'Welcome' : 'Sign in') + '</h1><p style="color:#57534e">'
       + (needsSetup ? 'Choose a password for your shop admin, then open the editor.'
@@ -450,6 +536,14 @@
       + (needsSetup ? 'Continue' : 'Sign in') + '</button>'
       + '<a class="btn btn-secondary" href="/admin/?return=' + encodeURIComponent('/?adminEdit=1&visualEdit=1') + '">Use full sign-in page</a>'
       + '<a class="btn btn-secondary" href="/admin/">Back to menu</a></div></form></div>';
+    var bannerBtn = document.getElementById('glastic-signin-banner-btn');
+    if (bannerBtn) {
+      bannerBtn.onclick = function () {
+        var pw = document.getElementById('gate-password');
+        if (pw) pw.focus();
+        gate.hidden = false;
+      };
+    }
     document.getElementById('gate-auth').onsubmit = function (event) {
       event.preventDefault();
       var password = document.getElementById('gate-password').value;
@@ -466,6 +560,8 @@
         body: JSON.stringify({ action: needsSetup ? 'setup' : 'login', password: password }),
         timeoutMs: AUTH_TIMEOUT_MS
       }).then(function () {
+        window.__GLASTIC_EDIT_SESSION_OK = true;
+        hideSignInBanner();
         return startEditor();
       }).catch(function (err) {
         showSignInForm(needsSetup);
@@ -491,6 +587,7 @@
       + '<button type="button" class="ghost" id="glastic-btn-exit" aria-label="Exit editor"><i class="fas fa-times"></i></button>'
       + '<select id="glastic-page-select" aria-label="Page"></select>'
       + '<span id="glastic-dirty-dot" title="Unsaved changes" style="width:0.5rem;height:0.5rem;border-radius:999px;background:#ea580c;display:none"></span>'
+      + '<span id="glastic-edit-status" class="status-pill warn">Starting editor…</span>'
       + '<span style="flex:1"></span>'
       + '<button type="button" class="icon-only" id="glastic-btn-undo" disabled aria-label="Undo"><i class="fas fa-rotate-left"></i><span class="btn-text">Undo</span></button>'
       + '<button type="button" class="icon-only" id="glastic-btn-colours" aria-label="Colours"><i class="fas fa-palette"></i><span class="btn-text">Colours</span></button>'
@@ -515,6 +612,13 @@
     toast.id = 'glastic-edit-toast';
     toast.setAttribute('role', 'status');
     document.body.appendChild(toast);
+
+    var signBanner = document.createElement('div');
+    signBanner.id = 'glastic-edit-signin-banner';
+    signBanner.hidden = true;
+    signBanner.innerHTML = '<p><strong>Sign in to edit</strong> — your shop password is required to change the live site.</p>'
+      + '<button type="button" class="primary" id="glastic-signin-banner-btn">Sign in</button>';
+    document.body.appendChild(signBanner);
 
     pageSelect = document.getElementById('glastic-page-select');
     dirtyDot = document.getElementById('glastic-dirty-dot');
@@ -552,7 +656,19 @@
       e.returnValue = '';
     });
     window.__glasticAdminEditBus = onEditBusMessage;
-    enableInlineEdit();
+    enableInlineEditWithRetries();
+  }
+
+  function showSignInBanner() {
+    var banner = document.getElementById('glastic-edit-signin-banner');
+    if (banner) banner.hidden = false;
+    updateStatusPill('Sign in to edit', 'err');
+    logEdit('session', 'unsigned — banner shown');
+  }
+
+  function hideSignInBanner() {
+    var banner = document.getElementById('glastic-edit-signin-banner');
+    if (banner) banner.hidden = true;
   }
 
   function setDirty(on) {
@@ -562,6 +678,9 @@
   }
 
   async function startEditor() {
+    window.__GLASTIC_EDIT_SESSION_OK = true;
+    hideSignInBanner();
+    logEdit('startEditor', 'loading shop data');
     showLoading('Loading your website…');
     var bootTimer = setTimeout(function () {
       logEdit('timeout', 'boot exceeded ' + BOOT_TIMEOUT_MS + 'ms');
@@ -583,7 +702,9 @@
 
   async function boot() {
     injectChrome();
+    window.__glasticAdminEditBus = onEditBusMessage;
     showLoading('Checking sign-in…');
+    logEdit('boot', 'auth check');
     try {
       var state = await api('/api/admin/auth', { timeoutMs: AUTH_TIMEOUT_MS });
       if (state.needsDatabase) {
@@ -595,6 +716,8 @@
         window.__editEditorBooted = true;
         return;
       }
+      window.__GLASTIC_EDIT_SESSION_OK = true;
+      logEdit('session', 'signed in');
       await startEditor();
     } catch (err) {
       if (err && err.needsDatabase) {

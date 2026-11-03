@@ -414,6 +414,9 @@
 
   if (isVisualPreviewFrame()) {
     /* Admin editor pushes draft settings; do not fetch published settings over the preview. */
+    if (isSameDocumentAdminEdit()) {
+      applyCachedTheme();
+    }
     if (window.parent !== window) {
       try {
         window.parent.postMessage({ source: 'glastic-visual-edit', type: 'iframe-loaded' }, window.location.origin);

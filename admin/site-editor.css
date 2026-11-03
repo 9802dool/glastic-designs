@@ -19,6 +19,52 @@ html.glastic-admin-edit body { padding-top: 3.25rem !important; }
   padding: 0.35rem 0.5rem;
   max-width: 80rem;
   margin: 0 auto;
+  flex-wrap: wrap;
+}
+#glastic-edit-toolbar .status-pill {
+  font: 600 0.6875rem/1.2 Inter, system-ui, sans-serif;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #065f46;
+  max-width: 11rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#glastic-edit-toolbar .status-pill.warn { background: #fff7ed; color: #9a3412; }
+#glastic-edit-toolbar .status-pill.err { background: #fef2f2; color: #b91c1c; }
+#glastic-edit-toolbar .status-pill.ok { background: #ecfdf5; color: #065f46; }
+#glastic-edit-signin-banner {
+  position: fixed;
+  top: calc(3.25rem + env(safe-area-inset-top));
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.65rem 1rem;
+  background: #fef3c7;
+  color: #78350f;
+  border-bottom: 1px solid #fcd34d;
+  font: 500 0.875rem Inter, system-ui, sans-serif;
+}
+#glastic-edit-signin-banner[hidden] { display: none !important; }
+#glastic-edit-signin-banner .primary {
+  min-height: 2.25rem;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 1rem;
+  font: 600 0.8125rem Inter, sans-serif;
+  background: #0f766e;
+  color: #fff;
+  cursor: pointer;
+}
+html.glastic-admin-edit:has(#glastic-edit-signin-banner:not([hidden])) body {
+  padding-top: calc(3.25rem + 3rem) !important;
 }
 #glastic-edit-toolbar button,
 #glastic-edit-toolbar select {

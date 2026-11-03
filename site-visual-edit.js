@@ -7,6 +7,23 @@
   var popover = null;
   var fileInput = null;
   var editingEl = null;
+  var markObserver = null;
+  var remarkTimer = null;
+
+  function veLog(stage, detail) {
+    try {
+      console.info('[glastic-edit]', 'visual:' + stage, detail !== undefined ? detail : '');
+    } catch (e) { /* ignore */ }
+  }
+
+  function isSameDocAdmin() {
+    try {
+      if (window.GLASTIC_ADMIN_SAME_DOC_EDIT) return window.GLASTIC_ADMIN_SAME_DOC_EDIT();
+      return params.get('adminEdit') === '1' && window.parent === window;
+    } catch (e) {
+      return false;
+    }
+  }
 
   var STATIC_TARGETS = [
     { selector: '#site-banner', key: 'banner.text', kind: 'text', route: ['home'] },
@@ -63,10 +80,10 @@
     var style = document.createElement('style');
     style.id = 'glastic-inline-edit-css';
     style.textContent = ''
-      + 'html.glastic-visual-edit-active [data-editable]{cursor:text;}'
+      + 'html.glastic-visual-edit-active [data-editable]{cursor:text;outline:2px dashed rgba(20,184,166,.55);outline-offset:3px;}'
       + 'html.glastic-visual-edit-active [data-editable][data-editable-kind="image"]{cursor:pointer;}'
       + 'html.glastic-visual-edit-active [data-editable][data-editable-kind="link"]{cursor:pointer;}'
-      + 'html.glastic-visual-edit-active [data-editable]:hover{outline:2px dashed rgba(20,184,166,.85);outline-offset:3px;}'
+      + 'html.glastic-visual-edit-active [data-editable]:hover{outline:2px dashed rgba(20,184,166,.95);outline-offset:3px;}'
       + 'html.glastic-visual-edit-active [data-editable].is-editing{outline:2px solid #0f766e;outline-offset:3px;}'
       + '.glastic-edit-popover{position:fixed;z-index:10001;background:#fff;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:0.65rem;min-width:11rem;max-width:min(20rem,calc(100vw - 1.5rem));font:600 0.8125rem Inter,system-ui,sans-serif;color:#1c1917;}'
       + '.glastic-edit-popover button,.glastic-edit-popover input{width:100%;min-height:2.75rem;border-radius:10px;border:1px solid #e7e5e4;padding:0 0.65rem;font:inherit;margin-top:0.35rem;}'
@@ -176,8 +193,11 @@
     });
   }
 
+  var lastMarkCount = -1;
+
   function refreshMarks() {
     if (!active) return;
+    if (markObserver) markObserver.disconnect();
     document.querySelectorAll('[data-editable]').forEach(function (el) {
       el.removeAttribute('data-editable');
       el.removeAttribute('data-editable-kind');
@@ -186,9 +206,52 @@
     document.querySelectorAll('.glastic-prod-hide').forEach(function (b) { b.remove(); });
     markStatic();
     markDynamic();
+    var count = document.querySelectorAll('[data-editable]').length;
+    if (count !== lastMarkCount) {
+      lastMarkCount = count;
+      veLog('marks', count + ' editable nodes');
+    }
+    if (markObserver && document.body) {
+      markObserver.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   window.__glasticVisualEditRefresh = refreshMarks;
+
+  function attachMarkObserver() {
+    if (markObserver || typeof MutationObserver === 'undefined') return;
+    markObserver = new MutationObserver(function () {
+      if (!active) return;
+      clearTimeout(attachMarkObserver._t);
+      attachMarkObserver._t = setTimeout(refreshMarks, 50);
+    });
+    markObserver.observe(document.body, { childList: true, subtree: true });
+    veLog('observer', 'attached');
+  }
+
+  function detachMarkObserver() {
+    if (markObserver) {
+      markObserver.disconnect();
+      markObserver = null;
+    }
+    if (remarkTimer) {
+      clearInterval(remarkTimer);
+      remarkTimer = null;
+    }
+  }
+
+  function scheduleRemarkBurst() {
+    if (remarkTimer) return;
+    var ticks = 0;
+    remarkTimer = setInterval(function () {
+      ticks += 1;
+      if (active) refreshMarks();
+      if (ticks >= 8) {
+        clearInterval(remarkTimer);
+        remarkTimer = null;
+      }
+    }, 250);
+  }
 
   function findEditable(start) {
     var node = start;
@@ -396,6 +459,18 @@
     document.execCommand('insertText', false, text);
   }
 
+  function onCaptureNavigate(event) {
+    if (!active) return;
+    if (event.target.closest && event.target.closest('#glastic-edit-toolbar, #glastic-edit-gate, .glastic-edit-popover')) return;
+    var editable = findEditable(event.target);
+    if (editable) {
+      var kind = editable.getAttribute('data-editable-kind');
+      if (kind === 'link' || kind === 'image') {
+        event.preventDefault();
+      }
+    }
+  }
+
   function onClick(event) {
     if (!active) return;
     var hideBtn = event.target.closest && event.target.closest('[data-product-hide]');
@@ -458,17 +533,24 @@
   window.__glasticDisableVisualEdit = disableEditMode;
 
   function enableEditMode() {
-    if (active) return;
+    if (active) {
+      refreshMarks();
+      return;
+    }
     active = true;
     window.GLASTIC_VISUAL_EDIT_ACTIVE = true;
     document.documentElement.classList.add('glastic-visual-edit-active');
     ensureStyles();
     refreshMarks();
+    attachMarkObserver();
+    scheduleRemarkBurst();
     showHintOnce();
+    document.addEventListener('click', onCaptureNavigate, true);
     document.addEventListener('click', onClick, true);
     document.addEventListener('click', onDocumentClick, false);
     document.addEventListener('keydown', onKeyDown, true);
     document.addEventListener('paste', onPastePlain, true);
+    veLog('enabled', isSameDocAdmin() ? 'same-document' : 'iframe');
     postToParent({ type: 'ready' });
   }
 
@@ -476,6 +558,8 @@
     active = false;
     window.GLASTIC_VISUAL_EDIT_ACTIVE = false;
     document.documentElement.classList.remove('glastic-visual-edit-active');
+    detachMarkObserver();
+    document.removeEventListener('click', onCaptureNavigate, true);
     document.removeEventListener('click', onClick, true);
     document.removeEventListener('click', onDocumentClick, false);
     document.removeEventListener('keydown', onKeyDown, true);
@@ -504,8 +588,48 @@
     }
   });
 
+  function sessionAllowsEdit() {
+    if (!isSameDocAdmin()) return true;
+    return window.__GLASTIC_EDIT_SESSION_OK === true;
+  }
+
+  function tryAutoEnable(reason) {
+    if (!sessionAllowsEdit()) {
+      veLog('wait-session', reason || '');
+      return false;
+    }
+    if (window.__glasticEnableVisualEdit) {
+      enableEditMode();
+      return true;
+    }
+    window.__GLASTIC_PENDING_VISUAL_ENABLE = true;
+    veLog('pending-enable', reason || '');
+    return false;
+  }
+
+  window.__GLASTIC_REQUEST_VISUAL_EDIT_ENABLE = tryAutoEnable;
+
   if (window.__GLASTIC_PENDING_VISUAL_ENABLE) {
     window.__GLASTIC_PENDING_VISUAL_ENABLE = false;
-    enableEditMode();
+    tryAutoEnable('pending-flag');
+  }
+
+  if (isSameDocAdmin()) {
+    veLog('boot', 'same-document admin edit');
+    var autoTicks = 0;
+    var autoTimer = setInterval(function () {
+      autoTicks += 1;
+      if (active && document.querySelectorAll('[data-editable]').length > 0) {
+        clearInterval(autoTimer);
+        return;
+      }
+      if (window.__GLASTIC_EDIT_SESSION_OK && !active) {
+        tryAutoEnable('session-ok-retry-' + autoTicks);
+      }
+      if (autoTicks >= 40) {
+        clearInterval(autoTimer);
+        if (!active) veLog('auto-enable-gave-up', 'no active edit mode after 20s');
+      }
+    }, 500);
   }
 })();
