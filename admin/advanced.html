@@ -245,14 +245,15 @@
         + '<button class="primary add-new" type="button" id="visual-edit">Edit my website</button>'
         + '<button class="ghost add-new" type="button" id="edit-website">Website look &amp; content (forms)</button>'
         + '<button class="ghost add-new" type="button" id="add-product">+ Add New Product</button>'
-        + '<p class="muted hint">Use <strong>Edit my website</strong> to tap the live page and change text and photos. The form view is still here if you prefer it.</p>'
+        + '<p class="muted hint">Use <strong>Edit my website</strong> for full-screen tap-to-edit. Forms below are still here if you prefer them.</p>'
+        + '<p class="muted hint"><a href="/admin/edit.html">Open full-screen editor</a></p>'
         + (notice ? '<div class="banner ' + esc(notice.kind) + '" role="status">' + noticeHtml() + '</div>' : '')
         + '</div><div class="list-grid">' + cards + '</div>';
       const wrap = app.querySelector('.span');
       const grid = app.querySelector('.list-grid');
       if (wrap && grid) wrap.appendChild(grid);
       document.getElementById('visual-edit').onclick = function () {
-        if (window.adminShowVisualEditor) window.adminShowVisualEditor();
+        window.location.href = '/admin/edit.html';
       };
       document.getElementById('edit-website').onclick = function () {
         if (window.adminShowSitePanel) window.adminShowSitePanel();
@@ -627,6 +628,5 @@
     });
   </script>
   <script src="/admin/site-panel.js"></script>
-  <script src="/admin/visual-editor.js"></script>
 </body>
 </html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#115e59">
+  <title>Edit website | Glastic Designs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --bar-h: 3.25rem;
+      --brand: #0f766e;
+      --brand-dark: #115e59;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --line: #e7e5e4;
+      --safe-b: env(safe-area-inset-bottom);
+      --safe-t: env(safe-area-inset-top);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: #0c0a09;
+      color: var(--ink);
+    }
+    .shell {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 100%;
+    }
+    .toolbar {
+      flex-shrink: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      padding-top: var(--safe-t);
+    }
+    .toolbar-inner {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-height: var(--bar-h);
+      padding: 0.35rem 0.5rem 0.35rem 0.25rem;
+      max-width: 80rem;
+      margin: 0 auto;
+    }
+    .toolbar button, .toolbar select {
+      font: inherit;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      border: 0;
+      border-radius: 999px;
+      min-height: 2.5rem;
+      padding: 0 0.75rem;
+      cursor: pointer;
+      touch-action: manipulation;
+      background: #f5f5f4;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    .toolbar button:active { background: #e7e5e4; }
+    .toolbar button.primary {
+      background: var(--brand);
+      color: #fff;
+    }
+    .toolbar button.primary:disabled { opacity: 0.45; }
+    .toolbar button.ghost { background: transparent; color: var(--muted); }
+    .toolbar .exit { margin-right: 0.25rem; }
+    .toolbar select {
+      flex: 1;
+      min-width: 0;
+      max-width: 9rem;
+      appearance: none;
+      background: #f5f5f4 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%2357534e' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 0.65rem center;
+      padding-right: 1.75rem;
+    }
+    .toolbar .spacer { flex: 1; min-width: 0.25rem; }
+    .dirty-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 999px;
+      background: #ea580c;
+      flex-shrink: 0;
+      display: none;
+    }
+    .dirty-dot.on { display: block; }
+    .frame-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      background: #fff;
+    }
+    #site-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(28, 25, 23, 0.45);
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+    .sheet-backdrop[hidden], .sheet[hidden] { display: none !important; }
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 210;
+      background: #fff;
+      border-radius: 1.25rem 1.25rem 0 0;
+      padding: 1rem 1rem max(1rem, var(--safe-b));
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+      max-width: 30rem;
+      margin: 0 auto;
+    }
+    .sheet h2 { margin: 0 0 0.75rem; font-size: 1.125rem; }
+    .look-btn {
+      display: block;
+      width: 100%;
+      min-height: 3.5rem;
+      margin: 0.35rem 0;
+      border: 2px solid transparent;
+      border-radius: 1rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: left;
+      padding: 0 1rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(1rem + var(--safe-b));
+      transform: translateX(-50%);
+      z-index: 300;
+      background: #064e3b;
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .toast.show { opacity: 1; }
+    .gate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100dvh;
+      padding: 1.5rem;
+      text-align: center;
+      color: #fafaf9;
+    }
+    @media (min-width: 768px) {
+      .toolbar-inner { padding-left: 1rem; padding-right: 1rem; }
+      .toolbar select { max-width: 11rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="gate" class="gate" hidden></div>
+  <div id="shell" class="shell" hidden>
+    <header class="toolbar" role="toolbar" aria-label="Website editor">
+      <div class="toolbar-inner">
+        <button type="button" class="ghost exit" id="btn-exit" aria-label="Exit editor"><i class="fas fa-times"></i></button>
+        <select id="page-select" aria-label="Page"></select>
+        <span class="dirty-dot" id="dirty-dot" title="Unsaved changes"></span>
+        <span class="spacer"></span>
+        <button type="button" id="btn-undo" disabled>Undo</button>
+        <button type="button" id="btn-colours">Colours</button>
+        <button type="button" class="primary" id="btn-save">Save</button>
+      </div>
+    </header>
+    <div class="frame-wrap">
+      <iframe id="site-frame" title="Your website"></iframe>
+    </div>
+  </div>
+  <button type="button" class="sheet-backdrop" id="sheet-backdrop" hidden aria-label="Close"></button>
+  <div class="sheet" id="colour-sheet" hidden role="dialog" aria-labelledby="sheet-title">
+    <h2 id="sheet-title">Pick a look</h2>
+    <p style="margin:0 0 0.75rem;color:var(--muted);font-size:0.875rem">Tap to preview on your site.</p>
+    <div id="look-list"></div>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="/admin/inline-editor.js"></script>
+</body>
+</html>
