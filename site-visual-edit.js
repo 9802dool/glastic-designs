@@ -39,8 +39,13 @@
   }
 
   function postToParent(msg) {
+    var payload = Object.assign({ source: 'glastic-visual-edit' }, msg);
+    if (window.__glasticAdminEditBus) {
+      window.__glasticAdminEditBus(payload);
+      return;
+    }
     if (!inIframe()) return;
-    window.parent.postMessage(Object.assign({ source: 'glastic-visual-edit' }, msg), window.location.origin);
+    window.parent.postMessage(payload, window.location.origin);
   }
 
   function sanitizePlain(text) {

@@ -1,13 +1,26 @@
 (function () {
   var CACHE_KEY = 'glastic-site-settings-v1';
 
+  function isSameDocumentAdminEdit() {
+    try {
+      return /(?:\?|&)adminEdit=1(?:&|$)/.test(window.location.search || '')
+        && /(?:\?|&)visualEdit=1(?:&|$)/.test(window.location.search || '')
+        && window.parent === window;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function isVisualPreviewFrame() {
     try {
+      if (isSameDocumentAdminEdit()) return true;
       return /(?:\?|&)visualEdit=1(?:&|$)/.test(window.location.search || '') && window.parent !== window;
     } catch (e) {
       return false;
     }
   }
+
+  window.GLASTIC_ADMIN_SAME_DOC_EDIT = isSameDocumentAdminEdit;
 
   function isPreviewApply() {
     return Boolean(window.__GLASTIC_PREVIEW_APPLY);
@@ -400,10 +413,12 @@
   });
 
   if (isVisualPreviewFrame()) {
-    /* Parent admin pushes draft settings; do not fetch published settings or defaults over the preview. */
-    try {
-      window.parent.postMessage({ source: 'glastic-visual-edit', type: 'iframe-loaded' }, window.location.origin);
-    } catch (e) { /* ignore */ }
+    /* Admin editor pushes draft settings; do not fetch published settings over the preview. */
+    if (window.parent !== window) {
+      try {
+        window.parent.postMessage({ source: 'glastic-visual-edit', type: 'iframe-loaded' }, window.location.origin);
+      } catch (e) { /* ignore */ }
+    }
   } else {
     applyCachedTheme();
     applyAll(DEFAULT_PAYLOAD);

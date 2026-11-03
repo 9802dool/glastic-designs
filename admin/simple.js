@@ -157,7 +157,7 @@
       + menuItem('words', 'fa-pen', 'Change my homepage words', 'Headline, intro, and about text')
       + menuItem('colours', 'fa-palette', 'Change my colours', 'Choose one of four site looks')
       + '</ul>'
-      + '<a class="btn-primary" style="display:block;text-align:center;text-decoration:none;margin-top:var(--space-4)" href="/admin/edit.html">Edit my website (tap anything)</a>'
+      + '<a class="btn-primary" style="display:block;text-align:center;text-decoration:none;margin-top:var(--space-4)" href="/?adminEdit=1&visualEdit=1">Edit my website (tap anything)</a>'
       + '<p class="muted" style="text-align:center;font-size:0.875rem;margin-top:0.5rem">Full-screen tap-to-edit on your live pages</p>'
       + '<a class="btn-ghost-link" href="/admin/advanced.html">More settings (for your developer)</a>';
     bindMenu();

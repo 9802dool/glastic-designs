@@ -1,4 +1,7 @@
 (function () {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('adminEdit') !== '1' || params.get('visualEdit') !== '1') return;
+
   var PAGES = [
     { path: '/', label: 'Home' },
     { path: '/products', label: 'Shop' },
@@ -15,22 +18,31 @@
   var undoStack = [];
   var dirty = false;
   var saving = false;
-  var iframe = null;
-  var currentPath = '/';
-  var iframeReady = false;
+  var currentPath = window.location.pathname || '/';
 
-  var gate = document.getElementById('gate');
-  var shell = document.getElementById('shell');
-  var pageSelect = document.getElementById('page-select');
-  var dirtyDot = document.getElementById('dirty-dot');
-  var btnSave = document.getElementById('btn-save');
-  var btnUndo = document.getElementById('btn-undo');
-  var toast = document.getElementById('toast');
-  var lookList = document.getElementById('look-list');
-  var colourSheet = document.getElementById('colour-sheet');
-  var sheetBackdrop = document.getElementById('sheet-backdrop');
+  var gate = null;
+  var pageSelect = null;
+  var dirtyDot = null;
+  var btnSave = null;
+  var btnUndo = null;
+  var toast = null;
+  var lookList = null;
+  var colourSheet = null;
+  var sheetBackdrop = null;
 
   var AUTH_TIMEOUT_MS = 20000;
+  var DATA_TIMEOUT_MS = 25000;
+  var BOOT_TIMEOUT_MS = 45000;
+
+  function logEdit(stage, detail) {
+    try {
+      console.info('[glastic-edit]', stage, detail !== undefined ? detail : '');
+    } catch (e) { /* ignore */ }
+  }
+
+  function editNavUrl(path) {
+    return path + (path.indexOf('?') >= 0 ? '&' : '?') + 'adminEdit=1&visualEdit=1';
+  }
 
   function api(url, options) {
     var opts = Object.assign({
@@ -77,31 +89,28 @@
   }
 
   function postPreview() {
-    if (!iframe || !iframe.contentWindow) return;
-    iframe.contentWindow.postMessage({
-      source: 'glastic-visual-admin',
-      type: 'preview',
-      settingsPayload: previewPayload(),
-      products: draft.products.slice(),
-      inlineEdit: true
-    }, window.location.origin);
+    if (window.GLASTIC_APPLY_SETTINGS) {
+      window.GLASTIC_APPLY_SETTINGS(previewPayload());
+    }
+    if (window.GLASTIC_RENDER_CATALOG) {
+      window.GLASTIC_RENDER_CATALOG(draft.products.slice());
+    }
+    if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
   }
 
-  function enableIframeEdit() {
-    if (!iframe || !iframe.contentWindow) return;
-    iframe.contentWindow.postMessage({ source: 'glastic-visual-admin', type: 'enable' }, window.location.origin);
+  function enableInlineEdit() {
     postPreview();
+    if (window.__glasticEnableVisualEdit) window.__glasticEnableVisualEdit();
+    else window.__GLASTIC_PENDING_VISUAL_ENABLE = true;
   }
 
-  function getPath(path) {
-    return path + (path.indexOf('?') >= 0 ? '&' : '?') + 'visualEdit=1';
-  }
-
-  function loadIframe(path) {
-    currentPath = path;
-    iframeReady = false;
-    if (pageSelect) pageSelect.value = path;
-    if (iframe) iframe.src = getPath(path);
+  function navigateTo(path) {
+    if (path === currentPath) return;
+    if (dirty && !confirm('You have unsaved changes. Switch pages anyway?')) {
+      if (pageSelect) pageSelect.value = currentPath;
+      return;
+    }
+    window.location.href = editNavUrl(path);
   }
 
   function pushUndo() {
@@ -113,12 +122,6 @@
     });
     if (undoStack.length > 40) undoStack.shift();
     btnUndo.disabled = undoStack.length === 0;
-  }
-
-  function setDirty(on) {
-    dirty = on;
-    dirtyDot.classList.toggle('on', dirty);
-    btnSave.disabled = saving;
   }
 
   function applyDraftSnapshot(snap) {
@@ -375,17 +378,9 @@
     }
   }
 
-  function onIframeMessage(event) {
-    if (event.origin !== window.location.origin) return;
-    var data = event.data;
+  function onEditBusMessage(data) {
     if (!data || data.source !== 'glastic-visual-edit') return;
-    if (data.type === 'iframe-loaded' || data.type === 'ready') {
-      iframeReady = true;
-      enableIframeEdit();
-    }
-    if (data.type === 'change') {
-      applyChange(data.key, data.value);
-    }
+    if (data.type === 'change') applyChange(data.key, data.value);
     if (data.type === 'pending-upload') {
       pushUndo();
       window.__vePendingUploads = window.__vePendingUploads || [];
@@ -397,8 +392,11 @@
   }
 
   async function loadData() {
-    var sdata = await api('/api/admin/settings');
-    var pdata = await api('/api/admin/products');
+    logEdit('loadData:start');
+    var sdata = await api('/api/admin/settings', { timeoutMs: DATA_TIMEOUT_MS });
+    logEdit('loadData:settings-ok');
+    var pdata = await api('/api/admin/products', { timeoutMs: DATA_TIMEOUT_MS });
+    logEdit('loadData:products-ok');
     meta.presets = (sdata.meta && sdata.meta.presets) || sdata.presets || [];
     draft.settings = sdata.settings;
     draft.gallery = sdata.gallery || [];
@@ -420,29 +418,27 @@
   }
 
   function showLoading(message) {
-    shell.hidden = true;
+    if (!gate) return;
     gate.hidden = false;
-    gate.className = 'gate';
-    gate.innerHTML = '<div class="gate-loading"><div class="spinner" aria-hidden="true"></div><p>'
+    gate.innerHTML = '<div style="text-align:center"><div class="spinner" aria-hidden="true"></div><p>'
       + esc(message || 'Loading editor…') + '</p></div>';
   }
 
   function showErrorPanel(title, message) {
-    shell.hidden = true;
+    logEdit('error', title + ': ' + message);
+    if (!gate) return;
     gate.hidden = false;
-    gate.className = 'gate';
-    gate.innerHTML = '<div class="gate-panel"><h1>' + esc(title) + '</h1><p>' + esc(message)
-      + '</p><div class="btn-row"><a class="btn btn-secondary" href="/admin/">Back to menu</a>'
-      + '<button type="button" class="btn-primary" id="gate-retry">Try again</button></div></div>';
+    gate.innerHTML = '<div class="panel"><h1 style="margin:0 0 0.5rem;font-size:1.25rem">' + esc(title)
+      + '</h1><p style="margin:0;color:#57534e">' + esc(message)
+      + '</p><p style="margin-top:1rem"><a href="/admin/" style="color:#0f766e">Back to menu</a> · '
+      + '<button type="button" id="gate-retry" style="border:0;background:none;color:#0f766e;font:inherit;cursor:pointer">Try again</button></p></div>';
     var retry = document.getElementById('gate-retry');
     if (retry) retry.onclick = function () { location.reload(); };
   }
 
   function showSignInForm(needsSetup) {
-    shell.hidden = true;
     gate.hidden = false;
-    gate.className = 'gate';
-    gate.innerHTML = '<div class="gate-panel"><h1>' + (needsSetup ? 'Welcome' : 'Sign in') + '</h1><p>'
+    gate.innerHTML = '<div class="panel"><h1 style="margin:0 0 0.5rem;font-size:1.25rem">' + (needsSetup ? 'Welcome' : 'Sign in') + '</h1><p style="color:#57534e">'
       + (needsSetup ? 'Choose a password for your shop admin, then open the editor.'
         : 'Sign in with your shop password to edit your website here.')
       + '</p><form id="gate-auth"><label for="gate-password">'
@@ -452,7 +448,7 @@
       + '<p id="gate-auth-error" class="alert" hidden role="alert"></p>'
       + '<div class="btn-row"><button type="submit" class="btn-primary">'
       + (needsSetup ? 'Continue' : 'Sign in') + '</button>'
-      + '<a class="btn btn-secondary" href="/admin/?return=' + encodeURIComponent('/admin/edit.html') + '">Use full sign-in page</a>'
+      + '<a class="btn btn-secondary" href="/admin/?return=' + encodeURIComponent('/?adminEdit=1&visualEdit=1') + '">Use full sign-in page</a>'
       + '<a class="btn btn-secondary" href="/admin/">Back to menu</a></div></form></div>';
     document.getElementById('gate-auth').onsubmit = function (event) {
       event.preventDefault();
@@ -482,9 +478,49 @@
     };
   }
 
-  function showEditorShell() {
-    gate.hidden = true;
-    shell.hidden = false;
+  function injectChrome() {
+    document.documentElement.classList.add('glastic-admin-edit');
+    gate = document.createElement('div');
+    gate.id = 'glastic-edit-gate';
+    gate.setAttribute('role', 'status');
+    document.body.appendChild(gate);
+
+    var bar = document.createElement('header');
+    bar.id = 'glastic-edit-toolbar';
+    bar.innerHTML = '<div class="toolbar-inner">'
+      + '<button type="button" class="ghost" id="glastic-btn-exit" aria-label="Exit editor"><i class="fas fa-times"></i></button>'
+      + '<select id="glastic-page-select" aria-label="Page"></select>'
+      + '<span id="glastic-dirty-dot" title="Unsaved changes" style="width:0.5rem;height:0.5rem;border-radius:999px;background:#ea580c;display:none"></span>'
+      + '<span style="flex:1"></span>'
+      + '<button type="button" class="icon-only" id="glastic-btn-undo" disabled aria-label="Undo"><i class="fas fa-rotate-left"></i><span class="btn-text">Undo</span></button>'
+      + '<button type="button" class="icon-only" id="glastic-btn-colours" aria-label="Colours"><i class="fas fa-palette"></i><span class="btn-text">Colours</span></button>'
+      + '<button type="button" class="primary" id="glastic-btn-save"><span class="btn-text">Save</span></button>'
+      + '</div>';
+    document.body.appendChild(bar);
+
+    sheetBackdrop = document.createElement('button');
+    sheetBackdrop.type = 'button';
+    sheetBackdrop.id = 'glastic-edit-sheet-backdrop';
+    sheetBackdrop.hidden = true;
+    sheetBackdrop.setAttribute('aria-label', 'Close');
+    document.body.appendChild(sheetBackdrop);
+
+    colourSheet = document.createElement('div');
+    colourSheet.id = 'glastic-edit-sheet';
+    colourSheet.hidden = true;
+    colourSheet.innerHTML = '<h2 style="margin:0 0 0.75rem">Pick a look</h2><div id="glastic-look-list"></div>';
+    document.body.appendChild(colourSheet);
+
+    toast = document.createElement('div');
+    toast.id = 'glastic-edit-toast';
+    toast.setAttribute('role', 'status');
+    document.body.appendChild(toast);
+
+    pageSelect = document.getElementById('glastic-page-select');
+    dirtyDot = document.getElementById('glastic-dirty-dot');
+    btnSave = document.getElementById('glastic-btn-save');
+    btnUndo = document.getElementById('glastic-btn-undo');
+    lookList = document.getElementById('glastic-look-list');
   }
 
   function initUi() {
@@ -492,14 +528,15 @@
       var opt = document.createElement('option');
       opt.value = p.path;
       opt.textContent = p.label;
+      if (p.path === currentPath) opt.selected = true;
       pageSelect.appendChild(opt);
     });
-    pageSelect.onchange = function () { loadIframe(pageSelect.value); };
-    document.getElementById('btn-exit').onclick = function () {
+    pageSelect.onchange = function () { navigateTo(pageSelect.value); };
+    document.getElementById('glastic-btn-exit').onclick = function () {
       if (dirty && !confirm('You have unsaved changes. Leave anyway?')) return;
       window.location.href = '/admin/';
     };
-    document.getElementById('btn-colours').onclick = openSheet;
+    document.getElementById('glastic-btn-colours').onclick = openSheet;
     sheetBackdrop.onclick = closeSheet;
     btnSave.onclick = saveAll;
     btnUndo.onclick = function () {
@@ -514,28 +551,38 @@
       e.preventDefault();
       e.returnValue = '';
     });
-    window.addEventListener('message', onIframeMessage);
-    iframe = document.getElementById('site-frame');
-    iframe.onload = function () {
-      if (iframeReady) enableIframeEdit();
-    };
-    loadIframe('/');
+    window.__glasticAdminEditBus = onEditBusMessage;
+    enableInlineEdit();
+  }
+
+  function setDirty(on) {
+    dirty = on;
+    if (dirtyDot) dirtyDot.style.display = on ? 'block' : 'none';
+    if (btnSave) btnSave.disabled = saving;
   }
 
   async function startEditor() {
     showLoading('Loading your website…');
+    var bootTimer = setTimeout(function () {
+      logEdit('timeout', 'boot exceeded ' + BOOT_TIMEOUT_MS + 'ms');
+      showErrorPanel('Loading timed out', 'Loading shop data took too long. Check your connection and try again.');
+    }, BOOT_TIMEOUT_MS);
     try {
       await loadData();
-      showEditorShell();
+      gate.hidden = true;
       initUi();
       window.__editEditorBooted = true;
+      logEdit('ready');
     } catch (err) {
       showErrorPanel('Could not load editor', (err && err.message)
         || 'Something went wrong loading your shop data.');
+    } finally {
+      clearTimeout(bootTimer);
     }
   }
 
   async function boot() {
+    injectChrome();
     showLoading('Checking sign-in…');
     try {
       var state = await api('/api/admin/auth', { timeoutMs: AUTH_TIMEOUT_MS });
@@ -563,5 +610,6 @@
     showErrorPanel('Editor error', (event && event.message) || 'Something went wrong loading the editor.');
   });
 
-  boot();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();

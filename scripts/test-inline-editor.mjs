@@ -131,34 +131,29 @@ async function runViewport(browser, viewport, tag) {
     return route.continue();
   });
 
-  await page.goto(ORIGIN + '/admin/edit.html', { waitUntil: 'networkidle' });
-  await page.waitForSelector('#shell:not([hidden])');
-  const frame = page.frameLocator('#site-frame');
-  await frame.locator('#hero-headline').waitFor({ timeout: 15000 });
-
-  await frame.locator('#site-logo').waitFor({ state: 'visible' });
-  await frame.locator('#hero-headline').waitFor({ state: 'visible' });
+  await page.goto(ORIGIN + '/?adminEdit=1&visualEdit=1', { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#glastic-edit-gate', { state: 'hidden', timeout: 20000 });
+  await page.waitForSelector('#hero-headline', { timeout: 15000 });
   await page.waitForTimeout(400);
-  await page.locator('#shell').screenshot({ path: `${OUT}/inline-edit-mode-${tag}.png` });
+  await page.locator('#glastic-edit-toolbar').screenshot({ path: `${OUT}/inline-edit-mode-${tag}.png` });
 
-  await frame.locator('#hero-headline').click();
-  await frame.locator('#hero-headline[contenteditable="true"]').waitFor();
-  await frame.locator('#hero-headline').evaluate(function (el) {
+  await page.locator('#hero-headline').click();
+  await page.locator('#hero-headline[contenteditable="true"]').waitFor();
+  await page.locator('#hero-headline').evaluate(function (el) {
     el.innerText = 'Edited Headline Live';
   });
-  await frame.locator('#hero-badge').click();
+  await page.locator('#hero-badge').click();
   await page.waitForTimeout(500);
-  await page.locator('#btn-undo').waitFor({ state: 'visible' });
-  if (await page.locator('#btn-undo').isDisabled()) {
+  if (await page.locator('#glastic-btn-undo').isDisabled()) {
     console.error(`FAIL ${tag}: undo still disabled after text edit (change not received)`);
     await context.close();
     process.exit(1);
   }
 
-  await page.locator('#shell').screenshot({ path: `${OUT}/inline-text-edit-${tag}.png` });
+  await page.locator('body').screenshot({ path: `${OUT}/inline-text-edit-${tag}.png` });
 
-  await frame.locator('#hero-image').click();
-  await frame.locator('.glastic-edit-popover #glastic-replace-photo').waitFor({ timeout: 5000 });
+  await page.locator('#hero-image').click();
+  await page.locator('.glastic-edit-popover #glastic-replace-photo').waitFor({ timeout: 5000 });
   const pngPath = path.join(OUT, `upload-${tag}.png`);
   await page.evaluate(function (b64) {
     const bin = atob(b64);
@@ -167,12 +162,10 @@ async function runViewport(browser, viewport, tag) {
     window.__testBlob = new Blob([arr], { type: 'image/png' });
   }, tinyPngBase64());
 
-  await frame.locator('#glastic-replace-photo').click();
+  await page.locator('.glastic-edit-popover #glastic-replace-photo').click();
   await page.waitForTimeout(200);
   await page.evaluate(function () {
-    const iframe = document.getElementById('site-frame');
-    const doc = iframe.contentDocument;
-    const input = doc.querySelector('input[type=file]');
+    const input = document.querySelector('input[type=file]');
     if (!input) throw new Error('file input missing');
     const file = new File([window.__testBlob], 'test.png', { type: 'image/png' });
     const dt = new DataTransfer();
@@ -182,12 +175,12 @@ async function runViewport(browser, viewport, tag) {
   });
   await page.waitForTimeout(800);
 
-  await page.locator('#btn-colours').click();
-  await page.locator('#look-list button[data-preset="ocean"]').click();
+  await page.locator('#glastic-btn-colours').click();
+  await page.locator('#glastic-look-list button[data-preset="ocean"]').click();
   await page.waitForTimeout(400);
 
-  await page.locator('#btn-save').click();
-  await page.waitForSelector('#toast.show', { timeout: 10000 });
+  await page.locator('#glastic-btn-save').click();
+  await page.waitForSelector('#glastic-edit-toast.show', { timeout: 10000 });
 
   if (!lastPatch || !lastPatch.homepage || lastPatch.homepage.heroHeadline !== 'Edited Headline Live') {
     console.error(`FAIL ${tag}: PATCH missing edited headline`, lastPatch);

@@ -96,19 +96,13 @@ async function mockAdminRoutes(page) {
   });
 }
 
-async function waitEditorFrame(page) {
-  const frame = page.frameLocator('#site-frame');
-  await frame.locator('#hero-headline').waitFor({ state: 'visible', timeout: 20000 });
-  await frame.locator('#site-logo').waitFor({ state: 'attached', timeout: 20000 });
-  await page.waitForTimeout(350);
-}
-
 async function captureEditor(page, width, height, name) {
   await page.setViewportSize({ width, height });
-  await page.goto(ORIGIN + '/admin/edit.html', { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector('#shell:not([hidden])');
-  await waitEditorFrame(page);
-  await page.locator('#shell').screenshot({ path: `${OUT}/${name}` });
+  await page.goto(ORIGIN + '/?adminEdit=1&visualEdit=1', { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#glastic-edit-gate', { state: 'hidden', timeout: 20000 });
+  await page.waitForSelector('#hero-headline', { timeout: 15000 });
+  await page.waitForTimeout(400);
+  await page.locator('body').screenshot({ path: `${OUT}/${name}` });
 }
 
 await waitServer();
@@ -134,15 +128,13 @@ await captureEditor(page3, 1280, 800, 'inline-edit-mode-1280.png');
 const page4 = await browser.newPage();
 await mockAdminRoutes(page4);
 await page4.setViewportSize({ width: 1280, height: 800 });
-await page4.goto(ORIGIN + '/admin/edit.html', { waitUntil: 'domcontentloaded' });
-await page4.waitForSelector('#shell:not([hidden])');
-const frame = page4.frameLocator('#site-frame');
-await waitEditorFrame(page4);
-await frame.locator('#hero-headline').click();
-await frame.locator('#hero-headline[contenteditable="true"]').waitFor();
-await frame.locator('#hero-subtext').click();
+await page4.goto(ORIGIN + '/?adminEdit=1&visualEdit=1', { waitUntil: 'domcontentloaded' });
+await page4.waitForSelector('#glastic-edit-gate', { state: 'hidden', timeout: 20000 });
+await page4.locator('#hero-headline').click();
+await page4.locator('#hero-headline[contenteditable="true"]').waitFor();
+await page4.locator('#hero-subtext').click();
 await page4.waitForTimeout(400);
-await page4.locator('#shell').screenshot({ path: `${OUT}/inline-text-edit-1280.png` });
+await page4.locator('body').screenshot({ path: `${OUT}/inline-text-edit-1280.png` });
 
 await browser.close();
 console.log('Saved final screenshots to', OUT);

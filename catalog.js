@@ -188,6 +188,7 @@
 
   function isVisualPreviewFrame() {
     try {
+      if (window.GLASTIC_ADMIN_SAME_DOC_EDIT && window.GLASTIC_ADMIN_SAME_DOC_EDIT()) return true;
       return /(?:\?|&)visualEdit=1(?:&|$)/.test(window.location.search || '') && window.parent !== window;
     } catch (e) {
       return false;
