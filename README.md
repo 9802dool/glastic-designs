@@ -30,7 +30,13 @@ Products and prices live in Neon Postgres. Photos for new uploads live in Vercel
 
 ### Website look (no redeploy)
 
-After signing in at `/admin`, use **Website look & content** to change brand colours, fonts, logo, homepage text and photos, impact stats, gallery, contact links, an announcement banner, and which sections are visible. Changes are stored in the same Neon database (`site_settings` and `gallery_photos` tables, created automatically on first use) and served from `GET /api/settings` with `Cache-Control: no-store`. The public site applies them immediately via `settings.js` (with the current theme cached in the browser to reduce colour flash).
+After signing in at `/admin`, use **Edit my website** to open a live preview of the public site. Tap text, photos, products, and links to edit them in a side panel; use **Site look** for theme presets, colours, fonts, and section visibility. **Publish changes** saves to the same APIs as the form-based **Website look & content** view (still available as a fallback).
+
+The preview loads your real pages in an iframe with `?visualEdit=1`. That query string only loads a small helper script; outlines and editing UI appear only when the signed-in admin parent sends an enable message after `GET /api/admin/auth` succeeds. Visitors never see edit mode, and the query flag does not allow writes by itself.
+
+Changes are stored in Neon (`site_settings`, `gallery_photos`, products tables) and served from `GET /api/settings` / `GET /api/products` with `Cache-Control: no-store`. The public site applies them via `settings.js` (theme cached in the browser to reduce colour flash).
+
+Local dev: `node scripts/dev-server.js` serves static files, SPA routes (`/products`, etc.), and the API handlers. Admin sign-in still needs `DATABASE_URL` (Neon) like production.
 
 No new environment variables are required beyond existing `DATABASE_URL` / Neon and `BLOB_READ_WRITE_TOKEN`.
 
