@@ -178,8 +178,29 @@
       color: #fafaf9;
     }
     @media (max-width: 519px) {
-      .toolbar button .btn-text { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-      .toolbar #btn-save { padding: 0 0.85rem; min-width: auto; }
+      .toolbar button.icon-only .btn-text {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+      .toolbar #btn-save {
+        padding: 0 0.9rem;
+        min-width: 4.25rem;
+        flex-shrink: 0;
+      }
+      .toolbar #btn-save .btn-text {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 0;
+        overflow: visible;
+        clip: auto;
+      }
     }
     @media (min-width: 520px) {
       .toolbar button.icon-only { width: auto; padding: 0 0.75rem; }

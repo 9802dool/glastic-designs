@@ -18,7 +18,7 @@ const mockSettings = {
     ]
   },
   settings: {
-    theme: { preset: 'forest', primary: '#065f46', primaryDark: '#064e3b', accent: '#0f766e', background: '#fafaf9', text: '#1c1917', fontId: 'playfair-inter', logoUrl: '/logo.svg' },
+    theme: { preset: 'forest', primary: '#065f46', primaryDark: '#064e3b', accent: '#0f766e', background: '#fafaf9', text: '#1c1917', fontId: 'playfair-inter', logoUrl: '/logo.jpg' },
     banner: { enabled: false, text: '', link: '' },
     visibility: { hero: true, about: true, gallery: true, products: true, process: true, impact: true, contact: true, consultation: true },
     homepage: {
@@ -71,7 +71,7 @@ const mockProducts = {
 async function waitServer() {
   for (let i = 0; i < 40; i++) {
     try {
-      if ((await fetch(ORIGIN + '/logo.svg')).ok) return;
+      if ((await fetch(ORIGIN + '/logo.jpg')).ok) return;
     } catch (e) { /* retry */ }
     await new Promise(function (r) { setTimeout(r, 250); });
   }

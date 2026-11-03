@@ -138,7 +138,7 @@
       + '<label class="field">Background<input type="color" id="color-bg" value="' + esc(theme.background) + '"></label></div>'
       + '<label class="field">Text<input type="color" id="color-text" value="' + esc(theme.text) + '"></label>'
       + '<label class="field" for="font-id">Fonts</label><select id="font-id">' + fontOptions + '</select>'
-      + '<h2 style="margin-top:1rem">Logo</h2><img class="thumb" id="logo-preview" src="' + esc(theme.logoUrl || '/logo.svg') + '" alt="" style="width:6rem;height:6rem">'
+      + '<h2 style="margin-top:1rem">Logo</h2><img class="thumb" id="logo-preview" src="' + esc(theme.logoUrl || '/logo.jpg') + '" alt="" style="width:6rem;height:6rem">'
       + '<label class="primary file-btn" style="margin-top:0.6rem">Upload logo<input type="file" accept="image/*" hidden id="logo-upload"></label></section>'
       + '</div>'
       + '<div id="site-tab-home" class="site-tab" hidden>'

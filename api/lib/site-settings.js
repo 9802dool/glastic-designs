@@ -91,7 +91,7 @@ function defaultSettings() {
       background: preset.background,
       text: preset.text,
       fontId: 'playfair-inter',
-      logoUrl: '/logo.svg'
+      logoUrl: '/logo.jpg'
     },
     homepage: {
       heroBadge: 'Made in Trinidad & Tobago ♻️',

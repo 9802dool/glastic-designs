@@ -179,7 +179,7 @@
         + fieldHtml('Banner text', 've-banner-text', s.banner.text)
         + fieldHtml('Link (optional)', 've-banner-link', s.banner.link);
     } else if (key === 'theme.logo') {
-      html += '<img class="thumb" src="' + esc(s.theme.logoUrl || '/logo.svg') + '" alt="" style="width:6rem;height:6rem">'
+      html += '<img class="thumb" src="' + esc(s.theme.logoUrl || '/logo.jpg') + '" alt="" style="width:6rem;height:6rem">'
         + '<label class="primary file-btn" style="margin-top:0.6rem">Upload logo<input type="file" accept="image/*" hidden id="ve-logo-file"></label>'
         + '<p class="muted hint">Logo uploads when you tap Publish.</p>';
     } else if (key.indexOf('homepage.') === 0) {
