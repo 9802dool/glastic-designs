@@ -5,6 +5,12 @@
     },
     "api/admin/products.js": {
       "includeFiles": "images/**"
+    },
+    "api/admin/settings.js": {
+      "includeFiles": "images/**"
+    },
+    "api/settings.js": {
+      "includeFiles": "images/**"
     }
   },
   "rewrites": [

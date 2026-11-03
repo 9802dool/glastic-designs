@@ -68,7 +68,12 @@
       .list-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
       .list-grid .span { grid-column: 1 / -1; }
     }
+    .admin-tabs { display: flex; gap: 0.4rem; overflow: auto; padding: 0.25rem 0 0.75rem; margin-bottom: 0.25rem; }
+    .admin-tabs button { min-height: 40px; white-space: nowrap; padding: 0.35rem 0.85rem; font-size: 0.8125rem; font-weight: 600; background: #fafaf9; color: #44403c; border: 1px solid #e7e5e4; border-radius: 999px; }
+    .admin-tabs button.chip-on { background: #f0fdfa; color: #115e59; border-color: #99f6e4; }
+    .hub-grid { display: grid; gap: 0.75rem; margin-top: 0.5rem; }
   </style>
+  <script src="/settings.js"></script>
 </head>
 <body>
   <header>
@@ -111,6 +116,8 @@
       if (!res.ok) throw Object.assign(new Error(data.error || 'Please try again.'), data);
       return data;
     }
+    window.adminApi = api;
+    window.adminShowProducts = function () { renderList(); };
     function mainPhoto(product) {
       const photos = product.photos || [];
       return photos.find(function (photo) { return photo.isMain; }) || photos[0];
@@ -218,14 +225,18 @@
           + '<button class="danger" type="button" data-delete="' + esc(product.id) + '">Delete</button>'
           + '</div></article>';
       }).join('');
-      app.innerHTML = '<div class="span">'
-        + '<button class="primary add-new" type="button" id="add-product">+ Add New Product</button>'
-        + '<p class="muted hint">Each product you save gets its own page on the website. You can add photos from your camera or photo library.</p>'
+      app.innerHTML = '<div class="span hub-grid">'
+        + '<button class="primary add-new" type="button" id="edit-website">Website look &amp; content</button>'
+        + '<button class="ghost add-new" type="button" id="add-product">+ Add New Product</button>'
+        + '<p class="muted hint">Tap Website look to change colours, text, and photos. Scroll down to edit products.</p>'
         + (notice ? '<div class="banner ' + esc(notice.kind) + '" role="status">' + noticeHtml() + '</div>' : '')
         + '</div><div class="list-grid">' + cards + '</div>';
       const wrap = app.querySelector('.span');
       const grid = app.querySelector('.list-grid');
       if (wrap && grid) wrap.appendChild(grid);
+      document.getElementById('edit-website').onclick = function () {
+        if (window.adminShowSitePanel) window.adminShowSitePanel();
+      };
       document.getElementById('add-product').onclick = function () {
         pendingFiles = [];
         notice = null;
@@ -295,6 +306,8 @@
       savebar.hidden = false;
       saveButton.disabled = false;
       saveButton.textContent = 'Save';
+      saveButton.setAttribute('form', 'product-form');
+      saveButton.onclick = null;
       paintStatus();
       document.getElementById('title').textContent = editing ? 'Edit product' : 'New product';
       signOut.hidden = false;
@@ -590,5 +603,6 @@
       else app.innerHTML = '<p class="banner bad">' + esc(error.message) + '</p>';
     });
   </script>
+  <script src="/admin/site-panel.js"></script>
 </body>
 </html>
