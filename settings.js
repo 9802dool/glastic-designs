@@ -1,6 +1,18 @@
 (function () {
   var CACHE_KEY = 'glastic-site-settings-v1';
 
+  function isVisualPreviewFrame() {
+    try {
+      return /(?:\?|&)visualEdit=1(?:&|$)/.test(window.location.search || '') && window.parent !== window;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function isPreviewApply() {
+    return Boolean(window.__GLASTIC_PREVIEW_APPLY);
+  }
+
   var FONT_LINKS = {
     'playfair-inter': 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap',
     'fraunces-inter': 'https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;600;700&display=swap',
@@ -67,6 +79,7 @@
     if (link.getAttribute('href') !== href) link.setAttribute('href', href);
     var logo = document.getElementById('site-logo');
     if (logo && theme.logoUrl) logo.setAttribute('src', theme.logoUrl);
+    if (isVisualPreviewFrame() || isPreviewApply()) return;
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify({ theme: theme, at: Date.now() }));
     } catch (e) { /* ignore */ }
@@ -322,15 +335,47 @@
     ]
   };
 
-  applyCachedTheme();
-  applyAll(DEFAULT_PAYLOAD);
-
   window.GLASTIC_APPLY_SETTINGS = applyAll;
 
-  fetch('/api/settings', { credentials: 'same-origin', cache: 'no-store' })
-    .then(function (res) { return res.json(); })
-    .then(function (data) {
-      applyAll(data);
-    })
-    .catch(function () { /* defaults in HTML remain */ });
+  function applyPreviewMessage(data) {
+    window.__GLASTIC_PREVIEW_APPLY = true;
+    try {
+      if (data.settingsPayload) applyAll(data.settingsPayload);
+      if (data.products && window.GLASTIC_RENDER_CATALOG) window.GLASTIC_RENDER_CATALOG(data.products);
+    } finally {
+      window.__GLASTIC_PREVIEW_APPLY = false;
+    }
+    if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
+  }
+
+  window.addEventListener('message', function (event) {
+    if (event.origin !== window.location.origin) return;
+    var data = event.data;
+    if (!data || data.source !== 'glastic-visual-admin') return;
+    if (data.type === 'preview') applyPreviewMessage(data);
+    if (data.type === 'enable') {
+      if (window.__glasticEnableVisualEdit) window.__glasticEnableVisualEdit();
+      else window.__GLASTIC_PENDING_VISUAL_ENABLE = true;
+    }
+    if (data.type === 'disable' && window.__glasticDisableVisualEdit) {
+      window.__glasticDisableVisualEdit();
+    }
+  });
+
+  if (isVisualPreviewFrame()) {
+    /* Parent admin pushes draft settings; do not fetch published settings or defaults over the preview. */
+    try {
+      window.parent.postMessage({ source: 'glastic-visual-edit', type: 'iframe-loaded' }, window.location.origin);
+    } catch (e) { /* ignore */ }
+  } else {
+    applyCachedTheme();
+    applyAll(DEFAULT_PAYLOAD);
+    fetch('/api/settings', { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (isVisualPreviewFrame()) return;
+        applyAll(data);
+      })
+      .catch(function () { /* defaults in HTML remain */ });
+  }
 })();

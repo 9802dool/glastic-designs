@@ -164,6 +164,9 @@
     });
   }
 
+  window.__glasticEnableVisualEdit = enableEditMode;
+  window.__glasticDisableVisualEdit = disableEditMode;
+
   function enableEditMode() {
     if (active) return;
     active = true;
@@ -200,17 +203,6 @@
     if (event.origin !== window.location.origin) return;
     var data = event.data;
     if (!data || data.source !== 'glastic-visual-admin') return;
-    if (data.type === 'enable') enableEditMode();
-    if (data.type === 'disable') disableEditMode();
-    if (data.type === 'preview') {
-      if (data.settingsPayload && window.GLASTIC_APPLY_SETTINGS) {
-        window.GLASTIC_APPLY_SETTINGS(data.settingsPayload);
-      }
-      if (data.products && window.GLASTIC_RENDER_CATALOG) {
-        window.GLASTIC_RENDER_CATALOG(data.products);
-      }
-      setTimeout(refreshMarks, 50);
-    }
     if (data.type === 'scroll-section' && data.sectionId) {
       var sec = document.getElementById(data.sectionId);
       if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -218,7 +210,8 @@
     }
   });
 
-  if (inIframe()) {
-    postToParent({ type: 'iframe-loaded' });
+  if (window.__GLASTIC_PENDING_VISUAL_ENABLE) {
+    window.__GLASTIC_PENDING_VISUAL_ENABLE = false;
+    enableEditMode();
   }
 })();

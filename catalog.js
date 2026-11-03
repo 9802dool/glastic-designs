@@ -183,7 +183,16 @@
     if (page) page.classList.remove('hidden');
   }
 
+  function isVisualPreviewFrame() {
+    try {
+      return /(?:\?|&)visualEdit=1(?:&|$)/.test(window.location.search || '') && window.parent !== window;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function load() {
+    if (isVisualPreviewFrame()) return;
     fetch('/api/products', { cache: 'no-store' }).then(function (res) {
       if (res.status === 503) return { products: FALLBACK };
       if (!res.ok) throw new Error('load');

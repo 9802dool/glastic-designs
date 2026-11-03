@@ -35,6 +35,16 @@
     return JSON.parse(JSON.stringify(obj));
   }
 
+  function darkenHex(hex, amount) {
+    var m = String(hex || '').match(/^#([0-9a-fA-F]{6})$/);
+    if (!m) return hex;
+    var n = parseInt(m[1], 16);
+    var r = Math.max(0, Math.round(((n >> 16) & 255) * (1 - amount)));
+    var g = Math.max(0, Math.round(((n >> 8) & 255) * (1 - amount)));
+    var b = Math.max(0, Math.round((n & 255) * (1 - amount)));
+    return '#' + [r, g, b].map(function (c) { return c.toString(16).padStart(2, '0'); }).join('');
+  }
+
   function setDirty(on) {
     dirty = on;
     var btn = document.getElementById('ve-discard');
@@ -75,6 +85,8 @@
     };
   }
 
+  var iframePreviewReady = false;
+
   function postPreview() {
     if (!iframe || !iframe.contentWindow) return;
     iframe.contentWindow.postMessage({
@@ -83,6 +95,13 @@
       settingsPayload: previewPayload(),
       products: draft.products.filter(function (p) { return !p.hidden; })
     }, window.location.origin);
+    if (dirty) {
+      var st = document.getElementById('save-status');
+      if (st && !saving) {
+        st.className = 'wait';
+        st.textContent = 'Preview updated — tap Publish changes when ready.';
+      }
+    }
   }
 
   function enableIframeEdit() {
@@ -91,12 +110,18 @@
     postPreview();
   }
 
+  function onPreviewFrameReady() {
+    iframePreviewReady = true;
+    enableIframeEdit();
+  }
+
   function getPath(path) {
     return path + (path.indexOf('?') >= 0 ? '&' : '?') + 'visualEdit=1';
   }
 
   function loadIframe(path) {
     currentPath = path;
+    iframePreviewReady = false;
     if (!iframe) return;
     iframe.src = getPath(path);
   }
@@ -419,7 +444,7 @@
       input.oninput = function () {
         if (id === 've-color-primary') {
           draft.settings.theme.primary = input.value;
-          draft.settings.theme.primaryDark = input.value;
+          draft.settings.theme.primaryDark = darkenHex(input.value, 0.22) || input.value;
         } else draft.settings.theme.accent = input.value;
         setDirty(true);
         postPreview();
@@ -556,7 +581,7 @@
       };
       setDirty(false);
       saveStatus.className = 'ok';
-      saveStatus.textContent = 'Published! Your website is updated.';
+      saveStatus.textContent = 'Saved! Your website is live with these changes.';
       postPreview();
       if (window.adminRefreshProducts) window.adminRefreshProducts(draft.products);
     } catch (error) {
@@ -644,6 +669,9 @@
     if (event.origin !== window.location.origin) return;
     var data = event.data;
     if (!data || data.source !== 'glastic-visual-edit') return;
+    if (data.type === 'iframe-loaded' || data.type === 'ready') {
+      onPreviewFrameReady();
+    }
     if (data.type === 'select') {
       renderEditPanel(document.getElementById('ve-edit-panel'), data.key, data.label);
     }

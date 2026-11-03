@@ -34,6 +34,12 @@
     html.themed .cart-count { background: var(--g-accent); }
     html.themed .cart-icon-btn, html.themed .menu-btn { color: var(--g-accent); }
     html.themed .pay-submit { background: var(--g-accent); }
+    html.themed .bg-emerald-800 { background-color: var(--g-primary-dark) !important; }
+    html.themed .hover\:bg-emerald-900:hover { background-color: var(--g-primary) !important; }
+    html.themed .bg-emerald-100 { background-color: color-mix(in srgb, var(--g-accent) 18%, white) !important; }
+    html.themed .gradient-bg .text-emerald-100 { color: color-mix(in srgb, var(--g-accent) 30%, white); }
+    html.themed .border-emerald-600 { border-color: var(--g-accent) !important; }
+    html.themed .bg-emerald-600.rounded-full { background-color: var(--g-accent) !important; }
     .plastic-pattern { background-image: radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%); }
   
     .product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -627,20 +633,9 @@
     </div>
   </div>
 </div>
+<script src="/site-visual-edit.js"></script>
 <script src="/nav.js"></script>
 <script src="/catalog.js"></script>
 <script src="/payments.js"></script>
-<script>
-  (function () {
-    try {
-      if (new URLSearchParams(window.location.search).get('visualEdit') === '1') {
-        var s = document.createElement('script');
-        s.src = '/site-visual-edit.js';
-        document.body.appendChild(s);
-      }
-    } catch (e) { /* ignore */ }
-  })();
-</script>
-
 </body>
 </html>

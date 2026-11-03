@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Visual preview test parent</title>
+  <style>iframe{width:100%;height:90vh;border:0}</style>
+</head>
+<body>
+  <iframe id="f" src="/?visualEdit=1"></iframe>
+  <script>
+    var ORIGIN = location.origin;
+    var f = document.getElementById('f');
+    function pushDraft() {
+      f.contentWindow.postMessage({
+        source: 'glastic-visual-admin',
+        type: 'preview',
+        settingsPayload: {
+          settings: {
+            theme: { preset: 'sunset', primary: '#c2410c', primaryDark: '#9a3412', accent: '#ea580c', background: '#fffbeb', text: '#292524', fontId: 'playfair-inter', logoUrl: '/logo.jpg' },
+            banner: { enabled: false, text: '', link: '' },
+            visibility: { hero: true, about: true, gallery: true, products: true, process: true, impact: true, contact: true, consultation: true },
+            homepage: {
+              heroBadge: 'TEST BADGE',
+              heroHeadline: 'Preview Headline Works',
+              heroSubtext: 'Sub',
+              heroImage: '/images/living-wall.jpg',
+              heroBadgeNote: 'X',
+              heroBadgeCaption: 'Y',
+              aboutEyebrow: 'A',
+              aboutTitle: 'B',
+              aboutText: 'C',
+              aboutImage: '/images/owner.jpg',
+              processSteps: [
+                { title: 'One', text: 'Step' },
+                { title: 'Two', text: 'Step' },
+                { title: 'Three', text: 'Step' },
+                { title: 'Four', text: 'Step' }
+              ]
+            },
+            gallery: { title: 'G', subtitle: 'S' },
+            impact: { title: 'I', bullets: ['a'], stats: [{ value: '1', label: 'L' }] },
+            contact: { whatsapp: '18687752407', facebook: 'https://www.facebook.com/gdistyles', instagram: 'https://instagram.com/glasticdesigns', youtube: '', tiktok: '', email: '', hours: '', contactTitle: 'T', contactLead: 'L' }
+          },
+          gallery: [{ id: 'living-wall', url: '/images/living-wall.jpg', caption: 'Cap' }]
+        },
+        products: []
+      }, ORIGIN);
+    }
+    window.addEventListener('message', function (e) {
+      if (e.origin !== ORIGIN) return;
+      if (e.data && e.data.source === 'glastic-visual-edit' && e.data.type === 'iframe-loaded') {
+        f.contentWindow.postMessage({ source: 'glastic-visual-admin', type: 'enable' }, ORIGIN);
+        pushDraft();
+        setTimeout(pushDraft, 1200);
+      }
+    });
+  </script>
+</body>
+</html>
