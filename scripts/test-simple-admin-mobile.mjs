@@ -71,22 +71,22 @@ await page.route('**/api/admin/settings**', function (route) {
 });
 
 await page.goto(ORIGIN + '/admin/', { waitUntil: 'networkidle' });
-await page.waitForSelector('text=What would you like to do?');
+await page.waitForSelector('h2.page-title');
 await page.screenshot({ path: OUT + '/admin-simple-menu-mobile.png', fullPage: true });
 
-const menuCount = await page.locator('.menu-btn').count();
+const menuCount = await page.locator('.menu-list .menu-btn').count();
 if (menuCount !== 6) {
   console.error('FAIL: expected 6 menu buttons, got', menuCount);
   process.exit(1);
 }
 
 await page.locator('.menu-btn').filter({ hasText: 'Change my homepage words' }).click();
-await page.waitForSelector('text=Homepage words');
+await page.waitForSelector('#headline');
 await page.screenshot({ path: OUT + '/admin-simple-words-mobile.png', fullPage: true });
 
-await page.locator('#back-btn').click();
+await page.locator('#nav-back').click();
 await page.locator('.menu-btn').filter({ hasText: 'Change my colours' }).click();
-await page.waitForSelector('text=Pick a look');
+await page.waitForSelector('.theme-list');
 await page.screenshot({ path: OUT + '/admin-simple-colours-mobile.png', fullPage: true });
 
 await browser.close();

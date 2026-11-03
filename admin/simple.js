@@ -10,9 +10,13 @@
 
   var app = document.getElementById('app');
   var titleEl = document.getElementById('title');
+  var navBack = document.getElementById('nav-back');
   var signOut = document.getElementById('sign-out');
+  var footerBar = document.getElementById('footer-bar');
+  var footerInner = document.getElementById('footer-inner');
   var products = [];
   var settingsCache = null;
+  var backHandler = null;
 
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
@@ -45,20 +49,51 @@
     return photos.find(function (p) { return p.isMain; }) || photos[0];
   }
 
-  function backQuiet(label) {
-    return '<button type="button" class="quiet" id="back-btn">' + esc(label || '← Back') + '</button>';
+  function setHeader(title, showBack, onBack) {
+    titleEl.textContent = title;
+    navBack.hidden = !showBack;
+    backHandler = onBack || null;
   }
 
+  function setFooter(html) {
+    if (!html) {
+      footerBar.hidden = true;
+      footerInner.innerHTML = '';
+      document.body.classList.remove('has-footer');
+      return;
+    }
+    footerBar.hidden = false;
+    footerInner.innerHTML = html;
+    document.body.classList.add('has-footer');
+  }
+
+  function showLoading(message) {
+    setFooter(null);
+    app.innerHTML = '<div class="loading" role="status"><div class="spinner" aria-hidden="true"></div><span>'
+      + esc(message || 'Loading…') + '</span></div>';
+  }
+
+  function errBlock(id) {
+    return '<p id="' + id + '" class="alert alert-error" hidden role="alert"></p>';
+  }
+
+  navBack.onclick = function () {
+    if (backHandler) backHandler();
+  };
+
   function renderDone(seeUrl, seeLabel) {
-    titleEl.textContent = 'All set';
-    app.innerHTML = '<div class="done-box">'
-      + '<i class="fas fa-circle-check" aria-hidden="true"></i>'
+    setHeader('All set', true, showMenu);
+    setFooter(
+      '<div class="stack">'
+      + '<a class="btn-primary" style="text-decoration:none" href="' + esc(seeUrl || '/') + '" target="_blank" rel="noopener">' + esc(seeLabel || 'See it') + '</a>'
+      + '<button type="button" class="btn-secondary" id="menu-btn">Back to menu</button>'
+      + '</div>'
+    );
+    app.innerHTML = '<div class="done-screen">'
+      + '<div class="done-icon" aria-hidden="true"><i class="fas fa-check"></i></div>'
       + '<h2>Done – it\'s on your website</h2>'
       + '<p class="muted">Shoppers can see the change right away.</p>'
-      + '<div class="split-actions">'
-      + '<a class="btn primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="' + esc(seeUrl || '/') + '" target="_blank" rel="noopener">' + esc(seeLabel || 'See it') + '</a>'
-      + '<button type="button" class="ghost" id="menu-btn">Back to menu</button>'
-      + '</div></div>';
+      + '</div>';
     document.getElementById('menu-btn').onclick = showMenu;
   }
 
@@ -109,24 +144,28 @@
   }
 
   function showMenu() {
-    titleEl.textContent = 'Your shop';
+    setHeader('Your shop', false, null);
     signOut.hidden = false;
-    app.innerHTML = '<p class="muted" style="margin:0.25rem 0 1rem">What would you like to do?</p>'
-      + menuButton('add', 'fa-plus', 'Add a new product', 'Put something new in your shop')
-      + menuButton('price', 'fa-tag', 'Change a price', 'Update what you charge')
-      + menuButton('photos', 'fa-camera', 'Change or add photos', 'Swap or add product pictures')
-      + menuButton('hide', 'fa-eye-slash', 'Sold out? Hide or show', 'Hide items you don\'t have right now')
-      + menuButton('words', 'fa-pen', 'Change my homepage words', 'Headline and about text')
-      + menuButton('colours', 'fa-palette', 'Change my colours', 'Pick a fresh look for your site')
-      + '<p class="more-link"><a href="/admin/advanced.html">More settings (for your developer)</a></p>';
+    setFooter(null);
+    app.innerHTML = '<h2 class="page-title">What would you like to do?</h2>'
+      + '<p class="lead">Tap a task below. Changes go live as soon as you save.</p>'
+      + '<ul class="menu-list">'
+      + menuItem('add', 'fa-plus', 'Add a new product', 'Photo, name, price, and group')
+      + menuItem('price', 'fa-tag', 'Change a price', 'Pick a product and update TT$')
+      + menuItem('photos', 'fa-camera', 'Change or add photos', 'Replace the main product photo')
+      + menuItem('hide', 'fa-eye-slash', 'Sold out? Hide or show', 'Hide items you don\'t have now')
+      + menuItem('words', 'fa-pen', 'Change my homepage words', 'Headline, intro, and about text')
+      + menuItem('colours', 'fa-palette', 'Change my colours', 'Choose one of four site looks')
+      + '</ul>'
+      + '<a class="btn-ghost-link" href="/admin/advanced.html">More settings (for your developer)</a>';
     bindMenu();
   }
 
-  function menuButton(id, icon, label, sub) {
-    return '<button type="button" class="menu-btn" data-go="' + esc(id) + '">'
-      + '<i class="fas ' + icon + '" aria-hidden="true"></i>'
-      + '<span><strong>' + esc(label) + '</strong><br><span class="muted" style="font-weight:400;font-size:0.88rem">' + esc(sub) + '</span></span>'
-      + '</button>';
+  function menuItem(id, icon, label, sub) {
+    return '<li><button type="button" class="menu-btn" data-go="' + esc(id) + '">'
+      + '<span class="icon"><i class="fas ' + icon + '" aria-hidden="true"></i></span>'
+      + '<span><span class="label">' + esc(label) + '</span><span class="sub">' + esc(sub) + '</span></span>'
+      + '</button></li>';
   }
 
   function bindMenu() {
@@ -145,32 +184,40 @@
 
   function productPickList(action) {
     if (!products.length) {
-      return '<p class="banner bad">No products yet. Tap Add a new product first.</p>'
-        + '<button type="button" class="ghost" id="menu-btn">Back to menu</button>';
+      return '<div class="empty-state"><p>No products yet. Add your first product from the menu.</p>'
+        + '<button type="button" class="btn-secondary" id="empty-add">Add a new product</button></div>';
     }
-    return products.map(function (p) {
+    return '<div class="pick-list">' + products.map(function (p) {
       var photo = mainPhoto(p);
       var img = photo
         ? '<img src="' + esc(photo.url) + '" alt="">'
         : '<div class="ph"></div>';
-      var extra = p.hidden ? ' <span class="muted">(hidden)</span>' : '';
+      var hidden = p.hidden ? ' · Hidden' : '';
       return '<button type="button" class="pick" data-pick="' + esc(p.id) + '" data-action="' + esc(action) + '">'
-        + img + '<span><strong>' + esc(p.name) + '</strong><span>' + money(p.priceTtd) + extra + '</span></span></button>';
-    }).join('');
+        + img
+        + '<span class="meta"><strong>' + esc(p.name) + '</strong><span class="price">' + money(p.priceTtd) + hidden + '</span></span>'
+        + '<i class="fas fa-chevron-right chev" aria-hidden="true"></i></button>';
+    }).join('') + '</div>';
   }
 
   async function pickProduct(action) {
-    titleEl.textContent = action === 'price' ? 'Change a price'
-      : action === 'photos' ? 'Change photos' : 'Hide or show';
-    await loadProducts();
-    app.innerHTML = backQuiet('← Back to menu')
-      + '<p class="muted">Tap the product you mean.</p>'
-      + productPickList(action);
-    document.getElementById('back-btn').onclick = showMenu;
-    if (!products.length) {
-      document.getElementById('menu-btn').onclick = showMenu;
+    var titles = { price: 'Change a price', photos: 'Change photos', hide: 'Hide or show' };
+    setHeader(titles[action] || 'Choose product', true, showMenu);
+    showLoading('Loading products…');
+    try {
+      await loadProducts();
+    } catch (e) {
+      app.innerHTML = '<p class="alert alert-error">' + esc(friendlyError(e)) + '</p>';
+      setFooter('<button type="button" class="btn-secondary" id="retry-btn">Try again</button>');
+      document.getElementById('retry-btn').onclick = function () { pickProduct(action); };
       return;
     }
+    setFooter(null);
+    app.innerHTML = '<h2 class="page-title">' + esc(titles[action]) + '</h2>'
+      + '<p class="lead">Tap the product you mean.</p>'
+      + productPickList(action);
+    var emptyAdd = document.getElementById('empty-add');
+    if (emptyAdd) emptyAdd.onclick = startAddProduct;
     app.querySelectorAll('[data-pick]').forEach(function (btn) {
       btn.onclick = function () {
         var id = btn.getAttribute('data-pick');
@@ -182,17 +229,22 @@
     });
   }
 
+  function productChip(product) {
+    var photo = mainPhoto(product);
+    return '<div class="product-chip">'
+      + (photo ? '<img src="' + esc(photo.url) + '" alt="">' : '<div class="ph"></div>')
+      + '<strong>' + esc(product.name) + '</strong></div>';
+  }
+
   function editPrice(id) {
     var product = products.find(function (p) { return p.id === id; });
     if (!product) return showMenu();
-    titleEl.textContent = 'New price';
-    app.innerHTML = backQuiet('← Choose another product')
-      + '<p class="card"><strong>' + esc(product.name) + '</strong></p>'
-      + '<label class="field" for="price">Price in TT dollars</label>'
-      + '<input id="price" type="number" inputmode="decimal" min="0" step="0.01" value="' + esc(product.priceTtd) + '">'
-      + '<p id="err" class="banner bad" hidden></p>'
-      + '<button type="button" class="primary" style="margin-top:1.25rem" id="save-btn">Save price</button>';
-    document.getElementById('back-btn').onclick = function () { pickProduct('price'); };
+    setHeader('New price', true, function () { pickProduct('price'); });
+    app.innerHTML = productChip(product)
+      + '<div class="field-block"><label class="field" for="price">Price in TT dollars</label>'
+      + '<input id="price" type="number" inputmode="decimal" min="0" step="0.01" value="' + esc(product.priceTtd) + '"></div>'
+      + errBlock('err');
+    setFooter('<button type="button" class="btn-primary" id="save-btn">Save price</button>');
     document.getElementById('save-btn').onclick = async function () {
       var err = document.getElementById('err');
       err.hidden = true;
@@ -223,20 +275,19 @@
     var product = products.find(function (p) { return p.id === id; });
     if (!product) return showMenu();
     var photo = mainPhoto(product);
-    titleEl.textContent = 'Product photos';
-    app.innerHTML = backQuiet('← Choose another product')
-      + '<p class="card"><strong>' + esc(product.name) + '</strong></p>'
-      + (photo ? '<img class="photo-preview" src="' + esc(photo.url) + '" alt="">' : '')
-      + '<label class="primary file-btn" style="display:flex;margin-top:0.5rem">Take or choose a photo<input type="file" accept="image/*" capture="environment" hidden id="photo-in"></label>'
-      + '<p class="muted">Tip: use a clear photo in good light. We shrink it so it uploads faster.</p>'
-      + '<p id="err" class="banner bad" hidden></p>';
-    document.getElementById('back-btn').onclick = function () { pickProduct('photos'); };
+    setHeader('Product photo', true, function () { pickProduct('photos'); });
+    app.innerHTML = productChip(product)
+      + (photo ? '<img class="photo-preview" src="' + esc(photo.url) + '" alt="">' : '<div class="photo-empty">No photo yet</div>')
+      + '<p class="muted">Use a clear photo in good light. We shrink it so it uploads faster on mobile data.</p>'
+      + errBlock('err');
+    setFooter('<label class="btn-primary file-btn">Take or choose photo<input type="file" accept="image/*" capture="environment" id="photo-in"></label>');
     document.getElementById('photo-in').onchange = async function (e) {
       var file = (e.target.files || [])[0];
       e.target.value = '';
       if (!file) return;
       var err = document.getElementById('err');
       err.hidden = true;
+      setFooter('<button type="button" class="btn-primary" disabled>Uploading…</button>');
       try {
         var data = await blobToBase64(await compress(file));
         var main = mainPhoto(product);
@@ -249,6 +300,10 @@
       } catch (ex) {
         err.hidden = false;
         err.textContent = friendlyError(ex);
+        setFooter('<label class="btn-primary file-btn">Try again<input type="file" accept="image/*" capture="environment" id="photo-in-retry"></label>');
+        document.getElementById('photo-in-retry').onchange = function (ev) {
+          document.getElementById('photo-in').onchange(ev);
+        };
       }
     };
   }
@@ -256,20 +311,19 @@
   function editHide(id) {
     var product = products.find(function (p) { return p.id === id; });
     if (!product) return showMenu();
-    titleEl.textContent = 'Hide or show';
     var hidden = Boolean(product.hidden);
-    app.innerHTML = backQuiet('← Choose another product')
-      + '<p class="card"><strong>' + esc(product.name) + '</strong></p>'
-      + '<p class="muted">' + (hidden ? 'This is hidden from your website right now.' : 'This is visible on your website now.') + '</p>'
-      + '<p id="err" class="banner bad" hidden></p>'
-      + '<button type="button" class="big-toggle ' + (hidden ? 'show' : 'hide') + '" id="toggle-btn">'
-      + (hidden ? 'Show on my website' : 'Hide from my website') + '</button>';
-    document.getElementById('back-btn').onclick = function () { pickProduct('hide'); };
+    setHeader('Hide or show', true, function () { pickProduct('hide'); });
+    app.innerHTML = productChip(product)
+      + '<p class="lead">' + (hidden ? 'This product is hidden from your website.' : 'This product is visible on your website.') + '</p>'
+      + errBlock('err');
+    var label = hidden ? 'Show on my website' : 'Hide from my website';
+    setFooter('<button type="button" class="btn-primary" id="toggle-btn">' + label + '</button>');
     document.getElementById('toggle-btn').onclick = async function () {
       var err = document.getElementById('err');
       err.hidden = true;
       var btn = document.getElementById('toggle-btn');
       btn.disabled = true;
+      btn.textContent = 'Saving…';
       try {
         await api('/api/admin/products', { method: 'POST', body: JSON.stringify({ action: 'visibility', id: product.id, hidden: !hidden }) });
         renderDone('/products', 'See the shop');
@@ -277,30 +331,36 @@
         err.hidden = false;
         err.textContent = friendlyError(e);
         btn.disabled = false;
+        btn.textContent = label;
       }
     };
   }
 
   async function editWords() {
-    titleEl.textContent = 'Homepage words';
-    await loadSettings();
+    setHeader('Homepage words', true, showMenu);
+    showLoading('Loading your words…');
+    try {
+      await loadSettings();
+    } catch (e) {
+      app.innerHTML = '<p class="alert alert-error">' + esc(friendlyError(e)) + '</p>';
+      return;
+    }
     var hp = settingsCache.homepage || {};
-    app.innerHTML = backQuiet('← Back to menu')
-      + '<p class="muted">These show on the main page visitors see first.</p>'
-      + '<label class="field" for="headline">Main headline</label>'
-      + '<textarea id="headline" rows="3">' + esc(hp.heroHeadline || '') + '</textarea>'
-      + '<label class="field" for="intro">Short intro line</label>'
-      + '<textarea id="intro" rows="3">' + esc(hp.heroSubtext || '') + '</textarea>'
-      + '<label class="field" for="about">About your shop</label>'
-      + '<textarea id="about" rows="5">' + esc(hp.aboutText || '') + '</textarea>'
-      + '<p id="err" class="banner bad" hidden></p>'
-      + '<button type="button" class="primary" style="margin-top:1.25rem" id="save-btn">Save words</button>';
-    document.getElementById('back-btn').onclick = showMenu;
+    app.innerHTML = '<p class="lead">These appear on the first page visitors see.</p>'
+      + '<div class="field-block"><label class="field" for="headline">Main headline</label>'
+      + '<textarea id="headline" rows="3">' + esc(hp.heroHeadline || '') + '</textarea></div>'
+      + '<div class="field-block"><label class="field" for="intro">Short intro line</label>'
+      + '<textarea id="intro" rows="3">' + esc(hp.heroSubtext || '') + '</textarea></div>'
+      + '<div class="field-block"><label class="field" for="about">About your shop</label>'
+      + '<textarea id="about" rows="5">' + esc(hp.aboutText || '') + '</textarea></div>'
+      + errBlock('err');
+    setFooter('<button type="button" class="btn-primary" id="save-btn">Save words</button>');
     document.getElementById('save-btn').onclick = async function () {
       var err = document.getElementById('err');
       err.hidden = true;
       var btn = document.getElementById('save-btn');
       btn.disabled = true;
+      btn.textContent = 'Saving…';
       try {
         await api('/api/admin/settings', {
           method: 'PATCH',
@@ -318,6 +378,7 @@
         err.hidden = false;
         err.textContent = friendlyError(e);
         btn.disabled = false;
+        btn.textContent = 'Save words';
       }
     };
   }
@@ -327,32 +388,36 @@
   }
 
   async function editColours() {
-    titleEl.textContent = 'Pick a look';
-    await loadSettings();
+    setHeader('Pick a look', true, showMenu);
+    showLoading('Loading looks…');
+    try {
+      await loadSettings();
+    } catch (e) {
+      app.innerHTML = '<p class="alert alert-error">' + esc(friendlyError(e)) + '</p>';
+      return;
+    }
     var cards = THEME_CARDS.map(function (t) {
       return '<button type="button" class="theme-card" data-theme="' + esc(t.id) + '" style="background:' + themeGradient(t.colors) + '">'
         + esc(t.label) + '</button>';
     }).join('');
     var hasPrev = false;
     try { hasPrev = Boolean(localStorage.getItem(PREV_THEME_KEY)); } catch (e) { /* ignore */ }
-    app.innerHTML = backQuiet('← Back to menu')
-      + '<p class="muted">Tap a look. It goes live right away.</p>'
-      + cards
-      + (hasPrev ? '<button type="button" class="ghost" id="restore-btn">Go back to my old look</button>' : '')
-      + '<p id="err" class="banner bad" hidden></p>';
-    document.getElementById('back-btn').onclick = showMenu;
+    app.innerHTML = '<p class="lead">Tap a look. It goes live right away.</p>'
+      + '<div class="theme-list">' + cards + '</div>'
+      + (hasPrev ? '<button type="button" class="btn-secondary" style="margin-top:var(--space-4)" id="restore-btn">Go back to my old look</button>' : '')
+      + errBlock('err');
+    setFooter(null);
     app.querySelectorAll('[data-theme]').forEach(function (btn) {
       btn.onclick = function () { applyThemePreset(btn.getAttribute('data-theme')); };
     });
-    if (hasPrev) {
-      document.getElementById('restore-btn').onclick = restorePreviousTheme;
-    }
+    if (hasPrev) document.getElementById('restore-btn').onclick = restorePreviousTheme;
   }
 
   async function applyThemePreset(presetId) {
     var err = document.getElementById('err');
     if (err) err.hidden = true;
     rememberThemeBeforeChange();
+    showLoading('Applying look…');
     try {
       await api('/api/admin/settings', { method: 'PATCH', body: JSON.stringify({ theme: { preset: presetId } }) });
       await loadSettings();
@@ -362,22 +427,24 @@
         err.hidden = false;
         err.textContent = friendlyError(e);
       }
+      editColours();
     }
   }
 
   async function restorePreviousTheme() {
-    var err = document.getElementById('err');
     var raw;
     try { raw = localStorage.getItem(PREV_THEME_KEY); } catch (e) { raw = null; }
     if (!raw) return;
-    if (err) err.hidden = true;
+    rememberThemeBeforeChange();
+    showLoading('Restoring…');
     try {
       var prev = JSON.parse(raw);
-      rememberThemeBeforeChange();
       await api('/api/admin/settings', { method: 'PATCH', body: JSON.stringify({ theme: prev }) });
       await loadSettings();
       renderDone('/', 'See homepage');
     } catch (e) {
+      editColours();
+      var err = document.getElementById('err');
       if (err) {
         err.hidden = false;
         err.textContent = friendlyError(e);
@@ -385,7 +452,6 @@
     }
   }
 
-  /* Add product wizard */
   var wizard = { step: 0, photoBlob: null, photoUrl: '', name: '', price: '', category: '', description: '' };
 
   function startAddProduct() {
@@ -393,21 +459,27 @@
     renderWizardStep();
   }
 
-  function renderWizardStep() {
-    var steps = [0, 1, 2, 3].map(function (i) {
+  function wizardStepsHtml() {
+    return '<div class="steps" aria-hidden="true">' + [0, 1, 2, 3].map(function (i) {
       return '<span class="' + (i <= wizard.step ? 'on' : '') + '"></span>';
-    }).join('');
-    titleEl.textContent = 'New product';
+    }).join('') + '</div>';
+  }
+
+  function renderWizardStep() {
+    setHeader('New product', true, wizard.step === 0 ? showMenu : function () {
+      wizard.step -= 1;
+      renderWizardStep();
+    });
     if (wizard.step === 0) {
-      app.innerHTML = backQuiet('← Back to menu')
-        + '<div class="steps">' + steps + '</div>'
-        + '<h2>Step 1 — Photo</h2>'
-        + '<p class="muted">Take a picture or pick one from your gallery.</p>'
-        + (wizard.photoUrl ? '<img class="photo-preview" src="' + esc(wizard.photoUrl) + '" alt="">' : '')
-        + '<label class="primary file-btn" style="display:flex">' + (wizard.photoUrl ? 'Choose a different photo' : 'Add a photo')
-        + '<input type="file" accept="image/*" capture="environment" hidden id="wiz-photo"></label>'
-        + '<button type="button" class="ghost" style="margin-top:0.5rem" id="next-btn"' + (wizard.photoBlob ? '' : ' disabled') + '>Next</button>';
-      document.getElementById('back-btn').onclick = showMenu;
+      app.innerHTML = wizardStepsHtml()
+        + '<h2 class="page-title">Photo</h2>'
+        + '<p class="lead">Take a picture or pick one from your gallery.</p>'
+        + (wizard.photoUrl ? '<img class="photo-preview" src="' + esc(wizard.photoUrl) + '" alt="">' : '<div class="photo-empty"><i class="fas fa-camera" aria-hidden="true"></i></div>')
+        + errBlock('err');
+      setFooter('<div class="stack">'
+        + '<label class="btn-secondary file-btn">' + (wizard.photoUrl ? 'Choose a different photo' : 'Add a photo')
+        + '<input type="file" accept="image/*" capture="environment" id="wiz-photo"></label>'
+        + '<button type="button" class="btn-primary" id="next-btn"' + (wizard.photoBlob ? '' : ' disabled') + '>Next</button></div>');
       document.getElementById('wiz-photo').onchange = function (e) {
         var file = (e.target.files || [])[0];
         e.target.value = '';
@@ -423,13 +495,12 @@
       return;
     }
     if (wizard.step === 1) {
-      app.innerHTML = backQuiet('← Back')
-        + '<div class="steps">' + steps + '</div>'
-        + '<h2>Step 2 — Name</h2>'
-        + '<label class="field" for="wiz-name">What is it called?</label>'
-        + '<input id="wiz-name" value="' + esc(wizard.name) + '" placeholder="e.g. Hex tile set">'
-        + '<button type="button" class="primary" style="margin-top:1.25rem" id="next-btn">Next</button>';
-      document.getElementById('back-btn').onclick = function () { wizard.step = 0; renderWizardStep(); };
+      app.innerHTML = wizardStepsHtml()
+        + '<h2 class="page-title">Name</h2>'
+        + '<div class="field-block"><label class="field" for="wiz-name">What is it called?</label>'
+        + '<input id="wiz-name" value="' + esc(wizard.name) + '" placeholder="e.g. Hex tile set" autocomplete="off"></div>'
+        + errBlock('err');
+      setFooter('<button type="button" class="btn-primary" id="next-btn">Next</button>');
       document.getElementById('next-btn').onclick = function () {
         wizard.name = document.getElementById('wiz-name').value.trim();
         if (!wizard.name) return;
@@ -439,13 +510,12 @@
       return;
     }
     if (wizard.step === 2) {
-      app.innerHTML = backQuiet('← Back')
-        + '<div class="steps">' + steps + '</div>'
-        + '<h2>Step 3 — Price</h2>'
-        + '<label class="field" for="wiz-price">Price in TT dollars</label>'
-        + '<input id="wiz-price" type="number" inputmode="decimal" min="0" step="0.01" value="' + esc(wizard.price) + '" placeholder="25">'
-        + '<button type="button" class="primary" style="margin-top:1.25rem" id="next-btn">Next</button>';
-      document.getElementById('back-btn').onclick = function () { wizard.step = 1; renderWizardStep(); };
+      app.innerHTML = wizardStepsHtml()
+        + '<h2 class="page-title">Price</h2>'
+        + '<div class="field-block"><label class="field" for="wiz-price">Price in TT dollars</label>'
+        + '<input id="wiz-price" type="number" inputmode="decimal" min="0" step="0.01" value="' + esc(wizard.price) + '" placeholder="25"></div>'
+        + errBlock('err');
+      setFooter('<button type="button" class="btn-primary" id="next-btn">Next</button>');
       document.getElementById('next-btn').onclick = function () {
         wizard.price = document.getElementById('wiz-price').value;
         if (wizard.price === '' || Number(wizard.price) < 0) return;
@@ -455,19 +525,16 @@
       return;
     }
     var chips = CATEGORIES.map(function (c) {
-      var on = wizard.category === c ? ' on' : '';
-      return '<button type="button" class="' + on + '" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
+      return '<button type="button" class="' + (wizard.category === c ? 'on' : '') + '" data-cat="' + esc(c) + '">' + esc(c) + '</button>';
     }).join('');
-    app.innerHTML = backQuiet('← Back')
-      + '<div class="steps">' + steps + '</div>'
-      + '<h2>Step 4 — Group</h2>'
-      + '<p class="muted">Where should shoppers find it?</p>'
+    app.innerHTML = wizardStepsHtml()
+      + '<h2 class="page-title">Group</h2>'
+      + '<p class="lead">Where should shoppers find it?</p>'
       + '<div class="chips">' + chips + '</div>'
-      + '<label class="field" for="wiz-desc">Description (optional)</label>'
-      + '<textarea id="wiz-desc" placeholder="A short note about sizes or colours…">' + esc(wizard.description) + '</textarea>'
-      + '<p id="err" class="banner bad" hidden></p>'
-      + '<button type="button" class="primary" style="margin-top:1.25rem" id="save-btn"' + (wizard.category ? '' : ' disabled') + '>Add to my website</button>';
-    document.getElementById('back-btn').onclick = function () { wizard.step = 2; renderWizardStep(); };
+      + '<div class="field-block"><label class="field" for="wiz-desc">Description (optional)</label>'
+      + '<textarea id="wiz-desc" placeholder="Sizes, colours, or notes…">' + esc(wizard.description) + '</textarea></div>'
+      + errBlock('err');
+    setFooter('<button type="button" class="btn-primary" id="save-btn"' + (wizard.category ? '' : ' disabled') + '>Add to my website</button>');
     app.querySelectorAll('[data-cat]').forEach(function (btn) {
       btn.onclick = function () {
         wizard.category = btn.getAttribute('data-cat');
@@ -484,6 +551,7 @@
     err.hidden = true;
     var btn = document.getElementById('save-btn');
     btn.disabled = true;
+    btn.textContent = 'Adding…';
     try {
       var created = await api('/api/admin/products', {
         method: 'POST',
@@ -510,28 +578,32 @@
       err.hidden = false;
       err.textContent = friendlyError(e);
       btn.disabled = false;
+      btn.textContent = 'Add to my website';
     }
   }
 
   function databaseHelp() {
+    setHeader('Setup needed', false, null);
+    setFooter(null);
     app.innerHTML = '<div class="card"><p><strong>One step left before you can use this page.</strong></p>'
-      + '<p class="muted">Ask your developer to connect the shop database in Vercel (Neon), then try again.</p>'
-      + '<p class="more-link"><a href="/admin/advanced.html">More settings</a></p></div>';
+      + '<p class="muted">Ask your developer to connect the shop database in Vercel (Neon), then try again.</p></div>'
+      + '<a class="btn-ghost-link" href="/admin/advanced.html">More settings</a>';
   }
 
   function authForm(mode) {
     var setup = mode === 'setup';
-    titleEl.textContent = setup ? 'Welcome' : 'Sign in';
-    app.innerHTML = '<form id="auth-form" class="card">'
+    setHeader(setup ? 'Welcome' : 'Sign in', false, null);
+    setFooter(null);
+    app.innerHTML = '<div class="auth-card"><form id="auth-form">'
       + (setup
         ? '<p>Choose a password only you will use on this phone.</p>'
         : '<p>Sign in to update your shop.</p>')
-      + '<label class="field" for="password">' + (setup ? 'New password' : 'Password') + '</label>'
-      + '<input id="password" type="password" autocomplete="' + (setup ? 'new-password' : 'current-password') + '" minlength="8" required>'
-      + (setup ? '<label class="field" for="confirm">Type it again</label><input id="confirm" type="password" autocomplete="new-password" minlength="8" required>' : '')
-      + '<p id="auth-status" class="banner bad" hidden></p>'
-      + '<button class="primary" type="submit" style="margin-top:1rem">' + (setup ? 'Continue' : 'Sign in') + '</button>'
-      + '</form>';
+      + '<div class="field-block"><label class="field" for="password">' + (setup ? 'New password' : 'Password') + '</label>'
+      + '<input id="password" type="password" autocomplete="' + (setup ? 'new-password' : 'current-password') + '" minlength="8" required></div>'
+      + (setup ? '<div class="field-block"><label class="field" for="confirm">Type it again</label><input id="confirm" type="password" autocomplete="new-password" minlength="8" required></div>' : '')
+      + errBlock('auth-status')
+      + '<button class="btn-primary" type="submit" style="margin-top:var(--space-5)">' + (setup ? 'Continue' : 'Sign in') + '</button>'
+      + '</form></div>';
     document.getElementById('auth-form').onsubmit = async function (event) {
       event.preventDefault();
       var password = document.getElementById('password').value;
@@ -567,6 +639,9 @@
     authForm(state.needsSetup ? 'setup' : 'login');
   }).catch(function (error) {
     if (error.needsDatabase) databaseHelp();
-    else app.innerHTML = '<p class="banner bad">' + esc(friendlyError(error)) + '</p>';
+    else {
+      setHeader('Your shop', false, null);
+      app.innerHTML = '<p class="alert alert-error">' + esc(friendlyError(error)) + '</p>';
+    }
   });
 })();
