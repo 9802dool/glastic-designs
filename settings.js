@@ -55,6 +55,44 @@
     return digits ? 'https://wa.me/' + digits : '';
   }
 
+  var DEFAULT_LOGO = '/logo.svg';
+
+  function resolveLogoUrl(url) {
+    var text = String(url == null ? '' : url).trim();
+    if (!text) return DEFAULT_LOGO;
+    if (/^blob:/.test(text)) return text;
+    if (/^https:\/\//.test(text) || /^\//.test(text)) return text;
+    return DEFAULT_LOGO;
+  }
+
+  function wireSiteLogo() {
+    var logo = document.getElementById('site-logo');
+    var wordmark = document.getElementById('site-logo-wordmark');
+    if (!logo || logo.__glasticLogoWired) return;
+    logo.__glasticLogoWired = true;
+    logo.addEventListener('error', function () {
+      logo.classList.add('is-broken');
+      if (wordmark) wordmark.classList.add('is-fallback');
+    });
+    logo.addEventListener('load', function () {
+      if (logo.naturalWidth > 0 && logo.naturalHeight > 0) {
+        logo.classList.remove('is-broken');
+        if (wordmark) wordmark.classList.remove('is-fallback');
+      }
+    });
+  }
+
+  function applySiteLogo(theme) {
+    wireSiteLogo();
+    var logo = document.getElementById('site-logo');
+    if (!logo) return;
+    var wordmark = document.getElementById('site-logo-wordmark');
+    var src = resolveLogoUrl(theme && theme.logoUrl);
+    logo.classList.remove('is-broken');
+    if (wordmark) wordmark.classList.remove('is-fallback');
+    if (logo.getAttribute('src') !== src) logo.setAttribute('src', src);
+  }
+
   function applyTheme(theme) {
     if (!theme) return;
     var root = document.documentElement;
@@ -77,8 +115,7 @@
       document.head.appendChild(link);
     }
     if (link.getAttribute('href') !== href) link.setAttribute('href', href);
-    var logo = document.getElementById('site-logo');
-    if (logo && theme.logoUrl) logo.setAttribute('src', theme.logoUrl);
+    applySiteLogo(theme);
     if (isVisualPreviewFrame() || isPreviewApply()) return;
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify({ theme: theme, at: Date.now() }));
@@ -277,7 +314,7 @@
 
   var DEFAULT_PAYLOAD = {
     settings: {
-      theme: { preset: 'forest', primary: '#065f46', primaryDark: '#064e3b', accent: '#0f766e', background: '#fafaf9', text: '#1c1917', fontId: 'playfair-inter', logoUrl: '/logo.jpg' },
+      theme: { preset: 'forest', primary: '#065f46', primaryDark: '#064e3b', accent: '#0f766e', background: '#fafaf9', text: '#1c1917', fontId: 'playfair-inter', logoUrl: '/logo.svg' },
       banner: { enabled: false, text: '', link: '' },
       visibility: { hero: true, about: true, gallery: true, products: true, process: true, impact: true, contact: true, consultation: true },
       homepage: {

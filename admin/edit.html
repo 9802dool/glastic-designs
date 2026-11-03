@@ -43,9 +43,9 @@
     .toolbar-inner {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.25rem;
       min-height: var(--bar-h);
-      padding: 0.35rem 0.5rem 0.35rem 0.25rem;
+      padding: 0.35rem 0.5rem 0.35rem 0.35rem;
       max-width: 80rem;
       margin: 0 auto;
     }
@@ -56,13 +56,23 @@
       border: 0;
       border-radius: 999px;
       min-height: 2.5rem;
+      min-width: 2.5rem;
       padding: 0 0.75rem;
       cursor: pointer;
       touch-action: manipulation;
       background: #f5f5f4;
       color: var(--ink);
       white-space: nowrap;
+      flex-shrink: 0;
     }
+    .toolbar button.icon-only {
+      width: 2.5rem;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .toolbar button .btn-text { pointer-events: none; }
     .toolbar button:active { background: #e7e5e4; }
     .toolbar button.primary {
       background: var(--brand);
@@ -72,14 +82,16 @@
     .toolbar button.ghost { background: transparent; color: var(--muted); }
     .toolbar .exit { margin-right: 0.25rem; }
     .toolbar select {
-      flex: 1;
+      flex: 1 1 6rem;
       min-width: 0;
-      max-width: 9rem;
+      max-width: none;
       appearance: none;
-      background: #f5f5f4 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%2357534e' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 0.65rem center;
-      padding-right: 1.75rem;
+      background: #f5f5f4 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%2357534e' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 0.5rem center;
+      padding: 0 1.5rem 0 0.65rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .toolbar .spacer { flex: 1; min-width: 0.25rem; }
+    .toolbar .spacer { display: none; }
     .dirty-dot {
       width: 0.5rem;
       height: 0.5rem;
@@ -165,9 +177,18 @@
       text-align: center;
       color: #fafaf9;
     }
+    @media (max-width: 519px) {
+      .toolbar button .btn-text { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+      .toolbar #btn-save { padding: 0 0.85rem; min-width: auto; }
+    }
+    @media (min-width: 520px) {
+      .toolbar button.icon-only { width: auto; padding: 0 0.75rem; }
+      .toolbar button.icon-only i { margin-right: 0.35rem; }
+      .toolbar .spacer { display: block; flex: 1; min-width: 0.25rem; }
+      .toolbar select { flex: 0 1 11rem; max-width: 11rem; }
+    }
     @media (min-width: 768px) {
-      .toolbar-inner { padding-left: 1rem; padding-right: 1rem; }
-      .toolbar select { max-width: 11rem; }
+      .toolbar-inner { padding-left: 1rem; padding-right: 1rem; gap: 0.35rem; }
     }
   </style>
 </head>
@@ -180,9 +201,9 @@
         <select id="page-select" aria-label="Page"></select>
         <span class="dirty-dot" id="dirty-dot" title="Unsaved changes"></span>
         <span class="spacer"></span>
-        <button type="button" id="btn-undo" disabled>Undo</button>
-        <button type="button" id="btn-colours">Colours</button>
-        <button type="button" class="primary" id="btn-save">Save</button>
+        <button type="button" class="icon-only" id="btn-undo" disabled aria-label="Undo"><i class="fas fa-rotate-left" aria-hidden="true"></i><span class="btn-text">Undo</span></button>
+        <button type="button" class="icon-only" id="btn-colours" aria-label="Colours"><i class="fas fa-palette" aria-hidden="true"></i><span class="btn-text">Colours</span></button>
+        <button type="button" class="primary" id="btn-save"><span class="btn-text">Save</span></button>
       </div>
     </header>
     <div class="frame-wrap">

@@ -70,11 +70,11 @@
     }
     .top-bar-inner {
       display: grid;
-      grid-template-columns: 2.75rem 1fr 2.75rem;
+      grid-template-columns: 2.75rem minmax(0, 1fr) auto;
       align-items: center;
       min-height: var(--header-h);
-      padding: 0 var(--space-4);
-      gap: var(--space-2);
+      padding: 0 var(--space-3);
+      gap: var(--space-1);
     }
     .top-bar .back {
       grid-column: 1;
@@ -99,11 +99,13 @@
       border: 0;
       background: transparent;
       color: var(--ink-faint);
-      font-size: 0.8125rem;
-      font-weight: 500;
-      padding: var(--space-2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: var(--space-2) var(--space-1);
       min-height: 2.75rem;
       cursor: pointer;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
     }
     .top-bar .sign-out[hidden] { display: none; }
     .top-bar-titles {

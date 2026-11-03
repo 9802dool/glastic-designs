@@ -31,7 +31,7 @@ const mockSettings = {
     ]
   },
   settings: {
-    theme: { preset: 'forest', primary: '#065f46', primaryDark: '#064e3b', accent: '#0f766e', background: '#fafaf9', text: '#1c1917', fontId: 'playfair-inter', logoUrl: '/logo.jpg' },
+    theme: { preset: 'forest', primary: '#065f46', primaryDark: '#064e3b', accent: '#0f766e', background: '#fafaf9', text: '#1c1917', fontId: 'playfair-inter', logoUrl: '/logo.svg' },
     banner: { enabled: false, text: '', link: '' },
     visibility: { hero: true, about: true, gallery: true, products: true, process: true, impact: true, contact: true, consultation: true },
     homepage: {
@@ -136,7 +136,10 @@ async function runViewport(browser, viewport, tag) {
   const frame = page.frameLocator('#site-frame');
   await frame.locator('#hero-headline').waitFor({ timeout: 15000 });
 
-  await page.screenshot({ path: `${OUT}/inline-edit-mode-${tag}.png` });
+  await frame.locator('#site-logo').waitFor({ state: 'visible' });
+  await frame.locator('#hero-headline').waitFor({ state: 'visible' });
+  await page.waitForTimeout(400);
+  await page.locator('#shell').screenshot({ path: `${OUT}/inline-edit-mode-${tag}.png` });
 
   await frame.locator('#hero-headline').click();
   await frame.locator('#hero-headline[contenteditable="true"]').waitFor();
@@ -152,7 +155,7 @@ async function runViewport(browser, viewport, tag) {
     process.exit(1);
   }
 
-  await page.screenshot({ path: `${OUT}/inline-text-edit-${tag}.png` });
+  await page.locator('#shell').screenshot({ path: `${OUT}/inline-text-edit-${tag}.png` });
 
   await frame.locator('#hero-image').click();
   await frame.locator('.glastic-edit-popover #glastic-replace-photo').waitFor({ timeout: 5000 });

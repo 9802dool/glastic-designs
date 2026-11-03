@@ -22,7 +22,7 @@ const mockProducts = {
 
 const mockSettings = {
   settings: {
-    theme: { preset: 'forest', primary: '#065f46', primaryDark: '#064e3b', accent: '#0f766e', background: '#fafaf9', text: '#1c1917', fontId: 'playfair-inter', logoUrl: '/logo.jpg' },
+    theme: { preset: 'forest', primary: '#065f46', primaryDark: '#064e3b', accent: '#0f766e', background: '#fafaf9', text: '#1c1917', fontId: 'playfair-inter', logoUrl: '/logo.svg' },
     homepage: {
       heroHeadline: 'Plastic Waste.\nBeautiful Design.',
       heroSubtext: 'We transform discarded plastic…',

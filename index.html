@@ -26,6 +26,8 @@
     body.has-site-banner { padding-top: 2.5rem; }
     body.has-site-banner nav.fixed { top: 2.5rem; }
     body.has-site-banner #mobile-menu { top: calc(5rem + 2.5rem); }
+    #site-logo.is-broken { display: none !important; }
+    #site-logo-wordmark.is-fallback { display: block !important; }
     html.themed .text-emerald-800, html.themed .text-emerald-900 { color: var(--g-primary-dark); }
     html.themed .text-emerald-700, html.themed .text-emerald-600 { color: var(--g-accent); }
     html.themed .bg-emerald-600, html.themed .bg-emerald-500 { background-color: var(--g-accent) !important; }
@@ -185,9 +187,9 @@
       <div class="flex justify-between items-center h-20">
         <a href="/" class="flex items-center space-x-3 min-w-0">
           <div class="bg-white p-1 rounded-lg">
-            <img id="site-logo" src="/logo.jpg" alt="Glastic Designs Logo" class="h-16 w-auto object-contain">
+            <img id="site-logo" src="/logo.svg" alt="" class="h-16 w-auto object-contain max-h-16">
           </div>
-          <span class="font-display font-bold text-xl text-emerald-800 hidden sm:block">Glastic Designs</span>
+          <span id="site-logo-wordmark" class="font-display font-bold text-xl text-emerald-800 hidden sm:block">Glastic Designs</span>
         </a>
         <div class="hidden lg:flex items-center gap-6">
           <a href="/about" class="nav-link" data-nav>About</a>

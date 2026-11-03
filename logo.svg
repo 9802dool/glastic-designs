@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Glastic Designs">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="50%" stop-color="#065f46"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#g)"/>
+  <path fill="#ecfdf5" d="M32 14c-8.5 0-15 6.2-15 14.5 0 5.2 2.8 9.7 7 12.2V44h8v-3.2c4.2-2.5 7-7 7-12.3C39 20.2 32.8 14 32 14zm0 6c4.8 0 8.5 3.4 8.5 8.5S36.8 37 32 37s-8.5-3.4-8.5-8.5S27.2 20 32 20z"/>
+</svg>
