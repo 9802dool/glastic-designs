@@ -618,6 +618,7 @@
       status.hidden = true;
       try {
         await api('/api/admin/auth', { method: 'POST', body: JSON.stringify({ action: setup ? 'setup' : 'login', password: password }) });
+        if (returnAfterAuth()) return;
         showMenu();
       } catch (error) {
         status.hidden = false;
@@ -632,10 +633,21 @@
     location.reload();
   };
 
+  function returnAfterAuth() {
+    var params = new URLSearchParams(window.location.search);
+    var dest = params.get('return') || params.get('next') || '';
+    if (dest && dest.charAt(0) === '/' && dest.indexOf('/admin') === 0 && dest.indexOf('//') !== 0) {
+      window.location.href = dest;
+      return true;
+    }
+    return false;
+  }
+
   api('/api/admin/auth').then(function (state) {
     if (state.needsDatabase) return databaseHelp();
     if (state.signedIn) {
       signOut.hidden = false;
+      if (returnAfterAuth()) return;
       return showMenu();
     }
     authForm(state.needsSetup ? 'setup' : 'login');

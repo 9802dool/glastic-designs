@@ -30,15 +30,41 @@
   var colourSheet = document.getElementById('colour-sheet');
   var sheetBackdrop = document.getElementById('sheet-backdrop');
 
+  var AUTH_TIMEOUT_MS = 20000;
+
   function api(url, options) {
-    return fetch(url, Object.assign({
+    var opts = Object.assign({
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' }
-    }, options || {})).then(function (res) {
-      return res.json().then(function (data) {
+    }, options || {});
+    var timeoutMs = opts.timeoutMs || 0;
+    delete opts.timeoutMs;
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    if (controller && timeoutMs > 0) {
+      opts.signal = controller.signal;
+      setTimeout(function () { controller.abort(); }, timeoutMs);
+    }
+    return fetch(url, opts).then(function (res) {
+      return res.text().then(function (text) {
+        var data = {};
+        if (text) {
+          try { data = JSON.parse(text); } catch (e) {
+            if (!res.ok) {
+              throw new Error(res.status === 401 || res.status === 403
+                ? 'Please sign in again.'
+                : 'The server returned an unexpected response (status ' + res.status + ').');
+            }
+            throw new Error('The server returned an unexpected response.');
+          }
+        }
         if (!res.ok) throw Object.assign(new Error(data.error || 'Request failed'), data);
         return data;
       });
+    }).catch(function (err) {
+      if (err && err.name === 'AbortError') {
+        throw new Error('This is taking too long — check your internet and try again.');
+      }
+      throw err;
     });
   }
 
@@ -387,12 +413,78 @@
     setDirty(false);
   }
 
-  function showGate(message, link) {
-    gate.hidden = false;
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+    });
+  }
+
+  function showLoading(message) {
     shell.hidden = true;
-    gate.innerHTML = '<div><p>' + message + '</p>'
-      + (link ? '<p style="margin-top:1rem"><a href="' + link + '" style="color:#5eead4">Sign in</a></p>' : '')
-      + '</div>';
+    gate.hidden = false;
+    gate.className = 'gate';
+    gate.innerHTML = '<div class="gate-loading"><div class="spinner" aria-hidden="true"></div><p>'
+      + esc(message || 'Loading editor…') + '</p></div>';
+  }
+
+  function showErrorPanel(title, message) {
+    shell.hidden = true;
+    gate.hidden = false;
+    gate.className = 'gate';
+    gate.innerHTML = '<div class="gate-panel"><h1>' + esc(title) + '</h1><p>' + esc(message)
+      + '</p><div class="btn-row"><a class="btn btn-secondary" href="/admin/">Back to menu</a>'
+      + '<button type="button" class="btn-primary" id="gate-retry">Try again</button></div></div>';
+    var retry = document.getElementById('gate-retry');
+    if (retry) retry.onclick = function () { location.reload(); };
+  }
+
+  function showSignInForm(needsSetup) {
+    shell.hidden = true;
+    gate.hidden = false;
+    gate.className = 'gate';
+    gate.innerHTML = '<div class="gate-panel"><h1>' + (needsSetup ? 'Welcome' : 'Sign in') + '</h1><p>'
+      + (needsSetup ? 'Choose a password for your shop admin, then open the editor.'
+        : 'Sign in with your shop password to edit your website here.')
+      + '</p><form id="gate-auth"><label for="gate-password">'
+      + (needsSetup ? 'New password' : 'Password') + '</label>'
+      + '<input id="gate-password" type="password" autocomplete="' + (needsSetup ? 'new-password' : 'current-password') + '" minlength="8" required>'
+      + (needsSetup ? '<label for="gate-confirm">Type it again</label><input id="gate-confirm" type="password" autocomplete="new-password" minlength="8" required>' : '')
+      + '<p id="gate-auth-error" class="alert" hidden role="alert"></p>'
+      + '<div class="btn-row"><button type="submit" class="btn-primary">'
+      + (needsSetup ? 'Continue' : 'Sign in') + '</button>'
+      + '<a class="btn btn-secondary" href="/admin/?return=' + encodeURIComponent('/admin/edit.html') + '">Use full sign-in page</a>'
+      + '<a class="btn btn-secondary" href="/admin/">Back to menu</a></div></form></div>';
+    document.getElementById('gate-auth').onsubmit = function (event) {
+      event.preventDefault();
+      var password = document.getElementById('gate-password').value;
+      var errEl = document.getElementById('gate-auth-error');
+      if (needsSetup && password !== document.getElementById('gate-confirm').value) {
+        errEl.hidden = false;
+        errEl.textContent = 'Those passwords do not match.';
+        return;
+      }
+      errEl.hidden = true;
+      showLoading('Signing in…');
+      api('/api/admin/auth', {
+        method: 'POST',
+        body: JSON.stringify({ action: needsSetup ? 'setup' : 'login', password: password }),
+        timeoutMs: AUTH_TIMEOUT_MS
+      }).then(function () {
+        return startEditor();
+      }).catch(function (err) {
+        showSignInForm(needsSetup);
+        errEl = document.getElementById('gate-auth-error');
+        if (errEl) {
+          errEl.hidden = false;
+          errEl.textContent = (err && err.message) || 'Sign-in failed.';
+        }
+      });
+    };
+  }
+
+  function showEditorShell() {
+    gate.hidden = true;
+    shell.hidden = false;
   }
 
   function initUi() {
@@ -430,20 +522,46 @@
     loadIframe('/');
   }
 
-  api('/api/admin/auth').then(async function (state) {
-    if (state.needsDatabase) {
-      showGate('Connect the database before editing.', '/admin/advanced.html');
-      return;
+  async function startEditor() {
+    showLoading('Loading your website…');
+    try {
+      await loadData();
+      showEditorShell();
+      initUi();
+      window.__editEditorBooted = true;
+    } catch (err) {
+      showErrorPanel('Could not load editor', (err && err.message)
+        || 'Something went wrong loading your shop data.');
     }
-    if (!state.signedIn) {
-      showGate('Sign in to edit your website.', '/admin/');
-      return;
+  }
+
+  async function boot() {
+    showLoading('Checking sign-in…');
+    try {
+      var state = await api('/api/admin/auth', { timeoutMs: AUTH_TIMEOUT_MS });
+      if (state.needsDatabase) {
+        showErrorPanel('Database not connected', 'Ask your developer to connect Neon in Vercel, then try again.');
+        return;
+      }
+      if (!state.signedIn) {
+        showSignInForm(state.needsSetup);
+        window.__editEditorBooted = true;
+        return;
+      }
+      await startEditor();
+    } catch (err) {
+      if (err && err.needsDatabase) {
+        showErrorPanel('Database not connected', 'Ask your developer to connect Neon in Vercel, then try again.');
+        return;
+      }
+      showErrorPanel('Could not open editor', (err && err.message) || 'Could not verify sign-in.');
     }
-    gate.hidden = true;
-    shell.hidden = false;
-    await loadData();
-    initUi();
-  }).catch(function () {
-    showGate('Could not verify sign-in.', '/admin/');
+  }
+
+  window.addEventListener('error', function (event) {
+    if (window.__editEditorBooted) return;
+    showErrorPanel('Editor error', (event && event.message) || 'Something went wrong loading the editor.');
   });
+
+  boot();
 })();

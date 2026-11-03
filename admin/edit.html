@@ -172,11 +172,62 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100dvh;
+      min-height: 100dvh;
       padding: 1.5rem;
       text-align: center;
       color: #fafaf9;
     }
+    .gate-panel {
+      width: 100%;
+      max-width: 22rem;
+      background: #fff;
+      color: var(--ink);
+      border-radius: 1.25rem;
+      padding: 1.5rem 1.25rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      text-align: left;
+    }
+    .gate-panel h1 { margin: 0 0 0.5rem; font-size: 1.25rem; }
+    .gate-panel p { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.9375rem; line-height: 1.45; }
+    .gate-panel label { display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .gate-panel input {
+      width: 100%;
+      min-height: 2.75rem;
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+      padding: 0 0.75rem;
+      font: inherit;
+      margin-bottom: 0.75rem;
+    }
+    .gate-panel .btn-row { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+    .gate-panel button, .gate-panel a.btn {
+      display: block;
+      width: 100%;
+      min-height: 2.75rem;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      line-height: 2.75rem;
+      border: 0;
+      cursor: pointer;
+    }
+    .gate-panel .btn-primary { background: var(--brand); color: #fff; }
+    .gate-panel .btn-secondary { background: #f5f5f4; color: var(--ink); }
+    .gate-panel .alert { color: #b91c1c; font-size: 0.875rem; margin: 0.5rem 0 0; }
+    .spinner {
+      width: 2rem;
+      height: 2rem;
+      border: 3px solid #e7e5e4;
+      border-top-color: var(--brand);
+      border-radius: 999px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .gate-loading { text-align: center; color: #fafaf9; }
+    .gate-loading .spinner { border-color: rgba(255,255,255,0.25); border-top-color: #5eead4; }
     @media (max-width: 519px) {
       .toolbar button.icon-only .btn-text {
         position: absolute;
@@ -214,7 +265,12 @@
   </style>
 </head>
 <body>
-  <div id="gate" class="gate" hidden></div>
+  <div id="gate" class="gate" role="status">
+    <div class="gate-loading">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading editor…</p>
+    </div>
+  </div>
   <div id="shell" class="shell" hidden>
     <header class="toolbar" role="toolbar" aria-label="Website editor">
       <div class="toolbar-inner">
@@ -238,6 +294,16 @@
     <div id="look-list"></div>
   </div>
   <div class="toast" id="toast" role="status"></div>
-  <script src="/admin/inline-editor.js"></script>
+  <script>
+    window.__editEditorBooted = false;
+    window.setTimeout(function () {
+      if (window.__editEditorBooted) return;
+      var gate = document.getElementById('gate');
+      var shell = document.getElementById('shell');
+      if (!gate || (shell && !shell.hidden)) return;
+      gate.innerHTML = '<div class="gate-panel"><h1>Editor did not start</h1><p>The editor script may be blocked or still loading. Check your connection and try again.</p><div class="btn-row"><a class="btn btn-secondary" href="/admin/">Back to menu</a><button type="button" class="btn-primary" onclick="location.reload()">Try again</button></div></div>';
+    }, 15000);
+  </script>
+  <script src="inline-editor.js" onerror="(function(){var g=document.getElementById('gate');if(!g)return;g.innerHTML='<div class=&quot;gate-panel&quot;><h1>Could not load editor</h1><p>The editor file failed to load. If this is a preview link, make sure you are signed in and the deployment finished building.</p><div class=&quot;btn-row&quot;><a class=&quot;btn btn-secondary&quot; href=&quot;/admin/&quot;>Back to menu</a></div></div>';})();"></script>
 </body>
 </html>
