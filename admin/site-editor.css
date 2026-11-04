@@ -81,6 +81,19 @@ html.glastic-admin-edit:has(#glastic-edit-signin-banner:not([hidden])) body {
 }
 #glastic-edit-toolbar button.primary { background: #0f766e; color: #fff; }
 #glastic-edit-toolbar button.ghost { background: transparent; color: #57534e; }
+#glastic-edit-toolbar a.toolbar-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0 0.65rem;
+  border-radius: 999px;
+  font: 600 0.8125rem Inter, system-ui, sans-serif;
+  color: #57534e;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+#glastic-edit-toolbar a.toolbar-link:active { background: #f5f5f4; }
 #glastic-edit-toolbar .glastic-page-picker {
   position: relative;
   flex: 1 1 6rem;

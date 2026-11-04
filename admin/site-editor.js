@@ -589,7 +589,7 @@
     gate.hidden = false;
     gate.innerHTML = '<div class="panel"><h1 style="margin:0 0 0.5rem;font-size:1.25rem">' + esc(title)
       + '</h1><p style="margin:0;color:#57534e">' + esc(message)
-      + '</p><p style="margin-top:1rem"><a href="/admin/" style="color:#0f766e">Back to menu</a> · '
+      + '</p><p style="margin-top:1rem"><a href="/admin/tasks.html" style="color:#0f766e">Quick tasks</a> · '
       + '<button type="button" id="gate-retry" style="border:0;background:none;color:#0f766e;font:inherit;cursor:pointer">Try again</button></p></div>';
     var retry = document.getElementById('gate-retry');
     if (retry) retry.onclick = function () { location.reload(); };
@@ -611,7 +611,7 @@
       + '<div class="btn-row"><button type="submit" class="btn-primary">'
       + (needsSetup ? 'Continue' : 'Sign in') + '</button>'
       + '<a class="btn btn-secondary" href="/admin/?return=' + encodeURIComponent('/?adminEdit=1&visualEdit=1') + '">Use full sign-in page</a>'
-      + '<a class="btn btn-secondary" href="/admin/">Back to menu</a></div></form></div>';
+      + '<a class="btn btn-secondary" href="/admin/tasks.html">Quick tasks</a></div></form></div>';
     var bannerBtn = document.getElementById('glastic-signin-banner-btn');
     if (bannerBtn) {
       bannerBtn.onclick = function () {
@@ -661,6 +661,7 @@
     bar.id = 'glastic-edit-toolbar';
     bar.innerHTML = '<div class="toolbar-inner">'
       + '<button type="button" class="ghost" id="glastic-btn-exit" aria-label="Exit editor"><i class="fas fa-times"></i></button>'
+      + '<a class="ghost toolbar-link" id="glastic-btn-tasks" href="/admin/tasks.html">Tasks</a>'
       + '<div class="glastic-page-picker" id="glastic-page-picker">'
       + '<button type="button" id="glastic-page-picker-btn" aria-haspopup="listbox" aria-expanded="false">'
       + '<span id="glastic-page-picker-label">Page</span><span aria-hidden="true"> ▾</span></button>'
@@ -731,7 +732,7 @@
     });
     document.getElementById('glastic-btn-exit').onclick = function () {
       if (dirty && !confirm('You have unsaved changes. Leave anyway?')) return;
-      window.location.href = '/admin/';
+      window.location.href = '/';
     };
     document.getElementById('glastic-btn-colours').onclick = openSheet;
     sheetBackdrop.onclick = closeSheet;

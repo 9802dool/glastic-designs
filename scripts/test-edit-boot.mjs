@@ -1,5 +1,5 @@
 /**
- * Boot UX: /admin/edit.html gateway + same-document /?adminEdit=1&visualEdit=1
+ * Boot UX: /admin gateway + same-document /?adminEdit=1&visualEdit=1
  */
 import { chromium } from 'playwright';
 
@@ -8,7 +8,7 @@ const ORIGIN = 'http://127.0.0.1:3000';
 async function waitServer() {
   for (let i = 0; i < 40; i++) {
     try {
-      if ((await fetch(ORIGIN + '/admin/edit.html')).ok) return;
+      if ((await fetch(ORIGIN + '/admin/')).ok) return;
     } catch (e) { /* retry */ }
     await new Promise(function (r) { setTimeout(r, 250); });
   }
@@ -40,9 +40,9 @@ const browser = await chromium.launch({ headless: true });
     }
     return route.continue();
   });
-  await page.goto(ORIGIN + '/admin/edit.html', { waitUntil: 'domcontentloaded' });
+  await page.goto(ORIGIN + '/admin/', { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#gate-password', { timeout: 8000 });
-  console.log('OK: edit.html gateway shows sign-in when unsigned');
+  console.log('OK: /admin gateway shows sign-in when unsigned');
   await page.close();
 }
 

@@ -98,7 +98,7 @@
     </div>
     <button type="button" class="quiet" id="sign-out" hidden>Sign out</button>
   </header>
-  <p style="width:min(100%,68rem);margin:0 auto;padding:0 1rem 0.5rem"><a href="/admin/" class="quiet" style="padding:0;font-size:0.9rem">← Simple menu for Alicia</a></p>
+  <p style="width:min(100%,68rem);margin:0 auto;padding:0 1rem 0.5rem"><a href="/admin/tasks.html" class="quiet" style="padding:0;font-size:0.9rem">← Quick tasks menu</a></p>
   <main id="app"></main>
   <div id="savebar" class="savebar" hidden>
     <div class="savebar-inner">
@@ -246,14 +246,14 @@
         + '<button class="ghost add-new" type="button" id="edit-website">Website look &amp; content (forms)</button>'
         + '<button class="ghost add-new" type="button" id="add-product">+ Add New Product</button>'
         + '<p class="muted hint">Use <strong>Edit my website</strong> for full-screen tap-to-edit. Forms below are still here if you prefer them.</p>'
-        + '<p class="muted hint"><a href="/admin/edit.html">Open full-screen editor</a></p>'
+        + '<p class="muted hint"><a href="/admin/">Open click-to-edit site</a></p>'
         + (notice ? '<div class="banner ' + esc(notice.kind) + '" role="status">' + noticeHtml() + '</div>' : '')
         + '</div><div class="list-grid">' + cards + '</div>';
       const wrap = app.querySelector('.span');
       const grid = app.querySelector('.list-grid');
       if (wrap && grid) wrap.appendChild(grid);
       document.getElementById('visual-edit').onclick = function () {
-        window.location.href = '/admin/edit.html';
+        window.location.href = '/admin/';
       };
       document.getElementById('edit-website').onclick = function () {
         if (window.adminShowSitePanel) window.adminShowSitePanel();

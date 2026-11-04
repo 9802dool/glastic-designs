@@ -1,6 +1,7 @@
 (function () {
   var AUTH_TIMEOUT_MS = 20000;
   var REDIRECT = '/?adminEdit=1&visualEdit=1';
+  var TASKS_URL = '/admin/tasks.html';
   var gate = document.getElementById('gate');
 
   function api(url, options) {
@@ -46,31 +47,50 @@
   function showError(title, message) {
     console.error('[glastic-edit-gateway]', title, message);
     gate.innerHTML = '<div class="gate-panel"><h1>' + esc(title) + '</h1><p>' + esc(message)
-      + '</p><div class="btn-row"><a class="btn btn-secondary" href="/admin/">Back to menu</a>'
+      + '</p><div class="btn-row"><a class="btn btn-secondary" href="' + TASKS_URL + '">Quick tasks</a>'
       + '<button type="button" class="btn-primary" id="gate-retry">Try again</button></div></div>';
     document.getElementById('gate-retry').onclick = function () { location.reload(); };
   }
 
   function showSignIn(needsSetup) {
     gate.innerHTML = '<div class="gate-panel"><h1>' + (needsSetup ? 'Welcome' : 'Sign in') + '</h1><p>'
-      + 'Sign in to open the full-page editor.</p><form id="gate-auth">'
-      + '<label for="gate-password">Password</label><input id="gate-password" type="password" minlength="8" required>'
+      + (needsSetup
+        ? 'Choose a password for your shop admin, then open the click-to-edit site.'
+        : 'Sign in with your shop password to edit your website.')
+      + '</p><form id="gate-auth">'
+      + '<label for="gate-password">' + (needsSetup ? 'New password' : 'Password') + '</label>'
+      + '<input id="gate-password" type="password" autocomplete="' + (needsSetup ? 'new-password' : 'current-password') + '" minlength="8" required>'
+      + (needsSetup
+        ? '<label for="gate-confirm">Type it again</label><input id="gate-confirm" type="password" autocomplete="new-password" minlength="8" required>'
+        : '')
       + '<p id="gate-auth-error" class="alert" hidden></p>'
-      + '<div class="btn-row"><button type="submit" class="btn-primary">Continue</button>'
-      + '<a class="btn btn-secondary" href="/admin/?return=' + encodeURIComponent(REDIRECT) + '">Back to menu</a></div></form></div>';
+      + '<div class="btn-row"><button type="submit" class="btn-primary">'
+      + (needsSetup ? 'Continue' : 'Sign in') + '</button>'
+      + '<a class="btn btn-secondary" href="' + TASKS_URL + '">Quick tasks menu</a></div></form></div>';
     document.getElementById('gate-auth').onsubmit = function (e) {
       e.preventDefault();
+      var password = document.getElementById('gate-password').value;
+      var errEl = document.getElementById('gate-auth-error');
+      if (needsSetup && password !== document.getElementById('gate-confirm').value) {
+        errEl.hidden = false;
+        errEl.textContent = 'Those passwords do not match.';
+        return;
+      }
+      errEl.hidden = true;
       showLoading('Signing in…');
       api('/api/admin/auth', {
         method: 'POST',
-        body: JSON.stringify({ action: needsSetup ? 'setup' : 'login', password: document.getElementById('gate-password').value }),
+        body: JSON.stringify({ action: needsSetup ? 'setup' : 'login', password: password }),
         timeoutMs: AUTH_TIMEOUT_MS
       }).then(function () {
         window.location.replace(REDIRECT);
       }).catch(function (err) {
         showSignIn(needsSetup);
-        var el = document.getElementById('gate-auth-error');
-        if (el) { el.hidden = false; el.textContent = err.message || 'Sign-in failed.'; }
+        errEl = document.getElementById('gate-auth-error');
+        if (errEl) {
+          errEl.hidden = false;
+          errEl.textContent = (err && err.message) || 'Sign-in failed.';
+        }
       });
     };
   }

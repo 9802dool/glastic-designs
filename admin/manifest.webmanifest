@@ -3,7 +3,7 @@
   "short_name": "Glastic",
   "description": "Update your Glastic Designs shop",
   "start_url": "/admin/",
-  "scope": "/admin/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#fafaf9",
   "theme_color": "#0f766e",

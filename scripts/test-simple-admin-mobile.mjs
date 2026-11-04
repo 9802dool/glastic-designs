@@ -70,7 +70,7 @@ await page.route('**/api/admin/settings**', function (route) {
   return route.continue();
 });
 
-await page.goto(ORIGIN + '/admin/', { waitUntil: 'networkidle' });
+await page.goto(ORIGIN + '/admin/tasks.html', { waitUntil: 'networkidle' });
 await page.waitForSelector('h2.page-title');
 await page.screenshot({ path: OUT + '/admin-simple-menu-mobile.png', fullPage: true });
 

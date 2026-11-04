@@ -636,7 +636,7 @@
   function returnAfterAuth() {
     var params = new URLSearchParams(window.location.search);
     var dest = params.get('return') || params.get('next') || '';
-    if (dest && dest.charAt(0) === '/' && dest.indexOf('/admin') === 0 && dest.indexOf('//') !== 0) {
+    if (dest && dest.charAt(0) === '/' && dest.indexOf('//') !== 0) {
       window.location.href = dest;
       return true;
     }
