@@ -119,6 +119,13 @@
       + '.glastic-edit-popover{position:fixed;z-index:10001;background:#fff;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:0.65rem;min-width:11rem;max-width:min(20rem,calc(100vw - 1.5rem));font:600 0.8125rem Inter,system-ui,sans-serif;color:#1c1917;}'
       + '.glastic-edit-popover button,.glastic-edit-popover input{width:100%;min-height:2.75rem;border-radius:10px;border:1px solid #e7e5e4;padding:0 0.65rem;font:inherit;margin-top:0.35rem;}'
       + '.glastic-edit-popover button.primary{background:#0f766e;color:#fff;border:0;}'
+      + '.glastic-link-chip{display:flex;flex-direction:column;gap:0.35rem;}'
+      + '.glastic-link-chip button{margin-top:0;border:1px solid #e7e5e4;background:#fafaf9;}'
+      + '.glastic-link-chip button.primary{margin-top:0.15rem;}'
+      + 'html.glastic-visual-edit-active a[data-nav-label]{cursor:pointer;}'
+      + '.glastic-nav-rename-btn{display:inline-flex;align-items:center;justify-content:center;margin-left:0.2rem;width:1.35rem;height:1.35rem;padding:0;border:0;border-radius:999px;background:rgba(15,118,110,.12);color:#0f766e;font-size:0.65rem;line-height:1;cursor:pointer;vertical-align:middle;opacity:0;pointer-events:none;transition:opacity .15s;}'
+      + 'html.glastic-visual-edit-active a[data-nav-label]:hover .glastic-nav-rename-btn,html.glastic-visual-edit-active a[data-nav-label]:focus-within .glastic-nav-rename-btn,.glastic-nav-rename-btn:focus{opacity:1;pointer-events:auto;}'
+      + '@media (hover:none){html.glastic-visual-edit-active .glastic-nav-rename-btn{opacity:1;pointer-events:auto;}}'
       + '.glastic-edit-hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(4.5rem + env(safe-area-inset-bottom));z-index:10000;background:#115e59;color:#fff;padding:0.55rem 1rem;border-radius:999px;font:600 0.8125rem Inter,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.2);pointer-events:none;}'
       + '.glastic-prod-hide{position:absolute;top:0.5rem;right:0.5rem;z-index:2;background:rgba(255,255,255,.95);border:0;border-radius:999px;padding:0.35rem 0.65rem;font:600 0.75rem Inter,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.12);cursor:pointer;min-height:2.25rem;}'
       + '.product-card.glastic-hidden-preview{opacity:0.55;}'
@@ -133,16 +140,65 @@
         el.setAttribute('data-editable-kind', t.kind);
       });
     });
-    document.querySelectorAll('[data-nav-label]').forEach(function (el) {
-      var label = el.getAttribute('data-nav-label');
-      if (!label) return;
-      el.setAttribute('data-editable', 'nav.' + label);
-      el.setAttribute('data-editable-kind', 'text');
-    });
-    var exploreLabel = document.getElementById('hero-explore-cta');
-    if (exploreLabel) {
-      exploreLabel.setAttribute('data-editable-label', 'chrome.heroExploreLabel');
+    markNavRenameControls();
+    var exploreCta = document.getElementById('hero-explore-cta');
+    if (exploreCta) {
+      exploreCta.setAttribute('data-editable-label', 'chrome.heroExploreLabel');
     }
+  }
+
+  function markNavRenameControls() {
+    document.querySelectorAll('[data-nav-label]').forEach(function (anchor) {
+      if (!anchor.querySelector('.glastic-nav-rename-btn')) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'glastic-nav-rename-btn';
+        btn.setAttribute('aria-label', 'Rename menu label');
+        btn.textContent = '\u270E';
+        anchor.appendChild(btn);
+      }
+    });
+  }
+
+  function isSiteNavLink(el) {
+    if (!el || !el.closest) return false;
+    var a = el.closest('a[href]');
+    if (!a) return false;
+    if (a.hasAttribute('data-nav') || a.hasAttribute('data-nav-label')) return true;
+    if (a.closest('#mobile-menu, .cat-tabs, .tabbar, nav')) return true;
+    return false;
+  }
+
+  function elementEditPlain(el) {
+    if (!el) return '';
+    if (el.querySelector('.glastic-nav-rename-btn')) {
+      var clone = el.cloneNode(true);
+      clone.querySelectorAll('.glastic-nav-rename-btn').forEach(function (b) { b.remove(); });
+      return sanitizePlain(clone.textContent);
+    }
+    return sanitizePlain(el.innerText);
+  }
+
+  function labelKeyForLink(el) {
+    var labelSel = el.getAttribute('data-editable-label');
+    if (labelSel) return labelSel;
+    var inner = el.querySelector('[data-editable-kind="text"]');
+    if (inner) return inner.getAttribute('data-editable');
+    return null;
+  }
+
+  function navigateWithEditParams(href) {
+    if (!href || href.charAt(0) === '#') return;
+    try {
+      var url = new URL(href, window.location.origin);
+      if (url.origin !== window.location.origin) {
+        window.open(href, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      url.searchParams.set('adminEdit', '1');
+      url.searchParams.set('visualEdit', '1');
+      window.location.href = url.pathname + url.search + url.hash;
+    } catch (e) { /* ignore */ }
   }
 
   function markShopTitles() {
@@ -303,6 +359,7 @@
       el.removeAttribute('data-upload-kind');
     });
     document.querySelectorAll('.glastic-prod-hide').forEach(function (b) { b.remove(); });
+    document.querySelectorAll('.glastic-nav-rename-btn').forEach(function (b) { b.remove(); });
     markStatic();
     markShopTitles();
     markDynamic();
@@ -386,7 +443,7 @@
     } catch (e) { return; }
     var hint = document.createElement('div');
     hint.className = 'glastic-edit-hint';
-    hint.textContent = 'Tap anything to edit';
+    hint.textContent = 'Use Pages menu to switch — tap outlines to edit';
     document.body.appendChild(hint);
     setTimeout(function () { hint.remove(); }, 4500);
   }
@@ -472,6 +529,40 @@
     };
   }
 
+  function startLinkActionChip(linkEl, innerEditable) {
+    closePopover();
+    var key = linkEl.getAttribute('data-editable') || (innerEditable && innerEditable.getAttribute('data-editable'));
+    var labelKey = labelKeyForLink(linkEl);
+    popover = document.createElement('div');
+    popover.className = 'glastic-edit-popover glastic-link-chip';
+    popover.innerHTML = '<div style="margin-bottom:0.15rem">Link</div>'
+      + '<button type="button" data-action="go">Go to page</button>'
+      + (labelKey ? '<button type="button" data-action="text">Edit text</button>' : '')
+      + (key ? '<button type="button" data-action="href">Change link</button>' : '');
+    document.body.appendChild(popover);
+    positionPopover(linkEl);
+    popover.querySelector('[data-action="go"]').onclick = function () {
+      closePopover();
+      navigateWithEditParams(linkEl.getAttribute('href'));
+    };
+    var textBtn = popover.querySelector('[data-action="text"]');
+    if (textBtn) {
+      textBtn.onclick = function () {
+        closePopover();
+        var labelEl = document.querySelector('[data-editable="' + labelKey + '"]')
+          || linkEl.querySelector('[data-editable-kind="text"]');
+        if (labelEl) startTextEdit(labelEl, labelEl.getAttribute('data-editable-kind') || 'text');
+      };
+    }
+    var hrefBtn = popover.querySelector('[data-action="href"]');
+    if (hrefBtn) {
+      hrefBtn.onclick = function () {
+        closePopover();
+        startLinkPopover(linkEl);
+      };
+    }
+  }
+
   function startLinkPopover(el) {
     closePopover();
     var key = el.getAttribute('data-editable');
@@ -504,7 +595,7 @@
     el.removeEventListener('blur', onEditBlur, true);
     el.classList.remove('is-editing');
     el.contentEditable = 'false';
-    var raw = sanitizePlain(el.innerText);
+    var raw = elementEditPlain(el);
     if (kind === 'price') {
       var num = parseFloat(raw.replace(/[^0-9.]/g, ''));
       if (!isFinite(num) || num < 0) {
@@ -525,12 +616,29 @@
       postToParent({ type: 'change', key: key, value: raw });
       el.textContent = raw;
     }
+    if (el.hasAttribute('data-nav-label')) {
+      el.removeAttribute('data-editable');
+      el.removeAttribute('data-editable-kind');
+    }
     editingEl = null;
   }
 
   function onEditBlur(event) {
     if (!editingEl || event.target !== editingEl) return;
     finishTextEdit(editingEl, editingEl.getAttribute('data-editable'), editingEl.getAttribute('data-editable-kind'));
+  }
+
+  function startNavLabelEdit(anchor, key) {
+    if (editingEl === anchor) return;
+    if (editingEl) finishTextEdit(editingEl, editingEl.getAttribute('data-editable'), editingEl.getAttribute('data-editable-kind'));
+    closePopover();
+    editingEl = anchor;
+    anchor.setAttribute('data-editable', key);
+    anchor.setAttribute('data-editable-kind', 'text');
+    anchor.classList.add('is-editing');
+    anchor.contentEditable = 'true';
+    anchor.addEventListener('blur', onEditBlur, true);
+    anchor.focus();
   }
 
   function startTextEdit(el, kind) {
@@ -564,10 +672,11 @@
   function onCaptureNavigate(event) {
     if (!active) return;
     if (event.target.closest && event.target.closest('#glastic-edit-toolbar, #glastic-edit-gate, .glastic-edit-popover')) return;
+    if (isSiteNavLink(event.target)) return;
     var editable = findEditable(event.target);
     if (editable) {
       var kind = editable.getAttribute('data-editable-kind');
-      if (kind === 'link' || kind === 'image') {
+      if (kind === 'image') {
         event.preventDefault();
       }
     }
@@ -575,6 +684,18 @@
 
   function onClick(event) {
     if (!active) return;
+    var renameBtn = event.target.closest && event.target.closest('.glastic-nav-rename-btn');
+    if (renameBtn) {
+      event.preventDefault();
+      event.stopPropagation();
+      var navAnchor = renameBtn.closest('[data-nav-label]');
+      if (navAnchor) {
+        var navKey = 'nav.' + navAnchor.getAttribute('data-nav-label');
+        startNavLabelEdit(navAnchor, navKey);
+      }
+      return;
+    }
+    if (isSiteNavLink(event.target)) return;
     var hideBtn = event.target.closest && event.target.closest('[data-product-hide]');
     if (hideBtn) {
       event.preventDefault();
@@ -587,6 +708,17 @@
       hideBtn.textContent = nowHidden ? 'Hidden – tap to show' : 'Hide from site';
       postToParent({ type: 'change', key: 'product.' + pid + '.hidden', value: nowHidden });
       return;
+    }
+    var linkAnchor = event.target.closest && event.target.closest('a[href]');
+    if (linkAnchor && linkAnchor.getAttribute('href') && linkAnchor.getAttribute('href') !== '#') {
+      var linkEditable = findEditable(event.target);
+      var linkKind = linkEditable && linkEditable.getAttribute('data-editable-kind');
+      if (linkKind === 'link' || (linkEditable && linkAnchor.contains(linkEditable))) {
+        event.preventDefault();
+        event.stopPropagation();
+        startLinkActionChip(linkAnchor, linkEditable);
+        return;
+      }
     }
     var el = findEditable(event.target);
     if (!el || el === editingEl) return;
@@ -601,7 +733,7 @@
     if (kind === 'link') {
       event.preventDefault();
       event.stopPropagation();
-      startLinkPopover(el);
+      startLinkActionChip(el.tagName === 'A' ? el : (el.closest('a[href]') || el), el);
       return;
     }
     if (kind === 'text' || kind === 'multiline' || kind === 'price') {

@@ -81,11 +81,50 @@ html.glastic-admin-edit:has(#glastic-edit-signin-banner:not([hidden])) body {
 }
 #glastic-edit-toolbar button.primary { background: #0f766e; color: #fff; }
 #glastic-edit-toolbar button.ghost { background: transparent; color: #57534e; }
-#glastic-edit-toolbar select {
+#glastic-edit-toolbar .glastic-page-picker {
+  position: relative;
   flex: 1 1 6rem;
   min-width: 0;
-  appearance: none;
-  padding-right: 1.5rem;
+}
+#glastic-edit-toolbar #glastic-page-picker-btn {
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#glastic-edit-toolbar #glastic-page-picker-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  z-index: 100010;
+  max-height: min(16rem, 50vh);
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  padding: 0.35rem;
+}
+#glastic-edit-toolbar #glastic-page-picker-menu[hidden] {
+  display: none !important;
+}
+#glastic-edit-toolbar .glastic-page-picker-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border-radius: 8px;
+  margin: 0;
+  min-height: 2.5rem;
+  background: transparent;
+}
+#glastic-edit-toolbar .glastic-page-picker-item.is-current,
+#glastic-edit-toolbar .glastic-page-picker-item[aria-selected="true"] {
+  background: #ecfdf5;
+  color: #065f46;
 }
 #glastic-edit-gate {
   position: fixed;

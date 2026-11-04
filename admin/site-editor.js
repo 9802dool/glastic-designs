@@ -24,10 +24,12 @@
   var undoStack = [];
   var dirty = false;
   var saving = false;
-  var currentPath = window.location.pathname || '/';
+  var currentPath = normalizePath(window.location.pathname || '/');
 
   var gate = null;
-  var pageSelect = null;
+  var pagePickerBtn = null;
+  var pagePickerMenu = null;
+  var pagePickerLabel = null;
   var dirtyDot = null;
   var btnSave = null;
   var btnUndo = null;
@@ -49,8 +51,50 @@
     } catch (e) { /* ignore */ }
   }
 
+  function normalizePath(path) {
+    if (!path) return '/';
+    var p = String(path).split('?')[0].split('#')[0];
+    if (p.length > 1 && p.charAt(p.length - 1) === '/') p = p.slice(0, -1);
+    return p || '/';
+  }
+
   function editNavUrl(path) {
     return path + (path.indexOf('?') >= 0 ? '&' : '?') + 'adminEdit=1&visualEdit=1';
+  }
+
+  function isPreviewDeployHost() {
+    var h = window.location.hostname;
+    if (h === 'localhost' || h === '127.0.0.1') return true;
+    if (h.indexOf('-git-') >= 0 && h.slice(-12) === '.vercel.app') return true;
+    if (h.slice(-12) === '.vercel.app' && h !== 'glastic-designs.vercel.app') return true;
+    return false;
+  }
+
+  function syncPagePicker() {
+    if (!pagePickerLabel || !pagePickerMenu) return;
+    var label = 'Page';
+    PAGES.forEach(function (p) {
+      if (p.path === currentPath) label = p.label;
+    });
+    pagePickerLabel.textContent = label;
+    pagePickerMenu.querySelectorAll('[data-page-path]').forEach(function (btn) {
+      var on = btn.getAttribute('data-page-path') === currentPath;
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      btn.classList.toggle('is-current', on);
+    });
+  }
+
+  function closePagePickerMenu() {
+    if (!pagePickerMenu || !pagePickerBtn) return;
+    pagePickerMenu.hidden = true;
+    pagePickerBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function togglePagePickerMenu() {
+    if (!pagePickerMenu || !pagePickerBtn) return;
+    var open = pagePickerMenu.hidden;
+    pagePickerMenu.hidden = !open;
+    pagePickerBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
 
   function api(url, options) {
@@ -191,15 +235,24 @@
     }
   }
 
-  function navigateTo(path) {
-    if (path === currentPath) return;
-    if (dirty && !confirm('You have unsaved changes. Switch pages anyway?')) {
-      if (pageSelect) pageSelect.value = currentPath;
+  function navigateTo(path, options) {
+    options = options || {};
+    path = normalizePath(path);
+    if (path === currentPath) {
+      closePagePickerMenu();
+      return;
+    }
+    if (!options.fromToolbar && dirty && !confirm('You have unsaved changes. Switch pages anyway?')) {
+      syncPagePicker();
       return;
     }
     persistDraftForNavigation();
+    closePagePickerMenu();
     window.location.href = editNavUrl(path);
   }
+
+  window.__glasticPersistDraftForNav = persistDraftForNavigation;
+  window.__glasticEditNavigateTo = function (path) { navigateTo(path, { fromToolbar: true }); };
 
   function pushUndo() {
     undoStack.push({
@@ -468,7 +521,11 @@
       undoStack = [];
       btnUndo.disabled = true;
       setDirty(false);
-      showToast('Saved – it\'s on your website');
+      if (isPreviewDeployHost()) {
+        showToast('Saved. Changes show on the live site after this update is published.');
+      } else {
+        showToast('Saved – it\'s on your website');
+      }
       postPreview();
     } catch (err) {
       showToast((err && err.message) || 'Could not save');
@@ -604,7 +661,10 @@
     bar.id = 'glastic-edit-toolbar';
     bar.innerHTML = '<div class="toolbar-inner">'
       + '<button type="button" class="ghost" id="glastic-btn-exit" aria-label="Exit editor"><i class="fas fa-times"></i></button>'
-      + '<select id="glastic-page-select" aria-label="Page"></select>'
+      + '<div class="glastic-page-picker" id="glastic-page-picker">'
+      + '<button type="button" id="glastic-page-picker-btn" aria-haspopup="listbox" aria-expanded="false">'
+      + '<span id="glastic-page-picker-label">Page</span><span aria-hidden="true"> ▾</span></button>'
+      + '<div id="glastic-page-picker-menu" role="listbox" aria-label="Pages" hidden></div></div>'
       + '<span id="glastic-dirty-dot" title="Unsaved changes" style="width:0.5rem;height:0.5rem;border-radius:999px;background:#ea580c;display:none"></span>'
       + '<span id="glastic-edit-status" class="status-pill warn">Starting editor…</span>'
       + '<span style="flex:1"></span>'
@@ -639,7 +699,9 @@
       + '<button type="button" class="primary" id="glastic-signin-banner-btn">Sign in</button>';
     document.body.appendChild(signBanner);
 
-    pageSelect = document.getElementById('glastic-page-select');
+    pagePickerBtn = document.getElementById('glastic-page-picker-btn');
+    pagePickerMenu = document.getElementById('glastic-page-picker-menu');
+    pagePickerLabel = document.getElementById('glastic-page-picker-label');
     dirtyDot = document.getElementById('glastic-dirty-dot');
     btnSave = document.getElementById('glastic-btn-save');
     btnUndo = document.getElementById('glastic-btn-undo');
@@ -648,13 +710,25 @@
 
   function initUi() {
     PAGES.forEach(function (p) {
-      var opt = document.createElement('option');
-      opt.value = p.path;
-      opt.textContent = p.label;
-      if (p.path === currentPath) opt.selected = true;
-      pageSelect.appendChild(opt);
+      var item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'glastic-page-picker-item';
+      item.setAttribute('role', 'option');
+      item.setAttribute('data-page-path', p.path);
+      item.textContent = p.label;
+      item.onclick = function () { navigateTo(p.path, { fromToolbar: true }); };
+      pagePickerMenu.appendChild(item);
     });
-    pageSelect.onchange = function () { navigateTo(pageSelect.value); };
+    syncPagePicker();
+    pagePickerBtn.onclick = function (e) {
+      e.stopPropagation();
+      togglePagePickerMenu();
+    };
+    document.addEventListener('click', function (e) {
+      if (!pagePickerMenu || pagePickerMenu.hidden) return;
+      if (e.target.closest && e.target.closest('#glastic-page-picker')) return;
+      closePagePickerMenu();
+    });
     document.getElementById('glastic-btn-exit').onclick = function () {
       if (dirty && !confirm('You have unsaved changes. Leave anyway?')) return;
       window.location.href = '/admin/';

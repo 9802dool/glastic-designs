@@ -160,10 +160,12 @@ async function run() {
     return undo && !undo.disabled;
   }, { timeout: 5000 });
 
-  page.once('dialog', function (d) { d.accept(); });
   await Promise.all([
     page.waitForURL(/\/products(\?|$)/),
-    page.locator('#glastic-page-select').selectOption('/products')
+    (async function () {
+      await page.locator('#glastic-page-picker-btn').click();
+      await page.locator('#glastic-page-picker-menu button[data-page-path="/products"]').click();
+    })()
   ]);
   await page.waitForSelector('#glastic-edit-gate', { state: 'hidden', timeout: 25000 });
   await page.waitForFunction(function () {
@@ -182,13 +184,15 @@ async function run() {
     return undo && !undo.disabled;
   }, { timeout: 5000 });
 
-  page.once('dialog', function (d) { d.accept(); });
   await Promise.all([
     page.waitForURL(function (url) {
       var p = url.pathname.replace(/\/$/, '') || '/';
       return p === '/';
     }),
-    page.locator('#glastic-page-select').selectOption('/')
+    (async function () {
+      await page.locator('#glastic-page-picker-btn').click();
+      await page.locator('#glastic-page-picker-menu button[data-page-path="/"]').click();
+    })()
   ]);
   await page.waitForSelector('#glastic-edit-gate', { state: 'hidden', timeout: 25000 });
 

@@ -46,7 +46,16 @@
     document.addEventListener('click', function (event) {
       var a = event.target.closest && event.target.closest('a[href]');
       if (!a || a.closest('#glastic-edit-toolbar, .glastic-edit-popover')) return;
+      if (event.target.closest && event.target.closest('.glastic-nav-rename-btn')) return;
       var href = a.getAttribute('href');
+      if (href && href.charAt(0) !== '#' && !/^(mailto:|tel:|javascript:)/i.test(href)) {
+        try {
+          var u = new URL(href, window.location.origin);
+          if (u.origin === window.location.origin && window.__glasticPersistDraftForNav) {
+            window.__glasticPersistDraftForNav();
+          }
+        } catch (e) { /* ignore */ }
+      }
       if (!href || href.charAt(0) === '#') return;
       try {
         var url = new URL(href, window.location.origin);
