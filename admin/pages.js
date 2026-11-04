@@ -220,7 +220,7 @@
       var photos = state.payload.gallery || [];
       var cards = photos.map(function (photo, index) {
         return '<article class="photo-card" data-gallery-id="' + esc(photo.id) + '">'
-          + '<img class="preview" src="' + esc(photo.url) + '" alt="">'
+          + '<img class="preview page-photo-preview" src="' + esc(photo.url) + '" alt="">'
           + '<label class="field" for="cap-' + esc(photo.id) + '">Caption</label>'
           + '<input id="cap-' + esc(photo.id) + '" data-gallery-caption="' + esc(photo.id) + '" value="' + esc(photo.caption || '') + '">'
           + '<div class="photo-actions"><div class="pair">'
@@ -237,7 +237,7 @@
     }
 
     function render() {
-      document.body.classList.add('editing');
+      document.body.classList.add('pages-editor', 'editing');
       savebar.hidden = false;
       saveButton.textContent = 'Save page';
       saveButton.type = 'button';
@@ -265,7 +265,7 @@
           var fid = 'f-' + (field.map ? field.map + '-' + field.mapKey : field.key);
           if (field.type === 'image') {
             body += '<label class="field">' + esc(field.label) + '</label>'
-              + '<img class="preview" style="height:10rem;margin-bottom:0.5rem" src="' + esc(val || '/images/living-wall.jpg') + '" alt="">'
+              + '<img class="preview page-photo-preview" src="' + esc(val || '/images/living-wall.jpg') + '" alt="">'
               + '<label class="ghost file-btn">Replace photo<input type="file" accept="image/*" hidden data-image-field="' + esc(field.key) + '"></label>';
             return;
           }
