@@ -209,26 +209,26 @@
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <div class="order-2 lg:order-1">
           <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-4 py-2 rounded-full text-sm mb-6">
-            <i class="fas fa-recycle"></i> Made in Trinidad & Tobago ♻️
+            <i class="fas fa-recycle"></i> <span data-content="home.heroBadge">Made in Trinidad & Tobago ♻️</span>
           </div>
-          <h1 class="font-display text-5xl md:text-6xl font-bold leading-tight mb-6">
+          <h1 class="font-display text-5xl md:text-6xl font-bold leading-tight mb-6" data-content="home.heroHeadline">
             Plastic Waste.<br>Beautiful Design.
           </h1>
-          <p class="text-xl text-emerald-100 mb-8 leading-relaxed">
+          <p class="text-xl text-emerald-100 mb-8 leading-relaxed" data-content="home.heroSubtext">
             We transform discarded plastic into durable, stylish interior products — tiles, furniture, coasters and more. Creating a circular economy right here in Trinidad and Tobago.
           </p>
           <div class="flex flex-col sm:flex-row gap-4">
-            <a href="/products" class="bg-white text-emerald-800 px-8 py-4 rounded-full font-semibold text-center hover:bg-emerald-50 transition">Explore Products</a>
+            <a href="/products" class="bg-white text-emerald-800 px-8 py-4 rounded-full font-semibold text-center hover:bg-emerald-50 transition"><span data-content="home.exploreLabel">Explore Products</span></a>
             <a href="https://www.facebook.com/gdistyles" target="_blank" class="border-2 border-white/50 px-8 py-4 rounded-full font-semibold text-center hover:bg-white/10 transition flex items-center justify-center gap-2">
               <i class="fab fa-facebook"></i> Follow on Facebook
             </a>
           </div>
         </div>
         <div class="relative order-1 lg:order-2">
-          <picture class="block"><source srcset="/images/living-wall.webp" type="image/webp"><img src="/images/living-wall.jpg" alt="Outdoor living wall by Glastic Designs, planted on a concrete wall" class="rounded-3xl shadow-2xl w-full object-cover object-center h-[420px] sm:h-[500px]" loading="eager" fetchpriority="high"></picture>
+          <picture class="block" data-content-image="home.heroImage"><source srcset="/images/living-wall.webp" type="image/webp"><img src="/images/living-wall.jpg" alt="Outdoor living wall by Glastic Designs, planted on a concrete wall" class="rounded-3xl shadow-2xl w-full object-cover object-center h-[420px] sm:h-[500px]" loading="eager" fetchpriority="high"></picture>
           <div class="absolute bottom-4 right-4 bg-white text-stone-900 px-4 py-3 rounded-2xl shadow-xl">
-            <div class="text-2xl font-bold text-emerald-600 leading-none">T&T</div>
-            <div class="text-sm font-medium">Living walls & planters</div>
+            <div class="text-2xl font-bold text-emerald-600 leading-none" data-content="home.heroBadgeNote">T&T</div>
+            <div class="text-sm font-medium" data-content="home.heroBadgeCaption">Living walls & planters</div>
           </div>
         </div>
       </div>
@@ -239,14 +239,14 @@
   <section id="about" class="site-page py-20 plastic-pattern">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-10 items-center mb-16">
-        <picture class="block">
+        <picture class="block" data-content-image="about.image">
           <source srcset="/images/owner.webp" type="image/webp">
           <img src="/images/owner.jpg" alt="Alicia Barrie-George holding plants beside the Glastic Designs studio" class="rounded-3xl w-full h-80 sm:h-[28rem] object-cover object-top shadow-lg" loading="lazy">
         </picture>
         <div>
-          <p class="text-emerald-700 font-semibold mb-3">We are nature's Keepers</p>
-          <h2 class="font-display text-4xl md:text-5xl font-bold text-emerald-900 mb-6">From Waste to Wonder</h2>
-          <p class="text-lg text-stone-600">Founded by Alicia Barrie-George, Glastic Designs (a play on glass, plants and plastics) began with a vision to introduce green spaces into urban Trinidad. After recognizing the massive volume of plastic waste, we pivoted to upcycling — turning discarded materials into high-value interior products, including living walls and planters.</p>
+          <p class="text-emerald-700 font-semibold mb-3" data-content="about.eyebrow">We are nature's Keepers</p>
+          <h2 class="font-display text-4xl md:text-5xl font-bold text-emerald-900 mb-6" data-content="about.title">From Waste to Wonder</h2>
+          <p class="text-lg text-stone-600" data-content="about.text">Founded by Alicia Barrie-George, Glastic Designs (a play on glass, plants and plastics) began with a vision to introduce green spaces into urban Trinidad. After recognizing the massive volume of plastic waste, we pivoted to upcycling — turning discarded materials into high-value interior products, including living walls and planters.</p>
         </div>
       </div>
       <div class="grid md:grid-cols-3 gap-8">
@@ -254,30 +254,30 @@
           <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl mb-6">
             <i class="fas fa-leaf"></i>
           </div>
-          <h3 class="font-bold text-xl mb-3">Circular Economy</h3>
-          <p class="text-stone-600">Every product gives plastic a second life, reducing landfill waste and pollution in our communities and oceans.</p>
+          <h3 class="font-bold text-xl mb-3" data-content="about.feature0Title">Circular Economy</h3>
+          <p class="text-stone-600" data-content="about.feature0Text">Every product gives plastic a second life, reducing landfill waste and pollution in our communities and oceans.</p>
         </div>
         <div class="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition">
           <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl mb-6">
             <i class="fas fa-school"></i>
           </div>
-          <h3 class="font-bold text-xl mb-3">School Furniture</h3>
-          <p class="text-stone-600">We refurbish discarded school furniture using recycled plastic, providing low-cost solutions and better learning environments.</p>
+          <h3 class="font-bold text-xl mb-3" data-content="about.feature1Title">School Furniture</h3>
+          <p class="text-stone-600" data-content="about.feature1Text">We refurbish discarded school furniture using recycled plastic, providing low-cost solutions and better learning environments.</p>
         </div>
         <div class="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition">
           <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl mb-6">
             <i class="fas fa-map-marker-alt"></i>
           </div>
-          <h3 class="font-bold text-xl mb-3">Made in TNT</h3>
-          <p class="text-stone-600">Proudly designed and manufactured in Trinidad and Tobago. Supporting local jobs and Caribbean entrepreneurship.</p>
+          <h3 class="font-bold text-xl mb-3" data-content="about.feature2Title">Made in TNT</h3>
+          <p class="text-stone-600" data-content="about.feature2Text">Proudly designed and manufactured in Trinidad and Tobago. Supporting local jobs and Caribbean entrepreneurship.</p>
         </div>
       </div>
       <figure class="mt-14 max-w-xl mx-auto">
-        <picture class="block">
+        <picture class="block" data-content-image="about.plantImage">
           <source srcset="/images/plant-benefits.webp" type="image/webp">
           <img src="/images/plant-benefits.jpg" alt="Glastic Designs graphic about the benefits of indoor plants" class="rounded-3xl w-full shadow-sm" loading="lazy">
         </picture>
-        <figcaption class="text-sm text-stone-500 text-center mt-3">Plantastic benefits of indoor plants, from our Facebook page.</figcaption>
+        <figcaption class="text-sm text-stone-500 text-center mt-3" data-content="about.plantCaption">Plantastic benefits of indoor plants, from our Facebook page.</figcaption>
       </figure>
     </div>
   </section>
@@ -287,10 +287,10 @@
   <section id="gallery" class="site-page py-20 bg-stone-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
-        <h2 class="font-display text-4xl md:text-5xl font-bold text-emerald-900 mb-4">Nature's Keepers</h2>
-        <p class="text-lg text-stone-600 max-w-2xl mx-auto">Living walls and planters from our work in Trinidad and Tobago.</p>
+        <h2 class="font-display text-4xl md:text-5xl font-bold text-emerald-900 mb-4" data-content="gallery.title">Nature's Keepers</h2>
+        <p class="text-lg text-stone-600 max-w-2xl mx-auto" data-content="gallery.subtitle">Living walls and planters from our work in Trinidad and Tobago.</p>
       </div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div id="gallery-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <figure class="group">
           <div class="photo-frame h-72 sm:h-80 rounded-3xl overflow-hidden bg-stone-200">
             <picture class="block h-full"><source srcset="/images/living-wall.webp" type="image/webp"><img src="/images/living-wall.jpg" alt="Outdoor living wall by Glastic Designs, planted on a concrete wall" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy"></picture>
@@ -339,7 +339,7 @@
           <a href="/category/gifts" data-nav>Gifts</a>
           <a href="/category/services" data-nav>Services</a>
         </nav>
-        <p class="text-sm text-emerald-800 mt-4">Add pieces to your cart, then check out once. The payment step is a demo — nothing is charged.</p>
+        <p class="text-sm text-emerald-800 mt-4" data-content="shop.demoNote">Add pieces to your cart, then check out once. The payment step is a demo — nothing is charged.</p>
       </div>
       <div id="product-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         <p class="text-stone-500 col-span-full text-center">Loading products…</p>
@@ -350,27 +350,27 @@
   <!-- Process -->
   <section id="process" class="site-page py-20 bg-emerald-900 text-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="font-display text-4xl md:text-5xl font-bold text-center mb-16">How We Make It</h2>
+      <h2 class="font-display text-4xl md:text-5xl font-bold text-center mb-16" data-content="process.title">How We Make It</h2>
       <div class="grid md:grid-cols-4 gap-8">
         <div class="text-center">
           <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold">1</div>
-          <h3 class="font-bold text-xl mb-3">Collect</h3>
-          <p class="text-emerald-100">We collect plastic waste at events, from partners and communities across Trinidad and Tobago.</p>
+          <h3 class="font-bold text-xl mb-3" data-content="process.step0Title">Collect</h3>
+          <p class="text-emerald-100" data-content="process.step0Text">We collect plastic waste at events, from partners and communities across Trinidad and Tobago.</p>
         </div>
         <div class="text-center">
           <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold">2</div>
-          <h3 class="font-bold text-xl mb-3">Sort & Shred</h3>
-          <p class="text-emerald-100">Plastics are sorted by type and color, then shredded for consistent material quality.</p>
+          <h3 class="font-bold text-xl mb-3" data-content="process.step1Title">Sort & Shred</h3>
+          <p class="text-emerald-100" data-content="process.step1Text">Plastics are sorted by type and color, then shredded for consistent material quality.</p>
         </div>
         <div class="text-center">
           <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold">3</div>
-          <h3 class="font-bold text-xl mb-3">Process</h3>
-          <p class="text-emerald-100">Using Precious Plastic techniques, we melt and form the plastic into sheets, tiles and components.</p>
+          <h3 class="font-bold text-xl mb-3" data-content="process.step2Title">Process</h3>
+          <p class="text-emerald-100" data-content="process.step2Text">Using Precious Plastic techniques, we melt and form the plastic into sheets, tiles and components.</p>
         </div>
         <div class="text-center">
           <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold">4</div>
-          <h3 class="font-bold text-xl mb-3">Create</h3>
-          <p class="text-emerald-100">Crafted into durable, beautiful products ready for homes, schools and businesses.</p>
+          <h3 class="font-bold text-xl mb-3" data-content="process.step3Title">Create</h3>
+          <p class="text-emerald-100" data-content="process.step3Text">Crafted into durable, beautiful products ready for homes, schools and businesses.</p>
         </div>
       </div>
     </div>
@@ -382,30 +382,30 @@
       <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl p-12">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 class="font-display text-4xl font-bold text-emerald-900 mb-6">Making a Difference</h2>
+            <h2 class="font-display text-4xl font-bold text-emerald-900 mb-6" data-content="impact.title">Making a Difference</h2>
             <ul class="space-y-4 text-lg">
-              <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-1"></i> <span>Collected tens of kilograms at events (e.g. 33 lbs at Honeyfest, 60kg with partners)</span></li>
-              <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-1"></i> <span>Partnered with NGC and others supporting local recycling efforts</span></li>
-              <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-1"></i> <span>Changing the cultural perspective: plastic is a resource, not trash</span></li>
-              <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-1"></i> <span>Supporting Every Bottle Back TT and circular economy initiatives</span></li>
+              <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-1"></i> <span data-content="impact.bullet0">Collected tens of kilograms at events (e.g. 33 lbs at Honeyfest, 60kg with partners)</span></li>
+              <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-1"></i> <span data-content="impact.bullet1">Partnered with NGC and others supporting local recycling efforts</span></li>
+              <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-1"></i> <span data-content="impact.bullet2">Changing the cultural perspective: plastic is a resource, not trash</span></li>
+              <li class="flex items-start gap-3"><i class="fas fa-check-circle text-emerald-600 mt-1"></i> <span data-content="impact.bullet3">Supporting Every Bottle Back TT and circular economy initiatives</span></li>
             </ul>
           </div>
           <div class="grid grid-cols-2 gap-6">
             <div class="bg-white p-6 rounded-2xl text-center shadow-sm">
-              <div class="text-4xl font-bold text-emerald-600">100%</div>
-              <div class="text-sm text-stone-600">Plastic Waste Products</div>
+              <div class="text-4xl font-bold text-emerald-600" data-content="impact.stat0Value">100%</div>
+              <div class="text-sm text-stone-600" data-content="impact.stat0Label">Plastic Waste Products</div>
             </div>
             <div class="bg-white p-6 rounded-2xl text-center shadow-sm">
-              <div class="text-4xl font-bold text-emerald-600">$250</div>
-              <div class="text-sm text-stone-600">TT Benches</div>
+              <div class="text-4xl font-bold text-emerald-600" data-content="impact.stat1Value">$250</div>
+              <div class="text-sm text-stone-600" data-content="impact.stat1Label">TT Benches</div>
             </div>
             <div class="bg-white p-6 rounded-2xl text-center shadow-sm">
-              <div class="text-4xl font-bold text-emerald-600">0.25kg</div>
-              <div class="text-sm text-stone-600">Recycled per Tile</div>
+              <div class="text-4xl font-bold text-emerald-600" data-content="impact.stat2Value">0.25kg</div>
+              <div class="text-sm text-stone-600" data-content="impact.stat2Label">Recycled per Tile</div>
             </div>
             <div class="bg-white p-6 rounded-2xl text-center shadow-sm">
-              <div class="text-4xl font-bold text-emerald-600">T&T</div>
-              <div class="text-sm text-stone-600">Proudly Local</div>
+              <div class="text-4xl font-bold text-emerald-600" data-content="impact.stat3Value">T&T</div>
+              <div class="text-sm text-stone-600" data-content="impact.stat3Label">Proudly Local</div>
             </div>
           </div>
         </div>
@@ -416,34 +416,34 @@
   <!-- Contact -->
   <section id="contact" class="site-page py-20 bg-stone-900 text-white">
     <div class="max-w-4xl mx-auto px-4 text-center">
-      <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">Ready to Order or Partner?</h2>
-      <p class="text-xl text-stone-300 mb-10">DM us on Facebook, WhatsApp, or follow our journey. Custom colors, sizes and bulk orders welcome.</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold mb-6" data-content="contact.title">Ready to Order or Partner?</h2>
+      <p class="text-xl text-stone-300 mb-10" data-content="contact.lead">DM us on Facebook, WhatsApp, or follow our journey. Custom colors, sizes and bulk orders welcome.</p>
       <div class="bg-white text-stone-900 rounded-3xl p-6 sm:p-8 text-left mb-10 shadow-xl">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p class="text-emerald-700 text-sm font-semibold">Book a consultation</p>
-            <h3 class="font-display text-3xl font-bold text-emerald-900 mt-1">Port of Spain studio visit</h3>
-            <p class="text-stone-600 mt-3">Reserve a design consultation and preview how paying online would work. The amount is a sample deposit in TTD.</p>
+            <p class="text-emerald-700 text-sm font-semibold" data-content="contact.consultEyebrow">Book a consultation</p>
+            <h3 class="font-display text-3xl font-bold text-emerald-900 mt-1" data-content="contact.consultTitle">Port of Spain studio visit</h3>
+            <p class="text-stone-600 mt-3" data-content="contact.consultLead">Reserve a design consultation and preview how paying online would work. The amount is a sample deposit in TTD.</p>
           </div>
           <div class="sm:text-right shrink-0">
-            <div class="text-3xl font-bold text-emerald-800" data-pay-amount="consult" data-pay-mode="deposit">$150.00 TTD</div>
-            <p class="text-sm text-stone-500">Deposit</p>
+            <div class="text-3xl font-bold text-emerald-800" data-pay-amount="consult" data-pay-mode="deposit" data-content="contact.consultDeposit">$150.00 TTD</div>
+            <p class="text-sm text-stone-500" data-content="contact.consultDepositLabel">Deposit</p>
           </div>
         </div>
         <div class="mt-6 flex flex-col sm:flex-row gap-3">
           <button type="button" data-pay-open="consult" data-pay-mode="deposit" class="pay-btn inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg w-full sm:w-auto">
-            <i class="fas fa-lock"></i> Pay Deposit
+            <i class="fas fa-lock"></i> <span data-content="contact.consultPayButton">Pay Deposit</span>
           </button>
-          <a href="https://wa.me/18687752407" class="inline-flex items-center justify-center gap-2 border-2 border-emerald-700 text-emerald-800 px-8 py-4 rounded-full font-semibold w-full sm:w-auto">WhatsApp instead</a>
+          <a href="https://wa.me/18687752407" class="inline-flex items-center justify-center gap-2 border-2 border-emerald-700 text-emerald-800 px-8 py-4 rounded-full font-semibold w-full sm:w-auto"><span data-content="contact.consultWaButton">WhatsApp instead</span></a>
         </div>
-        <p class="text-xs text-stone-500 mt-4">Demo — no real payment will be taken.</p>
+        <p class="text-xs text-stone-500 mt-4" data-content="contact.consultNote">Demo — no real payment will be taken.</p>
       </div>
       <div class="flex flex-col sm:flex-row justify-center gap-4 mb-12">
         <a href="https://wa.me/18687752407" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 px-10 py-4 rounded-full font-semibold text-lg flex items-center justify-center gap-3 transition">
-          <i class="fab fa-whatsapp text-2xl"></i> WhatsApp 775-2407
+          <i class="fab fa-whatsapp text-2xl"></i> <span data-content="contact.whatsappLabel">WhatsApp 775-2407</span>
         </a>
         <a href="https://www.facebook.com/gdistyles" target="_blank" class="bg-blue-600 hover:bg-blue-700 px-10 py-4 rounded-full font-semibold text-lg flex items-center justify-center gap-3 transition">
-          <i class="fab fa-facebook text-2xl"></i> Facebook Page
+          <i class="fab fa-facebook text-2xl"></i> <span data-content="contact.facebookLabel">Facebook Page</span>
         </a>
       </div>
       <div class="flex justify-center gap-8 text-2xl">
@@ -457,21 +457,21 @@
 
   <section id="cart-page" class="site-page py-20 bg-stone-50">
     <div class="max-w-3xl mx-auto px-4">
-      <h1 class="font-display text-4xl font-bold text-emerald-900 mb-3">Your cart</h1>
-      <p class="text-stone-600 mb-6">Review the pieces you chose, then use one demo checkout. Nothing is charged.</p>
+      <h1 class="font-display text-4xl font-bold text-emerald-900 mb-3" data-content="cart.title">Your cart</h1>
+      <p class="text-stone-600 mb-6" data-content="cart.intro">Review the pieces you chose, then use one demo checkout. Nothing is charged.</p>
       <div data-cart-panel class="cart-page-lines">
         <div class="cart-lines" data-cart-lines></div>
-        <p class="px-1 py-6 text-stone-600" data-cart-empty>Your cart is empty. Add a piece from the shop, then come back here to check out.</p>
+        <p class="px-1 py-6 text-stone-600" data-cart-empty data-content="cart.emptyText">Your cart is empty. Add a piece from the shop, then come back here to check out.</p>
         <div class="cart-foot hidden" data-cart-footer>
           <div class="flex justify-between items-end mb-4">
-            <span class="text-sm text-stone-500">Subtotal</span>
+            <span class="text-sm text-stone-500" data-content="cart.subtotalLabel">Subtotal</span>
             <span class="font-display text-3xl font-bold text-emerald-900 leading-none" data-cart-subtotal>$0.00 TTD</span>
           </div>
-          <button type="button" class="pay-submit" data-cart-checkout>Checkout</button>
-          <p class="text-xs text-stone-500 text-center mt-3">One demo checkout for this order. No real payment will be taken.</p>
+          <button type="button" class="pay-submit" data-cart-checkout data-content="cart.checkoutButton">Checkout</button>
+          <p class="text-xs text-stone-500 text-center mt-3" data-content="cart.checkoutNote">One demo checkout for this order. No real payment will be taken.</p>
         </div>
       </div>
-      <p class="mt-6"><a href="/products" class="text-emerald-800 font-semibold">Continue shopping</a></p>
+      <p class="mt-6"><a href="/products" class="text-emerald-800 font-semibold"><span data-content="cart.continueLabel">Continue shopping</span></a></p>
     </div>
   </section>
 
@@ -480,11 +480,11 @@
     <div class="max-w-7xl mx-auto px-4 text-center">
       <div class="flex items-center justify-center space-x-2 mb-4">
         <div class="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold">G</div>
-        <span class="font-display font-bold text-white text-lg">Glastic Designs Interior Styles</span>
+        <span class="font-display font-bold text-white text-lg" data-content="footer.brand">Glastic Designs Interior Styles</span>
       </div>
-      <p class="mb-2">Transforming plastic waste into beautiful, durable designs.</p>
-      <p class="text-sm">Proudly Made in Trinidad & Tobago 🇹🇹 | Circular Economy | Support Local</p>
-      <p class="text-xs mt-6">© 2026 Glastic Designs. All rights reserved. Content inspired by the official Facebook page.</p>
+      <p class="mb-2" data-content="footer.tagline">Transforming plastic waste into beautiful, durable designs.</p>
+      <p class="text-sm" data-content="footer.subline">Proudly Made in Trinidad & Tobago 🇹🇹 | Circular Economy | Support Local</p>
+      <p class="text-xs mt-6" data-content="footer.copyright">© 2026 Glastic Designs. All rights reserved. Content inspired by the official Facebook page.</p>
     </div>
   </footer>
   <nav class="tabbar lg:hidden" aria-label="Primary">
@@ -553,18 +553,18 @@
 <div id="cart-drawer" class="cart-overlay" data-cart-panel role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true">
   <div class="cart-sheet" role="document">
     <div class="cart-head">
-      <h2 id="cart-title" class="font-display text-2xl font-bold text-emerald-900">Your cart</h2>
+      <h2 id="cart-title" class="font-display text-2xl font-bold text-emerald-900" data-content="cart.title">Your cart</h2>
       <button type="button" class="pay-close" data-cart-close aria-label="Close cart">&times;</button>
     </div>
     <div id="cart-lines" class="cart-lines" data-cart-lines></div>
-    <p id="cart-empty" class="px-5 pb-8 text-stone-600" data-cart-empty>Your cart is empty. Add a piece from the products, then come back here to check out.</p>
+    <p id="cart-empty" class="px-5 pb-8 text-stone-600" data-cart-empty data-content="cart.emptyText">Your cart is empty. Add a piece from the products, then come back here to check out.</p>
     <div id="cart-footer" class="cart-foot hidden" data-cart-footer>
       <div class="flex justify-between items-end mb-4">
-        <span class="text-sm text-stone-500">Subtotal</span>
+        <span class="text-sm text-stone-500" data-content="cart.subtotalLabel">Subtotal</span>
         <span id="cart-subtotal" class="font-display text-3xl font-bold text-emerald-900 leading-none" data-cart-subtotal>$0.00 TTD</span>
       </div>
-      <button type="button" class="pay-submit" data-cart-checkout>Checkout</button>
-      <p class="text-xs text-stone-500 text-center mt-3">One demo checkout for this order. No real payment will be taken.</p>
+      <button type="button" class="pay-submit" data-cart-checkout data-content="cart.checkoutButton">Checkout</button>
+      <p class="text-xs text-stone-500 text-center mt-3" data-content="cart.checkoutNote">One demo checkout for this order. No real payment will be taken.</p>
     </div>
   </div>
 </div>
@@ -674,9 +674,10 @@
     </div>
   </div>
 </div>
-<script src="/nav.js"></script>
-<script src="/catalog.js"></script>
-<script src="/payments.js"></script>
+<script src="/nav.js" defer></script>
+<script src="/site-content.js" defer></script>
+<script src="/catalog.js" defer></script>
+<script src="/payments.js" defer></script>
 
 </body>
 </html>
