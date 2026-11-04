@@ -29,12 +29,11 @@
   }
 
   function shownProducts(products) {
-    if (isVisualPreviewFrame()) return products;
     var route = window.GLASTIC_ROUTE || {};
-    if (route.id !== 'category') return products.filter(function (p) { return !p.hidden; });
+    if (route.id !== 'category') return products;
     if (!route.category) return [];
     return products.filter(function (product) {
-      return !product.hidden && String(product.category || '').toLowerCase() === route.category.toLowerCase();
+      return String(product.category || '').toLowerCase() === route.category.toLowerCase();
     });
   }
 
@@ -42,7 +41,6 @@
     var grid = document.getElementById('product-grid');
     if (!grid) return;
     var all = products || [];
-    window.__GLASTIC_LAST_PRODUCTS = all;
     products = shownProducts(all);
     document.querySelectorAll('.product-page').forEach(function (page) { page.remove(); });
     grid.textContent = '';
@@ -58,8 +56,6 @@
       var photo = mainPhoto(product);
       var card = document.createElement('div');
       card.className = 'product-card group bg-stone-50 rounded-3xl overflow-hidden cursor-pointer';
-      card.setAttribute('data-product-id', product.id);
-      if (product.hidden) card.setAttribute('data-hidden', '1');
       card.innerHTML = ''
         + '<div class="photo-frame h-64 bg-stone-200 relative overflow-hidden">'
         + (photo ? photoHtml(photo.url, product.name + ' by Glastic Designs', 'w-full h-full object-cover') : '')
@@ -118,13 +114,8 @@
       document.body.appendChild(page);
     });
     if (window.GlasticPay && window.GlasticPay.adoptCatalog) window.GlasticPay.adoptCatalog(all);
-    if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
     openLinkedProduct();
   }
-
-  window.GLASTIC_RENDER_CATALOG = function (products) {
-    render(products || []);
-  };
 
   function fillGallery(container, product) {
     var photos = product.photos || [];
@@ -186,17 +177,7 @@
     if (page) page.classList.remove('hidden');
   }
 
-  function isVisualPreviewFrame() {
-    try {
-      if (window.GLASTIC_ADMIN_SAME_DOC_EDIT && window.GLASTIC_ADMIN_SAME_DOC_EDIT()) return true;
-      return /(?:\?|&)visualEdit=1(?:&|$)/.test(window.location.search || '') && window.parent !== window;
-    } catch (e) {
-      return false;
-    }
-  }
-
   function load() {
-    if (isVisualPreviewFrame()) return;
     fetch('/api/products', { cache: 'no-store' }).then(function (res) {
       if (res.status === 503) return { products: FALLBACK };
       if (!res.ok) throw new Error('load');
