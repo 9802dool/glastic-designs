@@ -1,12 +1,4 @@
 (function () {
-  var BLURB = {
-    Tiles: 'Durable, waterproof wall and floor tiles made from plastic waste. Hexagonal, square, and rectangular shapes are available.',
-    Planters: 'Living walls and vertical planters. We are nature\'s Keepers, planting walls for homes and outdoors in Trinidad and Tobago.',
-    Furniture: 'Benches, stools, shelves, consoles, and tables for indoors, outdoors, classrooms, and patios.',
-    Gifts: 'Coasters, clocks, trophies, medals, and keychains made from upcycled plastic.',
-    Services: 'Refurbished school desks and chairs, and design consultations with the studio.'
-  };
-
   function pathName() {
     return (location.pathname || '/').replace(/\/$/, '') || '/';
   }
@@ -30,17 +22,7 @@
   }
 
   function describeShop() {
-    var route = window.GLASTIC_ROUTE || { id: 'home' };
-    var title = document.getElementById('products-title');
-    var lead = document.getElementById('products-lead');
-    if (!title || !lead) return;
-    if (route.id === 'category' && route.category) {
-      title.textContent = route.category;
-      lead.textContent = BLURB[route.category] || '';
-    } else if (route.id === 'category') {
-      title.textContent = 'Shop';
-      lead.textContent = 'That category is not on this shop.';
-    }
+    if (window.__glasticApplyShopTitles) window.__glasticApplyShopTitles();
   }
 
   function closeMenu() {

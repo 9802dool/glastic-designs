@@ -5,6 +5,12 @@
     },
     "api/admin/products.js": {
       "includeFiles": "images/**"
+    },
+    "api/admin/settings.js": {
+      "includeFiles": "images/**"
+    },
+    "api/settings.js": {
+      "includeFiles": "images/**"
     }
   },
   "rewrites": [
@@ -27,13 +33,27 @@
     {
       "source": "/admin",
       "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" },
         { "key": "X-Robots-Tag", "value": "noindex" }
       ]
     },
     {
       "source": "/admin/(.*)",
       "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" },
         { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    },
+    {
+      "source": "/site-visual-edit.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
       ]
     }
   ]
