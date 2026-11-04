@@ -22,15 +22,11 @@ This is a static site. Deploy `index.html`, `payments.js`, and assets to Vercel,
 2. Import the repo in Vercel.
 3. Set the root directory if needed, or deploy as static.
 
-## Owner shop (simple phone dashboard)
+## Owner shop
 
-After sign-in at **`/admin`**, the owner sees **“What would you like to do?”** with six large buttons: add a product, change a price, change photos, hide/show sold-out items, edit homepage words, and pick one of four colour looks. Each task is one short screen; saving goes live immediately with a **Done – it's on your website** screen.
+The owner manages products at `/admin` on a phone. The first visit asks them to choose a password, which is stored only as a hash. A password can also be supplied with the `ADMIN_PASSWORD` environment variable in Vercel; that value is never shown on the site.
 
-- **Add to Home Screen:** `/admin/manifest.webmanifest`
-- **Stay signed in:** HttpOnly cookie, 30 days (`SESSION_DAYS`)
-- **Developer / advanced:** **More settings** → `/admin/advanced.html` (visual editor, full forms, gallery, contact, product list)
-
-Products and site copy use Neon Postgres and Vercel Blob via `/api/admin/*`. Local dev: `node scripts/dev-server.js`. Mobile UI smoke test: `node scripts/test-simple-admin-mobile.mjs`.
+Products and prices live in Neon Postgres. Photos for new uploads live in Vercel Blob. Until Neon is connected, the public site keeps showing the current products.
 
 ## Contact
 WhatsApp: 775-2407  
