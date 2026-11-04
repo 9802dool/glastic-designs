@@ -177,6 +177,7 @@
     document.documentElement.classList.add('themed');
   })();
 </script>
+<script src="/admin/edit-nav.js"></script>
 <script src="/settings.js"></script>
 </head>
 <body class="bg-stone-50 text-stone-900">
@@ -189,15 +190,15 @@
           <div class="bg-white p-1 rounded-lg">
             <img id="site-logo" src="/logo.jpg" alt="" class="h-16 w-16 object-cover rounded-full">
           </div>
-          <span id="site-logo-wordmark" class="font-display font-bold text-xl text-emerald-800 hidden sm:block">Glastic Designs</span>
+          <span id="site-wordmark" class="font-display font-bold text-xl text-emerald-800 hidden sm:block">Glastic Designs</span>
         </a>
         <div class="hidden lg:flex items-center gap-6">
-          <a href="/about" class="nav-link" data-nav>About</a>
-          <a href="/products" class="nav-link" data-nav>Shop</a>
-          <a href="/gallery" class="nav-link" data-nav>Gallery</a>
-          <a href="/process" class="nav-link" data-nav>Process</a>
-          <a href="/impact" class="nav-link" data-nav>Impact</a>
-          <a href="/contact" class="nav-link" data-nav>Contact</a>
+          <a href="/about" class="nav-link" data-nav data-nav-label="about">About</a>
+          <a href="/products" class="nav-link" data-nav data-nav-label="shop">Shop</a>
+          <a href="/gallery" class="nav-link" data-nav data-nav-label="gallery">Gallery</a>
+          <a href="/process" class="nav-link" data-nav data-nav-label="process">Process</a>
+          <a href="/impact" class="nav-link" data-nav data-nav-label="impact">Impact</a>
+          <a href="/contact" class="nav-link" data-nav data-nav-label="contact">Contact</a>
         </div>
         <div class="flex items-center gap-2">
           <button type="button" id="menu-open" class="menu-btn lg:hidden" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
@@ -215,13 +216,13 @@
   <div id="mobile-menu" class="lg:hidden" hidden>
     <p class="menu-label">Shop</p>
     <nav class="menu-list" aria-label="Mobile">
-      <a href="/" data-nav>Home</a>
-      <a href="/products" data-nav>Shop</a>
-      <a href="/category/tiles" data-nav>Tiles</a>
-      <a href="/category/planters" data-nav>Planters</a>
-      <a href="/category/furniture" data-nav>Furniture</a>
-      <a href="/category/gifts" data-nav>Gifts</a>
-      <a href="/category/services" data-nav>Services</a>
+      <a href="/" data-nav data-nav-label="home">Home</a>
+      <a href="/products" data-nav data-nav-label="shop">Shop</a>
+      <a href="/category/tiles" data-nav data-nav-label="catTiles">Tiles</a>
+      <a href="/category/planters" data-nav data-nav-label="catPlanters">Planters</a>
+      <a href="/category/furniture" data-nav data-nav-label="catFurniture">Furniture</a>
+      <a href="/category/gifts" data-nav data-nav-label="catGifts">Gifts</a>
+      <a href="/category/services" data-nav data-nav-label="catServices">Services</a>
       <p class="menu-label">Studio</p>
       <a href="/about" data-nav>About</a>
       <a href="/gallery" data-nav>Gallery</a>
@@ -251,9 +252,9 @@
             We transform discarded plastic into durable, stylish interior products — tiles, furniture, coasters and more. Creating a circular economy right here in Trinidad and Tobago.
           </p>
           <div class="flex flex-col sm:flex-row gap-4">
-            <a href="/products" class="bg-white text-emerald-800 px-8 py-4 rounded-full font-semibold text-center hover:bg-emerald-50 transition">Explore Products</a>
+            <a id="hero-explore-cta" href="/products" class="bg-white text-emerald-800 px-8 py-4 rounded-full font-semibold text-center hover:bg-emerald-50 transition"><span id="hero-explore-label">Explore Products</span></a>
             <a id="hero-facebook" href="https://www.facebook.com/gdistyles" target="_blank" class="border-2 border-white/50 px-8 py-4 rounded-full font-semibold text-center hover:bg-white/10 transition flex items-center justify-center gap-2">
-              <i class="fab fa-facebook"></i> Follow on Facebook
+              <i class="fab fa-facebook"></i> <span id="hero-facebook-label">Follow on Facebook</span>
             </a>
           </div>
         </div>
@@ -287,30 +288,30 @@
           <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl mb-6">
             <i class="fas fa-leaf"></i>
           </div>
-          <h3 class="font-bold text-xl mb-3">Circular Economy</h3>
-          <p class="text-stone-600">Every product gives plastic a second life, reducing landfill waste and pollution in our communities and oceans.</p>
+          <h3 id="about-feature-0-title" class="font-bold text-xl mb-3">Circular Economy</h3>
+          <p id="about-feature-0-text" class="text-stone-600">Every product gives plastic a second life, reducing landfill waste and pollution in our communities and oceans.</p>
         </div>
         <div class="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition">
           <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl mb-6">
             <i class="fas fa-school"></i>
           </div>
-          <h3 class="font-bold text-xl mb-3">School Furniture</h3>
-          <p class="text-stone-600">We refurbish discarded school furniture using recycled plastic, providing low-cost solutions and better learning environments.</p>
+          <h3 id="about-feature-1-title" class="font-bold text-xl mb-3">School Furniture</h3>
+          <p id="about-feature-1-text" class="text-stone-600">We refurbish discarded school furniture using recycled plastic, providing low-cost solutions and better learning environments.</p>
         </div>
         <div class="bg-white p-8 rounded-3xl shadow-sm hover:shadow-md transition">
           <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl mb-6">
             <i class="fas fa-map-marker-alt"></i>
           </div>
-          <h3 class="font-bold text-xl mb-3">Made in TNT</h3>
-          <p class="text-stone-600">Proudly designed and manufactured in Trinidad and Tobago. Supporting local jobs and Caribbean entrepreneurship.</p>
+          <h3 id="about-feature-2-title" class="font-bold text-xl mb-3">Made in TNT</h3>
+          <p id="about-feature-2-text" class="text-stone-600">Proudly designed and manufactured in Trinidad and Tobago. Supporting local jobs and Caribbean entrepreneurship.</p>
         </div>
       </div>
       <figure class="mt-14 max-w-xl mx-auto">
         <picture class="block">
           <source srcset="/images/plant-benefits.webp" type="image/webp">
-          <img src="/images/plant-benefits.jpg" alt="Glastic Designs graphic about the benefits of indoor plants" class="rounded-3xl w-full shadow-sm" loading="lazy">
+          <img id="about-plant-image" src="/images/plant-benefits.jpg" alt="Glastic Designs graphic about the benefits of indoor plants" class="rounded-3xl w-full shadow-sm" loading="lazy">
         </picture>
-        <figcaption class="text-sm text-stone-500 text-center mt-3">Plantastic benefits of indoor plants, from our Facebook page.</figcaption>
+        <figcaption id="about-plant-caption" class="text-sm text-stone-500 text-center mt-3">Plantastic benefits of indoor plants, from our Facebook page.</figcaption>
       </figure>
     </div>
   </section>
@@ -334,14 +335,14 @@
         <h2 id="products-title" class="font-display text-4xl md:text-5xl font-bold text-emerald-900 mb-4">Our Products</h2>
         <p id="products-lead" class="text-lg text-stone-600 max-w-2xl mx-auto">Durable, waterproof, low-maintenance pieces crafted from 100% plastic waste. Custom colors and sizes available.</p>
         <nav class="cat-tabs" aria-label="Categories">
-          <a href="/products" data-nav>All</a>
-          <a href="/category/tiles" data-nav>Tiles</a>
-          <a href="/category/planters" data-nav>Planters</a>
-          <a href="/category/furniture" data-nav>Furniture</a>
-          <a href="/category/gifts" data-nav>Gifts</a>
-          <a href="/category/services" data-nav>Services</a>
+          <a href="/products" data-nav data-nav-label="catAll">All</a>
+          <a href="/category/tiles" data-nav data-nav-label="catTiles">Tiles</a>
+          <a href="/category/planters" data-nav data-nav-label="catPlanters">Planters</a>
+          <a href="/category/furniture" data-nav data-nav-label="catFurniture">Furniture</a>
+          <a href="/category/gifts" data-nav data-nav-label="catGifts">Gifts</a>
+          <a href="/category/services" data-nav data-nav-label="catServices">Services</a>
         </nav>
-        <p class="text-sm text-emerald-800 mt-4">Add pieces to your cart, then check out once. The payment step is a demo — nothing is charged.</p>
+        <p id="products-demo-note" class="text-sm text-emerald-800 mt-4">Add pieces to your cart, then check out once. The payment step is a demo — nothing is charged.</p>
       </div>
       <div id="product-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         <p class="text-stone-500 col-span-full text-center">Loading products…</p>
@@ -352,7 +353,7 @@
   <!-- Process -->
   <section id="process" class="site-page py-20 bg-emerald-900 text-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="font-display text-4xl md:text-5xl font-bold text-center mb-16">How We Make It</h2>
+      <h2 id="process-page-title" class="font-display text-4xl md:text-5xl font-bold text-center mb-16">How We Make It</h2>
       <div id="process-steps" class="grid md:grid-cols-4 gap-8"></div>
     </div>
   </section>
@@ -380,33 +381,33 @@
       <div data-site-consultation class="bg-white text-stone-900 rounded-3xl p-6 sm:p-8 text-left mb-10 shadow-xl">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p class="text-emerald-700 text-sm font-semibold">Book a consultation</p>
-            <h3 class="font-display text-3xl font-bold text-emerald-900 mt-1">Port of Spain studio visit</h3>
-            <p class="text-stone-600 mt-3">Reserve a design consultation and preview how paying online would work. The amount is a sample deposit in TTD.</p>
+            <p id="consult-eyebrow" class="text-emerald-700 text-sm font-semibold">Book a consultation</p>
+            <h3 id="consult-title" class="font-display text-3xl font-bold text-emerald-900 mt-1">Port of Spain studio visit</h3>
+            <p id="consult-lead" class="text-stone-600 mt-3">Reserve a design consultation and preview how paying online would work. The amount is a sample deposit in TTD.</p>
           </div>
           <div class="sm:text-right shrink-0">
-            <div class="text-3xl font-bold text-emerald-800" data-pay-amount="consult" data-pay-mode="deposit">$150.00 TTD</div>
-            <p class="text-sm text-stone-500">Deposit</p>
+            <div id="consult-deposit-amount" class="text-3xl font-bold text-emerald-800" data-pay-amount="consult" data-pay-mode="deposit">$150.00 TTD</div>
+            <p id="consult-deposit-label" class="text-sm text-stone-500">Deposit</p>
           </div>
         </div>
         <div class="mt-6 flex flex-col sm:flex-row gap-3">
           <button type="button" data-pay-open="consult" data-pay-mode="deposit" class="pay-btn inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full font-semibold text-lg w-full sm:w-auto">
-            <i class="fas fa-lock"></i> Pay Deposit
+            <i class="fas fa-lock"></i> <span id="consult-pay-button">Pay Deposit</span>
           </button>
-          <a href="https://wa.me/18687752407" data-site-wa class="inline-flex items-center justify-center gap-2 border-2 border-emerald-700 text-emerald-800 px-8 py-4 rounded-full font-semibold w-full sm:w-auto">WhatsApp instead</a>
+          <a href="https://wa.me/18687752407" data-site-wa class="inline-flex items-center justify-center gap-2 border-2 border-emerald-700 text-emerald-800 px-8 py-4 rounded-full font-semibold w-full sm:w-auto"><span id="consult-wa-button">WhatsApp instead</span></a>
         </div>
-        <p class="text-xs text-stone-500 mt-4">Demo — no real payment will be taken.</p>
+        <p id="consult-note" class="text-xs text-stone-500 mt-4">Demo — no real payment will be taken.</p>
       </div>
       <div class="flex flex-col sm:flex-row justify-center gap-4 mb-12">
         <a href="https://wa.me/18687752407" target="_blank" data-site-wa class="bg-emerald-500 hover:bg-emerald-600 px-10 py-4 rounded-full font-semibold text-lg flex items-center justify-center gap-3 transition">
           <i class="fab fa-whatsapp text-2xl"></i> <span id="contact-wa-label">WhatsApp 775-2407</span>
         </a>
         <a href="https://www.facebook.com/gdistyles" target="_blank" data-site-social="facebook" class="bg-blue-600 hover:bg-blue-700 px-10 py-4 rounded-full font-semibold text-lg flex items-center justify-center gap-3 transition">
-          <i class="fab fa-facebook text-2xl"></i> Facebook Page
+          <i class="fab fa-facebook text-2xl"></i> <span id="contact-facebook-label">Facebook Page</span>
         </a>
       </div>
-      <p id="contact-email-row" class="text-stone-300 mb-3" hidden>Email: <a id="contact-email-link" href="#"><span id="contact-email"></span></a></p>
-      <p id="contact-hours-row" class="text-stone-400 mb-6" hidden>Hours: <span id="contact-hours"></span></p>
+      <p id="contact-email-row" class="text-stone-300 mb-3" hidden><span id="contact-email-label">Email:</span> <a id="contact-email-link" href="#"><span id="contact-email"></span></a></p>
+      <p id="contact-hours-row" class="text-stone-400 mb-6" hidden><span id="contact-hours-label">Hours:</span> <span id="contact-hours"></span></p>
       <div class="flex justify-center gap-8 text-2xl">
         <a href="https://www.facebook.com/gdistyles" target="_blank" data-site-social="facebook" class="hover:text-emerald-400 transition"><i class="fab fa-facebook"></i></a>
         <a href="https://instagram.com/glasticdesigns" target="_blank" data-site-social="instagram" class="hover:text-emerald-400 transition"><i class="fab fa-instagram"></i></a>
@@ -418,21 +419,21 @@
 
   <section id="cart-page" class="site-page py-20 bg-stone-50">
     <div class="max-w-3xl mx-auto px-4">
-      <h1 class="font-display text-4xl font-bold text-emerald-900 mb-3">Your cart</h1>
-      <p class="text-stone-600 mb-6">Review the pieces you chose, then use one demo checkout. Nothing is charged.</p>
+      <h1 id="cart-page-title" class="font-display text-4xl font-bold text-emerald-900 mb-3">Your cart</h1>
+      <p id="cart-page-intro" class="text-stone-600 mb-6">Review the pieces you chose, then use one demo checkout. Nothing is charged.</p>
       <div data-cart-panel class="cart-page-lines">
         <div class="cart-lines" data-cart-lines></div>
-        <p class="px-1 py-6 text-stone-600" data-cart-empty>Your cart is empty. Add a piece from the shop, then come back here to check out.</p>
+        <p id="cart-empty-text" class="px-1 py-6 text-stone-600" data-cart-empty>Your cart is empty. Add a piece from the shop, then come back here to check out.</p>
         <div class="cart-foot hidden" data-cart-footer>
           <div class="flex justify-between items-end mb-4">
-            <span class="text-sm text-stone-500">Subtotal</span>
+            <span id="cart-subtotal-label" class="text-sm text-stone-500">Subtotal</span>
             <span class="font-display text-3xl font-bold text-emerald-900 leading-none" data-cart-subtotal>$0.00 TTD</span>
           </div>
-          <button type="button" class="pay-submit" data-cart-checkout>Checkout</button>
-          <p class="text-xs text-stone-500 text-center mt-3">One demo checkout for this order. No real payment will be taken.</p>
+          <button type="button" class="pay-submit" data-cart-checkout><span id="cart-checkout-button">Checkout</span></button>
+          <p id="cart-checkout-note" class="text-xs text-stone-500 text-center mt-3">One demo checkout for this order. No real payment will be taken.</p>
         </div>
       </div>
-      <p class="mt-6"><a href="/products" class="text-emerald-800 font-semibold">Continue shopping</a></p>
+      <p class="mt-6"><a href="/products" class="text-emerald-800 font-semibold"><span id="cart-continue-label">Continue shopping</span></a></p>
     </div>
   </section>
 
@@ -441,19 +442,19 @@
     <div class="max-w-7xl mx-auto px-4 text-center">
       <div class="flex items-center justify-center space-x-2 mb-4">
         <div class="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold">G</div>
-        <span class="font-display font-bold text-white text-lg">Glastic Designs Interior Styles</span>
+        <span id="footer-brand" class="font-display font-bold text-white text-lg">Glastic Designs Interior Styles</span>
       </div>
-      <p class="mb-2">Transforming plastic waste into beautiful, durable designs.</p>
-      <p class="text-sm">Proudly Made in Trinidad & Tobago 🇹🇹 | Circular Economy | Support Local</p>
-      <p class="text-xs mt-6">© 2026 Glastic Designs. All rights reserved. Content inspired by the official Facebook page.</p>
+      <p id="footer-tagline" class="mb-2">Transforming plastic waste into beautiful, durable designs.</p>
+      <p id="footer-subline" class="text-sm">Proudly Made in Trinidad & Tobago 🇹🇹 | Circular Economy | Support Local</p>
+      <p id="footer-copyright" class="text-xs mt-6">© 2026 Glastic Designs. All rights reserved. Content inspired by the official Facebook page.</p>
     </div>
   </footer>
   <nav class="tabbar lg:hidden" aria-label="Primary">
-    <a href="/" data-nav data-match="exact">Home</a>
-    <a href="/products" data-nav data-match="shop">Shop</a>
-    <a href="/about" data-nav data-match="exact">About</a>
-    <a href="/contact" data-nav data-match="exact">Contact</a>
-    <a href="/cart" data-nav data-match="exact">Cart</a>
+    <a href="/" data-nav data-match="exact" data-nav-label="home">Home</a>
+    <a href="/products" data-nav data-match="shop" data-nav-label="shop">Shop</a>
+    <a href="/about" data-nav data-match="exact" data-nav-label="about">About</a>
+    <a href="/contact" data-nav data-match="exact" data-nav-label="contact">Contact</a>
+    <a href="/cart" data-nav data-match="exact" data-nav-label="cart">Cart</a>
   </nav>
 
 <!-- Product Modals -->

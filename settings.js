@@ -80,7 +80,7 @@
 
   function wireSiteLogo() {
     var logo = document.getElementById('site-logo');
-    var wordmark = document.getElementById('site-logo-wordmark');
+    var wordmark = document.getElementById('site-wordmark') || document.getElementById('site-logo-wordmark');
     if (!logo || logo.__glasticLogoWired) return;
     logo.__glasticLogoWired = true;
     logo.addEventListener('error', function () {
@@ -99,7 +99,7 @@
     wireSiteLogo();
     var logo = document.getElementById('site-logo');
     if (!logo) return;
-    var wordmark = document.getElementById('site-logo-wordmark');
+    var wordmark = document.getElementById('site-wordmark') || document.getElementById('site-logo-wordmark');
     var src = resolveLogoUrl(theme && theme.logoUrl);
     logo.classList.remove('is-broken');
     if (wordmark) wordmark.classList.remove('is-fallback');
@@ -297,9 +297,101 @@
     if (payWa && wa) payWa.setAttribute('href', wa);
   }
 
+  function applyShopSection(shop) {
+    if (!shop) return;
+    var route = window.GLASTIC_ROUTE || { id: 'home' };
+    var title = document.getElementById('products-title');
+    var lead = document.getElementById('products-lead');
+    if (title && lead) {
+      if (route.id === 'category' && route.category) {
+        title.textContent = (shop.categoryTitles && shop.categoryTitles[route.category]) || route.category;
+        lead.textContent = (shop.categoryBlurbs && shop.categoryBlurbs[route.category]) || '';
+      } else if (route.id === 'category') {
+        title.textContent = shop.invalidCategoryTitle || 'Shop';
+        lead.textContent = shop.invalidCategoryLead || '';
+      } else if (route.id === 'products') {
+        title.textContent = shop.title || title.textContent;
+        lead.textContent = shop.lead || lead.textContent;
+      }
+    }
+    setText('products-demo-note', shop.demoNote);
+  }
+
+  function applyAboutPageExtras(aboutPage) {
+    if (!aboutPage) return;
+    (aboutPage.features || []).forEach(function (feat, i) {
+      setText('about-feature-' + i + '-title', feat.title);
+      setText('about-feature-' + i + '-text', feat.text);
+    });
+    var plant = document.getElementById('about-plant-image');
+    if (plant && aboutPage.plantImage) plant.setAttribute('src', aboutPage.plantImage);
+    setText('about-plant-caption', aboutPage.plantCaption);
+  }
+
+  function applyProcessPage(processPage) {
+    if (!processPage) return;
+    setText('process-page-title', processPage.title);
+  }
+
+  function applyConsultationBlock(c) {
+    if (!c) return;
+    setText('consult-eyebrow', c.eyebrow);
+    setText('consult-title', c.title);
+    setText('consult-lead', c.lead);
+    setText('consult-deposit-amount', c.depositAmount);
+    setText('consult-deposit-label', c.depositLabel);
+    setText('consult-pay-button', c.payButton);
+    setText('consult-wa-button', c.waButton);
+    setText('consult-note', c.note);
+  }
+
+  function applyCartPage(cartPage) {
+    if (!cartPage) return;
+    setText('cart-page-title', cartPage.title);
+    setText('cart-page-intro', cartPage.intro);
+    setText('cart-empty-text', cartPage.emptyText);
+    setText('cart-subtotal-label', cartPage.subtotalLabel);
+    setText('cart-checkout-button', cartPage.checkoutButton);
+    setText('cart-checkout-note', cartPage.checkoutNote);
+    setText('cart-continue-label', cartPage.continueLabel);
+  }
+
+  function applyFooter(footer) {
+    if (!footer) return;
+    setText('footer-brand', footer.brand);
+    setText('footer-tagline', footer.tagline);
+    setText('footer-subline', footer.subline);
+    setText('footer-copyright', footer.copyright);
+  }
+
+  function applyNavLabels(nav) {
+    if (!nav) return;
+    document.querySelectorAll('[data-nav-label]').forEach(function (node) {
+      var key = node.getAttribute('data-nav-label');
+      if (key && nav[key] != null) node.textContent = nav[key];
+    });
+    var menuBtn = document.getElementById('menu-open');
+    if (menuBtn && nav.menuOpen && menuBtn.getAttribute('aria-expanded') !== 'true') {
+      menuBtn.textContent = nav.menuOpen;
+    }
+  }
+
+  function applyChrome(chrome) {
+    if (!chrome) return;
+    setText('site-wordmark', chrome.wordmark);
+    setText('hero-explore-label', chrome.heroExploreLabel);
+    var explore = document.getElementById('hero-explore-cta');
+    if (explore && chrome.heroExploreHref) explore.setAttribute('href', chrome.heroExploreHref);
+    setText('hero-facebook-label', chrome.heroFacebookLabel);
+    setText('contact-facebook-label', chrome.contactFacebookLabel);
+    setText('contact-email-label', chrome.contactEmailLabel || 'Email:');
+    setText('contact-hours-label', chrome.contactHoursLabel || 'Hours:');
+  }
+
   function applyAll(payload) {
     if (!payload || !payload.settings) return;
     var s = payload.settings;
+    window.__GLASTIC_LAST_SETTINGS = s;
     applyTheme(s.theme);
     applyBanner(s.banner);
     applyVisibility(s.visibility);
@@ -322,8 +414,21 @@
     applyContact(s.contact);
     var fbHero = document.getElementById('hero-facebook');
     if (fbHero && s.contact && s.contact.facebook) fbHero.setAttribute('href', s.contact.facebook);
+    applyShopSection(s.shop);
+    applyAboutPageExtras(s.aboutPage);
+    applyProcessPage(s.processPage);
+    applyConsultationBlock(s.consultation);
+    applyCartPage(s.cartPage);
+    applyFooter(s.footer);
+    applyNavLabels(s.nav);
+    applyChrome(s.chrome);
     if (window.__glasticVisualEditRefresh) window.__glasticVisualEditRefresh();
   }
+
+  window.__glasticApplyShopTitles = function () {
+    var s = window.__GLASTIC_LAST_SETTINGS;
+    if (s && s.shop) applyShopSection(s.shop);
+  };
 
   var DEFAULT_PAYLOAD = {
     settings: {

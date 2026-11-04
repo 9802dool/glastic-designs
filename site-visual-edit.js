@@ -26,25 +26,62 @@
   }
 
   var STATIC_TARGETS = [
-    { selector: '#site-banner', key: 'banner.text', kind: 'text', route: ['home'] },
+    { selector: '#site-banner', key: 'banner.text', kind: 'text' },
     { selector: '#site-logo', key: 'theme.logoUrl', kind: 'image' },
-    { selector: '#hero-badge', key: 'homepage.heroBadge', kind: 'text', route: ['home'] },
-    { selector: '#hero-headline', key: 'homepage.heroHeadline', kind: 'multiline', route: ['home'] },
-    { selector: '#hero-subtext', key: 'homepage.heroSubtext', kind: 'multiline', route: ['home'] },
-    { selector: '#hero-image', key: 'homepage.heroImage', kind: 'image', route: ['home'] },
-    { selector: '#hero-badge-note', key: 'homepage.heroBadgeNote', kind: 'text', route: ['home'] },
-    { selector: '#hero-badge-caption', key: 'homepage.heroBadgeCaption', kind: 'text', route: ['home'] },
-    { selector: '#hero-facebook', key: 'homepage.heroFacebook', kind: 'link', route: ['home'] },
-    { selector: '#about-eyebrow', key: 'homepage.aboutEyebrow', kind: 'text', route: ['about', 'home'] },
-    { selector: '#about-title', key: 'homepage.aboutTitle', kind: 'text', route: ['about', 'home'] },
-    { selector: '#about-text', key: 'homepage.aboutText', kind: 'multiline', route: ['about', 'home'] },
-    { selector: '#about-image', key: 'homepage.aboutImage', kind: 'image', route: ['about', 'home'] },
-    { selector: '#gallery-title', key: 'gallery.title', kind: 'text', route: ['gallery', 'home'] },
-    { selector: '#gallery-subtitle', key: 'gallery.subtitle', kind: 'multiline', route: ['gallery', 'home'] },
-    { selector: '#impact-title', key: 'impact.title', kind: 'text', route: ['impact', 'home'] },
-    { selector: '#contact-title', key: 'contact.contactTitle', kind: 'text', route: ['contact'] },
-    { selector: '#contact-lead', key: 'contact.contactLead', kind: 'multiline', route: ['contact'] },
-    { selector: '[data-site-wa]', key: 'contact.whatsapp', kind: 'link', route: ['contact', 'home'] },
+    { selector: '#site-wordmark', key: 'chrome.wordmark', kind: 'text' },
+    { selector: '#hero-badge', key: 'homepage.heroBadge', kind: 'text' },
+    { selector: '#hero-headline', key: 'homepage.heroHeadline', kind: 'multiline' },
+    { selector: '#hero-subtext', key: 'homepage.heroSubtext', kind: 'multiline' },
+    { selector: '#hero-image', key: 'homepage.heroImage', kind: 'image' },
+    { selector: '#hero-badge-note', key: 'homepage.heroBadgeNote', kind: 'text' },
+    { selector: '#hero-badge-caption', key: 'homepage.heroBadgeCaption', kind: 'text' },
+    { selector: '#hero-explore-label', key: 'chrome.heroExploreLabel', kind: 'text' },
+    { selector: '#hero-explore-cta', key: 'chrome.heroExploreHref', kind: 'link' },
+    { selector: '#hero-facebook', key: 'contact.facebook', kind: 'link' },
+    { selector: '#hero-facebook-label', key: 'chrome.heroFacebookLabel', kind: 'text' },
+    { selector: '#about-eyebrow', key: 'homepage.aboutEyebrow', kind: 'text' },
+    { selector: '#about-title', key: 'homepage.aboutTitle', kind: 'text' },
+    { selector: '#about-text', key: 'homepage.aboutText', kind: 'multiline' },
+    { selector: '#about-image', key: 'homepage.aboutImage', kind: 'image' },
+    { selector: '#about-feature-0-title', key: 'aboutPage.features.0.title', kind: 'text' },
+    { selector: '#about-feature-0-text', key: 'aboutPage.features.0.text', kind: 'multiline' },
+    { selector: '#about-feature-1-title', key: 'aboutPage.features.1.title', kind: 'text' },
+    { selector: '#about-feature-1-text', key: 'aboutPage.features.1.text', kind: 'multiline' },
+    { selector: '#about-feature-2-title', key: 'aboutPage.features.2.title', kind: 'text' },
+    { selector: '#about-feature-2-text', key: 'aboutPage.features.2.text', kind: 'multiline' },
+    { selector: '#about-plant-image', key: 'aboutPage.plantImage', kind: 'image' },
+    { selector: '#about-plant-caption', key: 'aboutPage.plantCaption', kind: 'text' },
+    { selector: '#gallery-title', key: 'gallery.title', kind: 'text' },
+    { selector: '#gallery-subtitle', key: 'gallery.subtitle', kind: 'multiline' },
+    { selector: '#products-lead', key: 'shop.lead', kind: 'multiline' },
+    { selector: '#products-demo-note', key: 'shop.demoNote', kind: 'text' },
+    { selector: '#process-page-title', key: 'processPage.title', kind: 'text' },
+    { selector: '#impact-title', key: 'impact.title', kind: 'text' },
+    { selector: '#contact-title', key: 'contact.contactTitle', kind: 'text' },
+    { selector: '#contact-lead', key: 'contact.contactLead', kind: 'multiline' },
+    { selector: '#contact-email', key: 'contact.email', kind: 'text' },
+    { selector: '#contact-hours', key: 'contact.hours', kind: 'text' },
+    { selector: '#consult-eyebrow', key: 'consultation.eyebrow', kind: 'text' },
+    { selector: '#consult-title', key: 'consultation.title', kind: 'text' },
+    { selector: '#consult-lead', key: 'consultation.lead', kind: 'multiline' },
+    { selector: '#consult-deposit-amount', key: 'consultation.depositAmount', kind: 'text' },
+    { selector: '#consult-deposit-label', key: 'consultation.depositLabel', kind: 'text' },
+    { selector: '#consult-pay-button', key: 'consultation.payButton', kind: 'text' },
+    { selector: '#consult-wa-button', key: 'consultation.waButton', kind: 'text' },
+    { selector: '#consult-note', key: 'consultation.note', kind: 'text' },
+    { selector: '#contact-facebook-label', key: 'chrome.contactFacebookLabel', kind: 'text' },
+    { selector: '#cart-page-title', key: 'cartPage.title', kind: 'text' },
+    { selector: '#cart-page-intro', key: 'cartPage.intro', kind: 'multiline' },
+    { selector: '#cart-empty-text', key: 'cartPage.emptyText', kind: 'multiline' },
+    { selector: '#cart-subtotal-label', key: 'cartPage.subtotalLabel', kind: 'text' },
+    { selector: '#cart-checkout-button', key: 'cartPage.checkoutButton', kind: 'text' },
+    { selector: '#cart-checkout-note', key: 'cartPage.checkoutNote', kind: 'text' },
+    { selector: '#cart-continue-label', key: 'cartPage.continueLabel', kind: 'text' },
+    { selector: '#footer-brand', key: 'footer.brand', kind: 'text' },
+    { selector: '#footer-tagline', key: 'footer.tagline', kind: 'multiline' },
+    { selector: '#footer-subline', key: 'footer.subline', kind: 'multiline' },
+    { selector: '#footer-copyright', key: 'footer.copyright', kind: 'text' },
+    { selector: '[data-site-wa]', key: 'contact.whatsapp', kind: 'link' },
     { selector: '[data-site-social="facebook"]', key: 'contact.facebook', kind: 'link' },
     { selector: '[data-site-social="instagram"]', key: 'contact.instagram', kind: 'link' },
     { selector: '[data-site-social="youtube"]', key: 'contact.youtube', kind: 'link' },
@@ -69,12 +106,6 @@
     return String(text || '').replace(/\r/g, '').replace(/\u00a0/g, ' ').trim();
   }
 
-  function routeOk(target) {
-    if (!target.route || !target.route.length) return true;
-    var route = window.GLASTIC_ROUTE || { id: 'home' };
-    return target.route.indexOf(route.id) >= 0;
-  }
-
   function ensureStyles() {
     if (document.getElementById('glastic-inline-edit-css')) return;
     var style = document.createElement('style');
@@ -97,12 +128,38 @@
 
   function markStatic() {
     STATIC_TARGETS.forEach(function (t) {
-      if (!routeOk(t)) return;
       document.querySelectorAll(t.selector).forEach(function (el) {
         el.setAttribute('data-editable', t.key);
         el.setAttribute('data-editable-kind', t.kind);
       });
     });
+    document.querySelectorAll('[data-nav-label]').forEach(function (el) {
+      var label = el.getAttribute('data-nav-label');
+      if (!label) return;
+      el.setAttribute('data-editable', 'nav.' + label);
+      el.setAttribute('data-editable-kind', 'text');
+    });
+    var exploreLabel = document.getElementById('hero-explore-cta');
+    if (exploreLabel) {
+      exploreLabel.setAttribute('data-editable-label', 'chrome.heroExploreLabel');
+    }
+  }
+
+  function markShopTitles() {
+    var title = document.getElementById('products-title');
+    if (!title) return;
+    var route = window.GLASTIC_ROUTE || { id: 'home' };
+    if (route.id === 'category' && route.category) {
+      title.setAttribute('data-editable', 'shop.categoryTitles.' + route.category);
+    } else {
+      title.setAttribute('data-editable', 'shop.title');
+    }
+    title.setAttribute('data-editable-kind', 'text');
+    var lead = document.getElementById('products-lead');
+    if (lead && route.id === 'category' && route.category) {
+      lead.setAttribute('data-editable', 'shop.categoryBlurbs.' + route.category);
+      lead.setAttribute('data-editable-kind', 'multiline');
+    }
   }
 
   function markDynamic() {
@@ -193,6 +250,48 @@
     });
   }
 
+  function markProductDetailPages() {
+    document.querySelectorAll('.product-page').forEach(function (page) {
+      var pid = page.id ? page.id.replace(/^page-/, '') : '';
+      if (!pid) return;
+      var h1 = page.querySelector('h1');
+      if (h1) {
+        h1.setAttribute('data-editable', 'product.' + pid + '.name');
+        h1.setAttribute('data-editable-kind', 'text');
+      }
+      var desc = page.querySelector('.product-description');
+      if (desc) {
+        desc.setAttribute('data-editable', 'product.' + pid + '.description');
+        desc.setAttribute('data-editable-kind', 'multiline');
+      }
+      var price = page.querySelector('.product-detail .text-emerald-800');
+      if (price) {
+        price.setAttribute('data-editable', 'product.' + pid + '.priceTtd');
+        price.setAttribute('data-editable-kind', 'price');
+      }
+      var photo = page.querySelector('.product-photo');
+      if (photo) {
+        photo.setAttribute('data-editable', 'product.' + pid + '.photoUrl');
+        photo.setAttribute('data-editable-kind', 'image');
+        photo.setAttribute('data-upload-kind', 'product-photo');
+        photo.setAttribute('data-product-id', pid);
+        if (window.__GLASTIC_LAST_PRODUCTS) {
+          var prod = window.__GLASTIC_LAST_PRODUCTS.find(function (p) { return p.id === pid; });
+          if (prod) {
+            var mp = (prod.photos || []).find(function (p) { return p.isMain; }) || (prod.photos || [])[0];
+            if (mp && mp.id) photo.setAttribute('data-photo-id', mp.id);
+          }
+        }
+      }
+      page.querySelectorAll('.product-gallery button img').forEach(function (thumb, ti) {
+        thumb.setAttribute('data-editable', 'product.' + pid + '.photoUrl');
+        thumb.setAttribute('data-editable-kind', 'image');
+        thumb.setAttribute('data-upload-kind', 'product-photo');
+        thumb.setAttribute('data-product-id', pid);
+      });
+    });
+  }
+
   var lastMarkCount = -1;
 
   function refreshMarks() {
@@ -205,7 +304,9 @@
     });
     document.querySelectorAll('.glastic-prod-hide').forEach(function (b) { b.remove(); });
     markStatic();
+    markShopTitles();
     markDynamic();
+    markProductDetailPages();
     var count = document.querySelectorAll('[data-editable]').length;
     if (count !== lastMarkCount) {
       lastMarkCount = count;
@@ -322,6 +423,7 @@
     if (key === 'theme.logoUrl') return 'logo';
     if (key === 'homepage.heroImage') return 'hero-image';
     if (key === 'homepage.aboutImage') return 'about-image';
+    if (key === 'aboutPage.plantImage') return 'about-plant-image';
     if (key.indexOf('gallery.item.') === 0) return 'gallery-replace';
     if (key.indexOf('product.') === 0 && key.indexOf('.photoUrl') > 0) return 'product-photo';
     return 'hero-image';

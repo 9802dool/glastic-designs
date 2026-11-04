@@ -140,6 +140,87 @@ function defaultSettings() {
       impact: true,
       contact: true,
       consultation: true
+    },
+    shop: {
+      title: 'Our Products',
+      lead: 'Durable, waterproof, low-maintenance pieces crafted from 100% plastic waste. Custom colors and sizes available.',
+      demoNote: 'Add pieces to your cart, then check out once. The payment step is a demo — nothing is charged.',
+      invalidCategoryTitle: 'Shop',
+      invalidCategoryLead: 'That category is not on this shop.',
+      categoryTitles: {
+        Tiles: 'Tiles',
+        Planters: 'Planters',
+        Furniture: 'Furniture',
+        Gifts: 'Gifts',
+        Services: 'Services'
+      },
+      categoryBlurbs: {
+        Tiles: 'Durable, waterproof wall and floor tiles made from plastic waste. Hexagonal, square, and rectangular shapes are available.',
+        Planters: 'Living walls and vertical planters. We are nature\'s Keepers, planting walls for homes and outdoors in Trinidad and Tobago.',
+        Furniture: 'Benches, stools, shelves, consoles, and tables for indoors, outdoors, classrooms, and patios.',
+        Gifts: 'Coasters, clocks, trophies, medals, and keychains made from upcycled plastic.',
+        Services: 'Refurbished school desks and chairs, and design consultations with the studio.'
+      }
+    },
+    aboutPage: {
+      features: [
+        { title: 'Circular Economy', text: 'Every product gives plastic a second life, reducing landfill waste and pollution in our communities and oceans.' },
+        { title: 'School Furniture', text: 'We refurbish discarded school furniture using recycled plastic, providing low-cost solutions and better learning environments.' },
+        { title: 'Made in TNT', text: 'Proudly designed and manufactured in Trinidad and Tobago. Supporting local jobs and Caribbean entrepreneurship.' }
+      ],
+      plantImage: '/images/plant-benefits.jpg',
+      plantCaption: 'Plantastic benefits of indoor plants, from our Facebook page.'
+    },
+    processPage: { title: 'How We Make It' },
+    consultation: {
+      eyebrow: 'Book a consultation',
+      title: 'Port of Spain studio visit',
+      lead: 'Reserve a design consultation and preview how paying online would work. The amount is a sample deposit in TTD.',
+      depositAmount: '$150.00 TTD',
+      depositLabel: 'Deposit',
+      payButton: 'Pay Deposit',
+      waButton: 'WhatsApp instead',
+      note: 'Demo — no real payment will be taken.'
+    },
+    cartPage: {
+      title: 'Your cart',
+      intro: 'Review the pieces you chose, then use one demo checkout. Nothing is charged.',
+      emptyText: 'Your cart is empty. Add a piece from the shop, then come back here to check out.',
+      subtotalLabel: 'Subtotal',
+      checkoutButton: 'Checkout',
+      checkoutNote: 'One demo checkout for this order. No real payment will be taken.',
+      continueLabel: 'Continue shopping'
+    },
+    footer: {
+      brand: 'Glastic Designs Interior Styles',
+      tagline: 'Transforming plastic waste into beautiful, durable designs.',
+      subline: 'Proudly Made in Trinidad & Tobago 🇹🇹 | Circular Economy | Support Local',
+      copyright: '© 2026 Glastic Designs. All rights reserved. Content inspired by the official Facebook page.'
+    },
+    nav: {
+      home: 'Home',
+      shop: 'Shop',
+      about: 'About',
+      gallery: 'Gallery',
+      process: 'Process',
+      impact: 'Impact',
+      contact: 'Contact',
+      cart: 'Cart',
+      menuOpen: 'Menu',
+      menuClose: 'Close',
+      catAll: 'All',
+      catTiles: 'Tiles',
+      catPlanters: 'Planters',
+      catFurniture: 'Furniture',
+      catGifts: 'Gifts',
+      catServices: 'Services'
+    },
+    chrome: {
+      wordmark: 'Glastic Designs',
+      heroExploreLabel: 'Explore Products',
+      heroExploreHref: '/products',
+      heroFacebookLabel: 'Follow on Facebook',
+      contactFacebookLabel: 'Facebook Page'
     }
   };
 }
@@ -161,7 +242,22 @@ function mergeSettings(raw) {
     }),
     contact: Object.assign({}, base.contact, raw.contact || {}),
     banner: Object.assign({}, base.banner, raw.banner || {}),
-    visibility: Object.assign({}, base.visibility, raw.visibility || {})
+    visibility: Object.assign({}, base.visibility, raw.visibility || {}),
+    shop: Object.assign({}, base.shop, raw.shop || {}, {
+      categoryBlurbs: Object.assign({}, base.shop.categoryBlurbs, (raw.shop && raw.shop.categoryBlurbs) || {}),
+      categoryTitles: Object.assign({}, base.shop.categoryTitles, (raw.shop && raw.shop.categoryTitles) || {})
+    }),
+    aboutPage: Object.assign({}, base.aboutPage, raw.aboutPage || {}, {
+      features: Array.isArray(raw.aboutPage && raw.aboutPage.features) && raw.aboutPage.features.length
+        ? raw.aboutPage.features
+        : base.aboutPage.features
+    }),
+    processPage: Object.assign({}, base.processPage, raw.processPage || {}),
+    consultation: Object.assign({}, base.consultation, raw.consultation || {}),
+    cartPage: Object.assign({}, base.cartPage, raw.cartPage || {}),
+    footer: Object.assign({}, base.footer, raw.footer || {}),
+    nav: Object.assign({}, base.nav, raw.nav || {}),
+    chrome: Object.assign({}, base.chrome, raw.chrome || {})
   };
 }
 

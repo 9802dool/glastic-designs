@@ -187,6 +187,60 @@ function sanitizeSettings(body) {
       link: cleanUrl(body.banner.link, 500) != null ? (cleanUrl(body.banner.link, 500) || '') : ''
     };
   }
+  function cleanRecord(obj, spec, current) {
+    var out = {};
+    Object.keys(spec).forEach(function (field) {
+      var rule = spec[field];
+      if (Object.prototype.hasOwnProperty.call(obj, field)) {
+        if (rule.type === 'text') {
+          out[field] = cleanText(obj[field], rule.max || 500, rule.opts || {}) || (current && current[field]) || '';
+        } else if (rule.type === 'map') {
+          out[field] = Object.assign({}, current && current[field], obj[field] || {});
+        } else if (rule.type === 'features') {
+          out[field] = Array.isArray(obj[field]) ? obj[field].slice(0, 6).map(function (item) {
+            return {
+              title: cleanText(item && item.title, 120) || '',
+              text: cleanText(item && item.text, 600, { keepLines: true }) || ''
+            };
+          }) : (current && current[field]);
+        }
+      }
+    });
+    return out;
+  }
+
+  if (body.shop && typeof body.shop === 'object') {
+    partial.shop = cleanRecord(body.shop, {
+      title: { type: 'text', max: 120 },
+      lead: { type: 'text', max: 800, opts: { keepLines: true } },
+      demoNote: { type: 'text', max: 400 },
+      invalidCategoryTitle: { type: 'text', max: 80 },
+      invalidCategoryLead: { type: 'text', max: 400 },
+      categoryBlurbs: { type: 'map' },
+      categoryTitles: { type: 'map' }
+    }, current.shop);
+  }
+  if (body.aboutPage && typeof body.aboutPage === 'object') {
+    partial.aboutPage = cleanRecord(body.aboutPage, {
+      features: { type: 'features' },
+      plantImage: { type: 'text', max: 500 },
+      plantCaption: { type: 'text', max: 300 }
+    }, current.aboutPage);
+  }
+  if (body.processPage && typeof body.processPage === 'object') {
+    partial.processPage = { title: cleanText(body.processPage.title, 120) || current.processPage.title };
+  }
+  ['consultation', 'cartPage', 'footer', 'nav', 'chrome'].forEach(function (section) {
+    if (body[section] && typeof body[section] === 'object') {
+      partial[section] = {};
+      Object.keys(body[section]).forEach(function (key) {
+        partial[section][key] = cleanText(body[section][key], 800, { keepLines: true, allowEmpty: true }) != null
+          ? cleanText(body[section][key], 800, { keepLines: true, allowEmpty: true })
+          : (current[section] && current[section][key]) || '';
+      });
+    }
+  });
+
   if (body.visibility && typeof body.visibility === 'object') {
     const v = body.visibility;
     partial.visibility = {
@@ -262,6 +316,22 @@ module.exports = async function handler(req, res) {
         addRandomSuffix: false
       });
       const settings = await saveSettings({ homepage: Object.assign({}, current.homepage, { aboutImage: blob.url }) });
+      return send(res, 200, { settings: settings });
+    }
+
+    if (req.method === 'POST' && body.action === 'about-plant-image') {
+      const buffer = photoBuffer(body.data);
+      if (!buffer) return send(res, 400, { error: 'That photo is too large. Try another one.' });
+      if (!process.env.BLOB_READ_WRITE_TOKEN) return send(res, 503, { error: 'Photo storage is not connected yet.' });
+      const current = await loadSettingsRow();
+      const blob = await put('site/about-plant-' + newId() + '.jpg', buffer, {
+        access: 'public',
+        contentType: 'image/jpeg',
+        addRandomSuffix: false
+      });
+      const settings = await saveSettings({
+        aboutPage: Object.assign({}, current.aboutPage || {}, { plantImage: blob.url })
+      });
       return send(res, 200, { settings: settings });
     }
 

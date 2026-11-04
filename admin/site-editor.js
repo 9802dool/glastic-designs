@@ -9,7 +9,13 @@
     { path: '/gallery', label: 'Gallery' },
     { path: '/process', label: 'How we make it' },
     { path: '/impact', label: 'Impact' },
-    { path: '/contact', label: 'Contact' }
+    { path: '/contact', label: 'Contact' },
+    { path: '/cart', label: 'Cart' },
+    { path: '/category/tiles', label: 'Tiles' },
+    { path: '/category/planters', label: 'Planters' },
+    { path: '/category/furniture', label: 'Furniture' },
+    { path: '/category/gifts', label: 'Gifts' },
+    { path: '/category/services', label: 'Services' }
   ];
 
   var published = { settings: null, gallery: [], products: [] };
@@ -270,6 +276,8 @@
       s.impact.stats[si][sf] = value;
     } else if (key.indexOf('contact.') === 0) {
       s.contact[key.slice('contact.'.length)] = value;
+    } else if (/^(shop|aboutPage|processPage|consultation|cartPage|footer|nav|chrome)\./.test(key)) {
+      setNested(s, parseKey(key), value);
     } else if (key.indexOf('product.') === 0) {
       var rest = key.slice('product.'.length);
       var dot = rest.indexOf('.');
@@ -358,6 +366,9 @@
       } else if (job.action === 'about-image') {
         var r3 = await api('/api/admin/settings', { method: 'POST', body: JSON.stringify({ action: 'about-image', data: job.data }) });
         if (r3.settings && r3.settings.homepage) draft.settings.homepage.aboutImage = r3.settings.homepage.aboutImage;
+      } else if (job.action === 'about-plant-image') {
+        var r3b = await api('/api/admin/settings', { method: 'POST', body: JSON.stringify({ action: 'about-plant-image', data: job.data }) });
+        if (r3b.settings && r3b.settings.aboutPage) draft.settings.aboutPage.plantImage = r3b.settings.aboutPage.plantImage;
       } else if (job.action === 'gallery-replace') {
         await api('/api/admin/settings', { method: 'POST', body: JSON.stringify({ action: 'gallery-delete', id: job.id }) });
         await api('/api/admin/settings', { method: 'POST', body: JSON.stringify({ action: 'gallery-photo', data: job.data, caption: job.caption || '' }) });
@@ -407,7 +418,15 @@
         impact: s.impact,
         contact: s.contact,
         banner: s.banner,
-        visibility: s.visibility
+        visibility: s.visibility,
+        shop: cloneData(s.shop || {}),
+        aboutPage: cloneData(s.aboutPage || {}),
+        processPage: cloneData(s.processPage || {}),
+        consultation: cloneData(s.consultation || {}),
+        cartPage: cloneData(s.cartPage || {}),
+        footer: cloneData(s.footer || {}),
+        nav: cloneData(s.nav || {}),
+        chrome: cloneData(s.chrome || {})
       };
       for (var i = 0; i < draft.gallery.length; i++) {
         var item = draft.gallery[i];
@@ -490,8 +509,8 @@
     };
     window.__vePendingUploads = [];
     undoStack = [];
-    setDirty(false);
     restoreDraftFromNavigation();
+    if (!dirty) setDirty(false);
   }
 
   function esc(value) {
@@ -675,6 +694,7 @@
     dirty = on;
     if (dirtyDot) dirtyDot.style.display = on ? 'block' : 'none';
     if (btnSave) btnSave.disabled = saving;
+    if (on) persistDraftForNavigation();
   }
 
   async function startEditor() {
