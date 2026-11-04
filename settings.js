@@ -117,8 +117,10 @@
     var fonts = FONT_FAMILIES[theme.fontId] || FONT_FAMILIES['playfair-inter'];
     root.style.setProperty('--g-display-font', fonts.display);
     root.style.setProperty('--g-body-font', fonts.body);
-    document.body.style.backgroundColor = theme.background || '';
-    document.body.style.color = theme.text || '';
+    if (document.body) {
+      document.body.style.backgroundColor = theme.background || '';
+      document.body.style.color = theme.text || '';
+    }
     var href = FONT_LINKS[theme.fontId] || FONT_LINKS['playfair-inter'];
     var link = document.getElementById('site-font-link');
     if (!link) {
@@ -227,11 +229,11 @@
     if (!banner || !banner.enabled || !banner.text) {
       bar.hidden = true;
       bar.innerHTML = '';
-      document.body.classList.remove('has-site-banner');
+      if (document.body) document.body.classList.remove('has-site-banner');
       return;
     }
     bar.hidden = false;
-    document.body.classList.add('has-site-banner');
+    if (document.body) document.body.classList.add('has-site-banner');
     var inner = esc(banner.text);
     if (banner.link) {
       inner = '<a href="' + esc(banner.link) + '" class="underline font-semibold">' + inner + '</a>';
@@ -528,14 +530,21 @@
       } catch (e) { /* ignore */ }
     }
   } else {
-    applyCachedTheme();
-    applyAll(DEFAULT_PAYLOAD);
-    fetch('/api/settings', { credentials: 'same-origin', cache: 'no-store' })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        if (isVisualPreviewFrame()) return;
-        applyAll(data);
-      })
-      .catch(function () { /* defaults in HTML remain */ });
+    function bootPublicSite() {
+      applyCachedTheme();
+      applyAll(DEFAULT_PAYLOAD);
+      fetch('/api/settings', { credentials: 'same-origin', cache: 'no-store' })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (isVisualPreviewFrame()) return;
+          applyAll(data);
+        })
+        .catch(function () { /* defaults in HTML remain */ });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootPublicSite);
+    } else {
+      bootPublicSite();
+    }
   }
 })();
