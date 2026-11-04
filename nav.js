@@ -29,19 +29,31 @@
     }
   }
 
+  function shopCopy() {
+    return window.GLASTIC_SHOP_COPY || null;
+  }
+
   function describeShop() {
     var route = window.GLASTIC_ROUTE || { id: 'home' };
     var title = document.getElementById('products-title');
     var lead = document.getElementById('products-lead');
     if (!title || !lead) return;
+    var copy = shopCopy();
+    var blurbs = (copy && copy.categoryBlurbs) || BLURB;
+    var titles = (copy && copy.categoryTitles) || {};
     if (route.id === 'category' && route.category) {
-      title.textContent = route.category;
-      lead.textContent = BLURB[route.category] || '';
+      title.textContent = titles[route.category] || route.category;
+      lead.textContent = blurbs[route.category] || '';
     } else if (route.id === 'category') {
       title.textContent = 'Shop';
       lead.textContent = 'That category is not on this shop.';
+    } else if (copy && route.id === 'products') {
+      title.textContent = copy.title || title.textContent;
+      lead.textContent = copy.lead || lead.textContent;
     }
   }
+
+  window.GlasticNav = { refreshShopHeadings: describeShop };
 
   function closeMenu() {
     var menu = document.getElementById('mobile-menu');
